@@ -1,0 +1,556 @@
+<?php
+/**
+ * @file
+ * Provides a way to dump necessary data for ots integration.
+ */
+
+define('PROPCO_OTS_FILE_PATH', 'sites/default/files/ots/');
+
+/**
+ * Implements hook_menu().
+ */
+function propco_ots_menu() {
+  $items['admin/config/ots'] = array(
+    'title' => 'OTS API Configuration',
+    'description' => 'Options for configuration of the OTS integration',
+    'position' => 'right',
+    'weight' => -5,
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+
+  $items['admin/config/ots/settings'] = array(
+    'title' => 'OTS Settings',
+    'description' => 'Configure OTS API Settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('propco_ots_admin_api_form'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'propco_ots.admin.inc',
+  );
+
+  return $items;
+}
+
+
+/**
+ * Generate fulfillment file form.
+ */
+function propco_ots_fulfillment_form($form, &$form_state) {
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Generate Fulfillment File'),
+    '#submit' => array('propco_ots_fulfillment_form_submit'),
+  );
+
+  return $form;
+}
+
+
+/**
+ * Form handler that will initialize batch export.
+ */
+function propco_ots_fulfillment_form_submit($form_id, &$form_state) {
+  $batch = propco_ots_fulfillment_batch();
+
+  if (!empty($batch['operations'])) {
+    batch_set($batch);
+  }
+  else {
+    drupal_set_message(t('No available data to be processed.'), 'warning');
+  }
+
+}
+
+
+/**
+ * Create a batch process for generating order fulfillment file.
+ */
+function propco_ots_fulfillment_batch() {
+
+  // Fetch ots configuration vars.
+  $entry_access_code = variable_get('ots_entry_access_code');
+  $operator_id = variable_get('ots_operator_id');
+
+  $creation_date = date('mdY');
+
+  // Generate new order fulfillment file.
+  $order_file_date = date('YmdHis');
+  $order_filename = $entry_access_code . '_fulfillment_' . $order_file_date . '.dat';
+
+  $operations = array();
+
+  // Fetch all programs that has member numbers only.
+  $program_efq = new EntityFieldQuery();
+  $program_efq->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', 'program')
+    ->propertyCondition('status', NODE_PUBLISHED)
+    ->fieldCondition('field_ots_member_number', 'value', '', '!=');
+
+  $program_result = $program_efq->execute();
+
+  if (!empty($program_result['node'])) {
+    $program_nids = array_keys($program_result['node']);
+
+    foreach ($program_nids as $program_nid) {
+      // Load program node.
+      $program_node = node_load($program_nid);
+      // Fetch program's export schedule.
+      $export_schedule = field_get_items('node', $program_node, 'field_ots_export_schedule');
+      if (!empty($export_schedule)) {
+        $export_schedule = $export_schedule[0]['value'];
+      }
+
+      // Fetch program's export day.
+      $export_day = field_get_items('node', $program_node, 'field_ots_export_day');
+      if (!empty($export_day)) {
+        $export_day = $export_day[0]['value'];
+      }
+
+      $current_day = date('l');
+
+      // Fetch program's export day.
+      $generate_order = field_get_items('node', $program_node, 'field_ots_enable_export');
+
+      if ($generate_order && ($export_schedule == 'daily' || ($export_schedule == 'weekly' && $export_day == $current_day))) {
+        // Fetch all program's redemptions.
+        $query = db_select('node', 'n');
+        $query->addField('n', 'nid');
+        $query->leftJoin('field_data_field_ots_sync_date', 'sd', 'n.nid = sd.entity_id');
+        $query->leftJoin('field_data_field_redemption_program', 'rp', 'n.nid = rp.entity_id');
+        $query->condition('rp.field_redemption_program_target_id', $program_nid);
+        $query->isNull('sd.field_ots_sync_date_value');
+        $result = $query->execute();
+
+        // Create batch line.
+        while($record = $result->fetchAssoc()) {
+          $redemption_nid = $record['nid'];
+
+          $operations[] = array('propco_ots_fulfillment_batch_process', array(
+              $program_nid,
+              $redemption_nid,
+              $order_filename,
+            ));
+        }
+      }
+    }
+  }
+
+  if (!empty($operations)) {
+    // Write header record.
+    propco_ots_fulfillment_header_record($entry_access_code, $creation_date, $order_filename);
+
+    // Instantiate batch.
+    $batch = array(
+      'title' => t('Exporting'),
+      'finished' => 'propco_ots_fulfillment_batch_finished',
+      'init_message' => t('Exporting started.'),
+      'progress_message' => t('Processed @current out of @total.'),
+      'error_message' => t('Exporting data has encountered an error.'),
+      'operations' => $operations,
+    );
+  }
+
+  return $batch;
+}
+
+
+/**
+ * Batch operation callback.
+ */
+function propco_ots_fulfillment_batch_process($program_nid, $redemption_nid, $order_filename, &$context) {
+
+  // Fetch redemption node.
+  $redemption_node = node_load($redemption_nid);
+
+  // Fetch sync_date value.
+  $sync_date = field_get_items('node', $redemption_node, 'field_ots_sync_date');
+
+  // Guard clause, make sure that we're only exporting redemptions that doesn't
+  // have sync date.
+  if (!empty($sync_date)) {
+    return;
+  }
+
+  $name = $redemption_node->field_first_name[LANGUAGE_NONE][0]['value'] . " " . $redemption_node->field_last_name[LANGUAGE_NONE][0]['value'];
+
+  // Open order file.
+  $order_file = fopen(PROPCO_OTS_FILE_PATH . $order_filename, 'a+');
+
+  // Write shipping record to file.
+  propco_ots_fulfillment_shipping_record($program_nid, $redemption_node, $order_file, $context);
+
+  // Write line item to file.
+  propco_ots_fulfillment_line_item_record($redemption_node, $order_file, $context);
+
+  // Close order file.
+  fclose($order_file);
+
+  $context['results']['order_filename'] = $order_filename;
+  $context['results']['nids'][] = $redemption_node->nid;
+}
+
+
+/**
+ * Writes header record of the order fulfillment file.
+ */
+function propco_ots_fulfillment_header_record($entry_access_code, $creation_date, $order_filename) {
+  $record_type = 'HR';
+  $service = 'SHP';
+
+  $order_file = fopen(PROPCO_OTS_FILE_PATH . $order_filename, 'w');
+  $header = array($record_type, $creation_date, $entry_access_code, $service);
+
+  fputcsv($order_file, $header, '|');
+  fclose($order_file);
+}
+
+
+/**
+ * Writes shipping record of the order fulfillment file.
+ */
+function propco_ots_fulfillment_shipping_record($program_nid, &$redemption_node, &$order_file, &$context) {
+  // Hard coded values as per OTS file documentation.
+  $record_type = 'ST';
+  $payment_type = 'CPN';
+
+  // Fetch redemptions' program.
+  $program_node = node_load($program_nid);
+
+  // Load the pin node.
+  $pin_id = $redemption_node->field_redemption_pin[LANGUAGE_NONE][0]['target_id'];
+  $pin_node = node_load($pin_id);
+
+  // The field_awards_selected could be more than one but we only need the first
+  // selected award.
+  $award_nid = $redemption_node->field_awards_selected[LANGUAGE_NONE][0]['target_id'];
+  $award_node = node_load($award_nid);
+
+  // Build shipping record, this requires the correct order and we to use
+  // array_values later, used key value pairs to prevent confusion when
+  // modifying.
+  $shipping = array(
+    'record_type' => $record_type,
+    'member_number' => $program_node->field_ots_member_number[LANGUAGE_NONE][0]['value'],
+    'membership_flag' => 'N',
+    'user_group' => $program_node->field_ots_user_group[LANGUAGE_NONE][0]['value'],
+    'operator_id' => variable_get('ots_operator_id'),
+    'order_type' => 'OFFLINE',
+    'source_id' => 'GPS',
+    'external_order_id' => $pin_node->title,
+    'rep_id' => 0,
+    'bucket_type' => $program_node->field_ots_bucket_type[LANGUAGE_NONE][0]['value'],
+    // Billing details.
+    'bill_to_first_name' => propco_ots_clean_string($redemption_node->field_first_name[LANGUAGE_NONE][0]['value']),
+    'bill_to_last_name' => propco_ots_clean_string($redemption_node->field_last_name[LANGUAGE_NONE][0]['value']),
+    'bill_to_address_line_one' => propco_ots_clean_string($redemption_node->field_address[LANGUAGE_NONE][0]['thoroughfare']),
+    'bill_to_address_line_two' => propco_ots_clean_string($redemption_node->field_address[LANGUAGE_NONE][0]['premise']),
+    'bill_to_city' => propco_ots_clean_string($redemption_node->field_address[LANGUAGE_NONE][0]['locality']),
+    'bill_to_state' => propco_ots_clean_string($redemption_node->field_address[LANGUAGE_NONE][0]['administrative_area']),
+    'bill_to_zip' => propco_ots_clean_string($redemption_node->field_address[LANGUAGE_NONE][0]['postal_code']),
+    'bill_to_home_phone' => proco_ots_phone_format($redemption_node->field_phone[LANGUAGE_NONE][0]['value']),
+    'bill_to_business_phone' => proco_ots_phone_format($redemption_node->field_phone[LANGUAGE_NONE][0]['value']),
+    'bill_to_email' => $redemption_node->field_address[LANGUAGE_NONE][0]['field_email'],
+    // Shipping details.
+    'ship_to_first_name' => propco_ots_clean_string($redemption_node->field_first_name[LANGUAGE_NONE][0]['value']),
+    'ship_to_last_name' => propco_ots_clean_string($redemption_node->field_last_name[LANGUAGE_NONE][0]['value']),
+    'ship_to_address_line_one' => propco_ots_clean_string($redemption_node->field_address[LANGUAGE_NONE][0]['thoroughfare']),
+    'ship_to_address_line_two' => propco_ots_clean_string($redemption_node->field_address[LANGUAGE_NONE][0]['premise']),
+    'ship_to_city' => propco_ots_clean_string($redemption_node->field_address[LANGUAGE_NONE][0]['locality']),
+    'ship_to_state' => propco_ots_clean_string($redemption_node->field_address[LANGUAGE_NONE][0]['administrative_area']),
+    'ship_to_zip' => propco_ots_clean_string($redemption_node->field_address[LANGUAGE_NONE][0]['postal_code']),
+    'ship_to_home_phone' => proco_ots_phone_format($redemption_node->field_phone[LANGUAGE_NONE][0]['value']),
+    'ship_to_business_phone' => proco_ots_phone_format($redemption_node->field_phone[LANGUAGE_NONE][0]['value']),
+    'special_instructions' => '',
+    'payment_type' => $payment_type,
+    'payment_description' => variable_get('ots_entry_access_code'),
+    'payment_amount' => proco_ots_money_format($award_node->field_price[LANGUAGE_NONE][0]['value']),
+    'expiration_date' => propco_ots_date_format($pin_node->field_pin_expire[LANGUAGE_NONE][0]['value']),
+  );
+
+  $shipping_line = implode('|', $shipping) . PHP_EOL;
+  // Can't use fputcsv, since addresses have white spaces fputcsv wraps them in
+  // double qoutes. We don't want that!
+  fwrite($order_file, $shipping_line);
+
+  // Update context result.
+  $context['results']['shipping']['nids'][] = $redemption_node->nid;
+}
+
+
+/**
+ * Writes line item record of the order fulfillment file.
+ */
+function propco_ots_fulfillment_line_item_record(&$redemption_node, &$order_file, &$context) {
+  // Hard coded values as per OTS file documentation.
+  $record_type = 'LI';
+  $delivery_mechanism = 'STD';
+
+  // The field_awards_selected could be more than one but we only need the first
+  // selected award.
+  $award_nid = $redemption_node->field_awards_selected[LANGUAGE_NONE][0]['target_id'];
+  $award_node = node_load($award_nid);
+
+  // Load the pin node.
+  $pin_id = $redemption_node->field_redemption_pin[LANGUAGE_NONE][0]['target_id'];
+  $pin_node = node_load($pin_id);
+
+  $amount = proco_ots_money_format($award_node->field_price[LANGUAGE_NONE][0]['value']);
+
+  // Build line item record.
+  $line_item = array(
+    'record_type' => $record_type,
+    'item_number' => 1,
+    'external_line_id' => $pin_node->title,
+    'quantity' => 1,
+    'model_id' => 'sku1060028_5',
+    'unit_base_price' => $amount,
+    'unit_tax_price' => '0',
+    'unit_freight_price' => '0',
+    'unit_fdc' => $amount,
+    'delivery_mechanism' => $delivery_mechanism,
+  );
+
+  fputcsv($order_file, array_values($line_item), '|');
+
+  // Create ots sync date.
+  $sync_date = array(
+    'value' => format_date(strtotime('now'), 'custom', 'Y-m-d H:i:s', 'UTC'),
+    'timezone' => variable_get('date_default_timezone'),
+    'timezone_db' => 'UTC',
+    'date_type' => 'date',
+  );
+
+  // Update sync date.
+  $redemption_node->field_ots_sync_date[LANGUAGE_NONE][0] = $sync_date;
+
+  node_save($redemption_node);
+
+  // Update context result.
+  $context['results']['line_item']['nids'][] = $redemption_node->nid;
+}
+
+
+/**
+ * Writes the trailer record of the order fultillment file.
+ */
+function propco_ots_fulfillment_trailer_record($order_filename, $order_total) {
+  $order_file = fopen(PROPCO_OTS_FILE_PATH . $order_filename, 'a+');
+
+  // Adding header and trailer.
+  $order_total += 2;
+
+  $record_type = 'TR';
+  $trailer = array($record_type, $order_total);
+
+  fputcsv($order_file, $trailer, '|');
+  fclose($order_file);
+}
+
+
+/**
+ * Batch finish callback.
+ */
+function propco_ots_fulfillment_batch_finished($success, $results, $operations) {
+  $total_result = count($results['nids']);
+  $total_line = count($results['shipping']['nids']) + count($results['line_item']['nids']);
+
+  // Create the trailer record.
+  propco_ots_fulfillment_trailer_record($results['order_filename'], $total_line);
+
+  // Create control file listing the newly created file, used to handle cron
+  // scripts PGP encryption command and uploading.
+  file_save_data($results['order_filename'], 'public://ots/control.txt', FILE_EXISTS_REPLACE);
+
+  if ($success) {
+    $message = format_plural($total_result, 'One order processed.', $total_result . ' order processed.');
+  }
+  else {
+    $message = t('Finished with an error.');
+  }
+
+  watchdog('propco_ots', $message);
+  drupal_set_message($message);
+}
+
+
+/**
+ * Implements hook_cron().
+ * Generates order fulfillment file via cron.
+ */
+function propco_ots_generate_fulfillment_cron() {
+  $form_state = array();
+  // Mimic form submission to run batch.
+  drupal_form_submit('propco_ots_fulfillment_form', $form_state);
+}
+
+
+/**
+ * Implements hook_cron().
+ * Read and loads all status files from cigna/affinion.
+ */
+function propco_ots_read_status_cron() {
+  $file_folder = PROPCO_OTS_FILE_PATH . 'order_status/' . date('Ymd') . '/';
+
+  $dat_files = propco_ots_get_status_files($file_folder);
+
+  if (!empty($dat_files['load_status'])) {
+    propco_ots_load_status($dat_files['load_status'], $file_folder);
+  }
+  else {
+    watchdog('propco_ots', 'Propco OTS - Load status file does not exists.');
+  }
+
+  // Disable this for now since it doesn't do anything at all.
+  /*
+  if (!empty($dat_files['order_status'])) {
+    propco_ots_order_status($dat_files['order_status'], $file_folder);
+  }
+  else {
+    watchdog('propco_ots', 'Propco OTS - Order status file does not exists.');
+  }*/
+
+}
+
+
+/**
+ * Read ots status files directory and returns the fetched filenames from cigna/
+ * affinions ftp server.
+ */
+function propco_ots_get_status_files($file_folder) {
+  $entry_access_code = variable_get('ots_entry_access_code');
+
+  // Declare dat files filename pattern.
+  $order_file_pattern = strtolower($entry_access_code . '_fulfillment');
+  $load_file_pattern = strtolower('ots_' . $entry_access_code . '_statusupdate');
+
+  // Scan directory and remove dots.
+  $files = array_diff(scandir($file_folder), array('..', '.'));
+
+  $dat_files = array();
+
+  $file = strtolower($file);
+
+  foreach ($files as $file) {
+    $lc_filename = strtolower($file);
+
+    if (strpos($lc_filename, $load_file_pattern) !== FALSE) {
+      // Load status file.
+      $dat_files['load_status'] = $file;
+    }
+    elseif (strpos($lc_filename, $order_file_pattern) !== FALSE) {
+      // Order status file.
+      $dat_files['order_status'] = $file;
+    }
+  }
+
+  return $dat_files;
+}
+
+
+/**
+ * Read load status file and update redemption node.
+ */
+function propco_ots_load_status($filename, $file_folder) {
+  $load_file = $file_folder . $filename;
+
+  if (($file = fopen($load_file, 'r')) !== FALSE) {
+    while($data = fgetcsv($file, 0 , ',')) {
+
+      // Extract the creation date from load status file's header.
+      if ($data[0] == 'HR') {
+        $creation_date = strtotime($data[1]);
+      }
+
+      // Make sure that we are only reading the data record.
+      if ($data[0] == 'DR') {
+
+        $query = new EntityFieldQuery();
+        $query->entityCondition('entity_type', 'node')
+          ->entityCondition('bundle', 'pin')
+          ->propertyCondition('title', $data[4])
+          ->range(0, 1);
+
+        $result = $query->execute();
+
+        if (isset($result['node'])) {
+          $nid = array_keys($result['node']);
+
+          // Load pin node.
+          $pin_node = node_load($nid[0]);
+
+          // Load redemption node.
+          $redemption_node = node_load($pin_node->field_redemption[LANGUAGE_NONE][0]['target_id']);
+
+          // Update redemption node with all the data coming from load status.
+          $status_date = array(
+            'value' => format_date($creation_date, 'custom', 'Y-m-d H:i:s', 'UTC'),
+            'timezone' => variable_get('date_default_timezone'),
+            'timezone_db' => 'UTC',
+            'date_type' => 'date',
+          );
+
+          // Create load status sync date.
+          $redemption_node->field_ots_item_status_date[LANGUAGE_NONE][0] = $status_date;
+          // Update item status.
+          $redemption_node->field_ots_item_status[LANGUAGE_NONE][0]['value'] = $data[12];
+          // Update order number
+          $redemption_node->field_ots_order_number[LANGUAGE_NONE][0]['value'] = $data[5];
+
+          node_save($redemption_node);
+
+        }
+      }
+
+    }
+  }
+}
+
+/**
+ * Read order status file and update redemption node.
+ */
+function propco_ots_order_status($filename, $file_folder) {
+  fgetcsv($file_folder . $filename);
+}
+
+
+/**
+ * Format phone numbers to ots format.
+ */
+function proco_ots_phone_format($phone) {
+  $phone = preg_replace('/[^0-9]/', '', $phone);
+
+  return $phone;
+}
+
+
+/**
+ * Format money to ots format.
+ */
+function proco_ots_money_format($money) {
+  $money = preg_replace('/[^0-9]/', '', $money);
+
+  return $money;
+}
+
+
+/**
+ * Format date to ots format.
+ */
+function propco_ots_date_format($date) {
+  $date = date('Ymd', strtotime($date));
+
+  return $date;
+}
+
+/**
+ * Removes extra spaces.
+ */
+function propco_ots_clean_string($text) {
+  $text = trim($text);
+
+  return $text;
+}

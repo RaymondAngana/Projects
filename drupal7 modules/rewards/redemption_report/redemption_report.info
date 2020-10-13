@@ -1,0 +1,15 @@
+name = Propco Redemption Report
+description = Redemption report for propco agent role.
+core = 7.x
+package = Propco Features
+version = 7.x-1.0
+project = propco_redemption_report
+dependencies[] = rules
+dependencies[] = views
+dependencies[] = views_data_export
+features[ctools][] = views:views_default:3.0
+features[features_api][] = api:2
+features[rules_config][] = rules_propco_agent_login
+features[views_view][] = redemption_report
+features_exclude[dependencies][ctools] = ctools
+features_exclude[dependencies][entity] = entity

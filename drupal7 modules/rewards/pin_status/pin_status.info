@@ -1,0 +1,4 @@
+name = Propco Pin Status
+description = Module to update pin status
+package = "Propco Rewards"
+core = 7.x

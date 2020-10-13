@@ -1,0 +1,28 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and schema hooks for Propco encryption module.
+ */
+
+/**
+ * PPE-13: Alter table for redemption encryption fixes.
+ */
+function propco_encryption_update_7001() {
+  $tables_column = array(
+    'field_data_field_first_name' => 'field_first_name_value',
+    'field_revision_field_name' => 'field_name_value',
+    'field_data_field_name' => 'field_name_value',
+  );
+  $message = t('Successfully altered table columns for encryption.');
+
+  foreach($tables_column as $table => $column) {
+    db_change_field($table, $column, $column, array(
+      'type' => 'varchar',
+      'length' => 512,
+    ));
+  }
+
+  drupal_set_message($message);
+  return $message;
+}

@@ -1,0 +1,11 @@
+name = Propco Rewards
+description = module providing forms and functionality for the propco rewards redemption
+package = "Propco Rewards"
+core = 7.x
+dependencies[] = ctools
+dependencies[] = encrypt
+dependencies[] = entity
+dependencies[] = propco_encryption_settings
+dependencies[] = session_cache
+
+configure = admin/config/propco-rewards

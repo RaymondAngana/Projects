@@ -1,0 +1,159 @@
+<?php
+
+/**
+ * @file
+ * Prayvine custom module contains minor and generic hooks or updates.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function prayvine_custom_menu() {
+  $items['admin/prayvine/prayer-request/reminder'] = array(
+    'title' => 'Prayer Request Reminder',
+    'description' => 'Administration page for testing Prayer Request Reminders.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('prayvine_custom_prayer_request_reminder_form'),
+    'access arguments' => array('access administration pages'),
+    'file' => 'prayvine_custom.admin.inc',
+  );
+
+  $items['admin/prayvine/prayer-request/%/edit'] = array(
+    'title' => 'Edit Prayer Request Reminder',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('prayvine_custom_prayer_request_reminder_edit_form', 3),
+    'access arguments' => array('access administration pages'),
+    'file' => 'prayvine_custom.admin.inc',
+  );
+
+  $items['admin/prayvine/topic/reminder'] = array(
+    'title' => 'Topic Reminder',
+    'description' => 'Administration page for testing Topic Reminders.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('prayvine_custom_topic_reminder_form'),
+    'access arguments' => array('access administration pages'),
+    'file' => 'prayvine_custom.admin.inc',
+  );
+
+  $items['admin/prayvine/topic/%/edit'] = array(
+    'title' => 'Edit Topic Reminder',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('prayvine_custom_topic_reminder_edit_form', 3),
+    'access arguments' => array('access administration pages'),
+    'file' => 'prayvine_custom.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements template_preprocess_page().
+ */
+function prayvine_custom_preprocess_page(&$variables) {
+  // Check if variable class exists and initialize if not.
+  if (!isset($variables['class'])) {
+    $variables['class'] = "";
+  }
+
+  // Check if variable front_page exists and initialize if not.
+  if (!isset($variables['front_page'])) {
+    $variables['front_page'] = "";
+  }
+
+  if ($node = menu_get_object()) {
+    if ($node->vid == '212' || $node->vid == '209') {
+      $variables['class'] = "id-main";
+    }
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function prayvine_custom_form_alter(&$form, &$form_state, $form_id) {
+  // Update changes to Set Follow-up Reminder webform.
+  if ($form_id == 'webform_client_form_4606') {
+    // Changed the default value of Post Reminder.
+    $form['submitted']['first_reminder']['#default_value'] = 0;
+
+    // Remove additional reminder field.
+    $form['submitted']['second_reminder'] = array();
+  }
+
+  // Hide the latest update field on Topic Add/Edit Form.
+  if ($form_id == 'topic_node_form') {
+    $form['field_topic_latest_update']['#access'] = 0;
+  }
+}
+
+/**
+ * Implements hook_views_pre_render().
+ */
+function prayvine_custom_views_pre_render(&$view) {
+  if ($view->name == 'subscribers') {
+    foreach ($view->result as $key => $res) {
+      // Do not include rows with empty uid value.
+      if (!isset($res->users_prayvine_subscriptions_uid) ||
+          empty($res->users_prayvine_subscriptions_uid)) {
+        unset($view->result[$key]);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_user_insert().
+ */
+function prayvine_custom_user_insert(&$edit, $account, $category) {
+  // When a user is created, check on the prayvine invites table and update
+  // the first access column.
+  if (isset($account->mail)) {
+    db_update('prayvine_invites')
+      ->fields(array(
+        'first_access' => date('Y-m-d H:i:s', $account->created),
+        'claimed_uid' => $account->uid,
+      ))
+      ->condition('mail', $account->mail, '=')
+      ->execute();
+  }
+}
+
+/**
+ * Implements hook_node_insert().
+ */
+function prayvine_custom_node_insert($node) {
+  // Set the latest post date value when a topic node is created.
+  if ($node->type == 'topic') {
+    $topic = node_load($node->nid);
+    $latest_post = date('Y-m-d H:i:s', $node->created);
+    $topic->field_topic_latest_update[LANGUAGE_NONE][0]['value'] = $latest_post;
+    node_save($topic);
+  }
+
+  // Update the Topic's latest post date when a prayer or prayer request is
+  // posted on the topic community.
+  if ($node->type == 'prayer' || $node->type == 'prayer_request') {
+    if (isset($node->field_topic_id[LANGUAGE_NONE][0]['value'])) {
+      $topic = node_load($node->field_topic_id[LANGUAGE_NONE][0]['value']);
+      $latest_post = date('Y-m-d H:i:s', $node->created);
+      $topic->field_topic_latest_update[LANGUAGE_NONE][0]['value'] = $latest_post;
+      node_save($topic);
+    }
+  }
+}
+
+/**
+ * Implements hook_comment_insert().
+ */
+function prayvine_custom_comment_insert($comment) {
+  $nid = $comment->nid;
+  $node = node_load($nid);
+
+  // Update the Topic's latest post date when a post update is
+  // posted on the topic community.
+  if ($node->type == 'topic') {
+    $latest_post = date('Y-m-d H:i:s', $comment->created);
+    $node->field_topic_latest_update[LANGUAGE_NONE][0]['value'] = $latest_post;
+    node_save($node);
+  }
+}

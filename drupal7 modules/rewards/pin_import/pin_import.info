@@ -1,0 +1,7 @@
+name = Propco Pin Import
+description = module providing the pin import functionality
+package = "Propco Rewards"
+core = 7.x
+dependencies[] = session_cache
+dependencies[] = entity
+dependencies[] = ctools

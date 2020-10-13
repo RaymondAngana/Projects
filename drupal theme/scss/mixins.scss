@@ -1,0 +1,26 @@
+/* MIXINS */
+
+//
+// Alternate buttons
+//
+@each $color,
+$value in $theme-colors {
+    .btn-#{$color} a {
+        @include button-variant($value, $value);
+    }
+}
+
+@each $color,
+$value in $theme-colors {
+    .btn-outline-#{$color} a {
+        @include button-outline-variant($value);
+    }
+}
+
+// ***************** //
+// Promet Source V3  //
+// ***************** //
+
+// Rem.
+// Reference: https://github.com/pierreburel/sass-rem.
+@import "../node_modules/sass-rem/rem";

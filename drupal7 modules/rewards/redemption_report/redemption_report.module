@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Propco Redemption Report feature.
+ */
+
+include_once 'propco_redemption_report.features.inc';

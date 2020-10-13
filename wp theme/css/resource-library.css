@@ -1,0 +1,98 @@
+/*
+* Resource Library Styles.
+*/
+.resource-subnav {
+  margin: 20px 0;
+}
+div.resource-pagination a {
+  background: #dee4e9;
+  padding: 5px 20px;
+  display: inline-block;
+  margin: 0 5px 10px 0;
+  border: 1px solid #e2e2e2;
+  color: #555555;
+  text-decoration: none !important;
+}
+div.resource-pagination a.active,
+div.resource-pagination a:hover {
+  background: #47a3c5;
+  color: #fff;
+}
+div.resource .resource-wrapper {
+  width: 30%;
+  border: 1px solid #caccce;
+  float: left;
+  margin-right: 3%;
+  margin-bottom: 30px;
+  transition: box-shadow .2s;
+  position: relative;
+  background: #f7f7f7;
+  height: 180px;
+}
+div.resource .resource-wrapper:hover {
+  box-shadow: 0 0.19em 0.62em rgba(0, 0, 0, 0.2);
+}
+div.resource .resource-icon {
+  height: 70px;
+  background: #f7f7f7 url('../images/resource-icons.png') no-repeat 0px center;
+  width: 28px;
+  margin: auto;
+  zoom: 1.5;
+}
+div.resource.research .resource-icon {
+  background-position-x: -25px;
+}
+div.resource.setting-goals .resource-icon {
+  background-position-x: -50px;
+}
+div.resource.job-search .resource-icon {
+  background-position-x: -78px;
+  width: 25px;
+}
+div.resource.going-to-work .resource-icon {
+  background-position-x: -102px;
+  width: 26px;
+}
+div.resource.success .resource-icon {
+  background-position-x: -102px;
+  width: 26px;
+}
+div.resource .resource-link,
+div.resource .resource-terms {
+  text-align: center;
+  width: 100%;
+  background: #fefefe;
+  font-size: 12pt;
+  padding: 5px 10px;
+  height: 35px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+div.resource .resource-terms {
+  border-top: 1px solid #dedede;
+  padding-top: 5px;
+}
+div.resource .resource-link .pf-content {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+div.resource .resource-link .pf-content a {
+  font-weight: bold;
+  text-decoration: none !important;
+  font-size: 12pt;
+}
+div.resource .resource-link .pf-content a:hover {
+  text-decoration: underline !important;
+}
+div.resource .resource-terms:before {
+  content: "Sections: ";
+}
+
+@media screen and (max-width: 768px) {
+  div.resource .resource-wrapper {
+    width: 100%;
+  }
+}
+

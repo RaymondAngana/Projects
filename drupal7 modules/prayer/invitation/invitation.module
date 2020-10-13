@@ -1,0 +1,266 @@
+<?php
+
+/**
+ * @file
+ * Prayvine Invite Module.
+ *
+ * Hanldes customizations related to invitations.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function prayvine_invitation_menu() {
+  $items['invite/%node'] = [
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('prayvine_invitation_main_form', 1),
+    'access callback' => 'prayvine_invitation_main_form_access',
+    'access arguments' => array(1),
+    'type' => MENU_CALLBACK,
+  ];
+
+  $items['prayvine/batch-invite/%node'] = [
+    'page callback' => '_prayvine_invitation_send_invites_batch_callback',
+    'page arguments' => array(1),
+    'access callback' => '_prayvine_invitation_send_invites_batch_callback_access',
+    'access arguments' => array(2),
+    'type' => MENU_CALLBACK,
+  ];
+
+  return $items;
+}
+
+/**
+ * Access to main form checker.
+ */
+function prayvine_invitation_main_form_access($topic) {
+  if (!isset($topic) && !isset($topic->type)) {
+    drupal_set_message(t('Invalid Prayer.'), 'error');
+    return FALSE;
+  }
+
+  global $user;
+  if (user_is_anonymous()) {
+    drupal_set_message(t('Please log in first'), 'error');
+    return FALSE;
+  }
+
+  if ($topic->uid != $user->uid && !prayvine_has_permission($user->uid, $topic->nid, '')) {
+    drupal_set_message(t('Please log out and log back in'), 'error');
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+/**
+ * Main form for handing out invitations.
+ */
+function prayvine_invitation_main_form($form, &$form_state, $topic) {
+  global $user;
+
+  $form['emails'] = [
+    '#title' => t('Enter e-mail addresses to invite. <em>Tip: If you have a large list of people to invite, copy-and-paste your contact list in any format (Excel, Gmail, Outlook, CSV, etc.)</em>'),
+    '#type' => 'textarea'
+  ];
+
+  $name = prayvine_get_name($user->uid);
+
+  drupal_set_title(t('Invite friends to pray about @title', array('@title' => $topic->title)));
+
+  if (empty($topic->field_ministry[LANGUAGE_NONE][0]['value'])) {
+    $default_message = t('Will you please pray with me about @title? I am inviting you to Prayvine, where we can share prayer requests and encourage one another. It takes less than a minute to join. Thanks, @author', array('@author' => $name, '@title' => $topic->title));
+  }
+  else {
+    $default_message = t('Will you please pray for me? I am inviting you to Prayvine, where I\'m sharing new prayer requests, photos, and ministry stories. It takes less than a minute to join. Thanks, @author', array('@author' => $name, '@title' => $topic->title));
+  }
+
+  $form['message'] = [
+    '#title' => t('Invitation message'),
+    '#type' => 'textarea',
+    '#default_value' => $default_message,
+  ];
+
+  $form['nid'] = [
+    '#type' => 'hidden',
+    '#value' => $topic->nid
+  ];
+
+  $form['submit'] = [
+    '#type' => 'submit',
+    '#value' => t('Send invitation'),
+    '#submit' => ['_prayvine_inivtation_send_invites_batch_submit_form'],
+  ];
+
+  $form['#validate'][] = '_prayvine_invitation_send_invites_validate';
+
+  return $form;
+}
+
+/**
+ * Checks access to batch invite callback.
+ */
+function _prayvine_invitation_send_invites_batch_callback_access($topic) {
+  $access = prayvine_invitation_main_form_access($topic);
+
+  if (!$access) {
+    return FALSE;
+  }
+
+  global $user;
+  if (user_is_anonymous() || ($user->uid != $topic->uid && !prayvine_has_permission($user->uid, $nid, ''))) {
+    drupal_set_message(t('You lack permission to send invites for this prayer journal.'), 'error');
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+/**
+ * Validate batch invite form.
+ */
+function _prayvine_invitation_send_invites_validate($form, &$form_state) {
+  $nid = $form_state['values']['nid'];
+  if (!is_numeric($nid) || $nid < 1) {
+    form_set_error(NULL, t('Invalid prayer journal.'));
+  }
+
+  global $user;
+  $topic = node_load($nid);
+  if (user_is_anonymous() || ($user->uid != $topic->uid && !prayvine_has_permission($user->uid, $nid, ''))) {
+    form_set_error(NULL, t('You lack permission to send invites for this prayer journal.'));
+  }
+}
+
+/**
+ * Callback handler for batch invites apart from main invite form.
+ */
+function _prayvine_invitation_send_invites_batch_callback() {
+  global $user;
+  global $conf;
+  $nid = check_plain($_POST['nid']);
+
+  // If skip just redirect.
+  if ($_POST['op'] == 'Skip this step') {
+    drupal_goto('/node/' . $nid);
+  }
+
+  $data['topic_nid'] = $nid;
+  $data['user'] = $user;
+
+  $topic = node_load($nid);
+  if (isset($topic) && $topic->type == 'topic') {
+
+    // No check_markup, this is will be escaped inside rules.
+    $data['message'] = '';
+    if (!empty($_POST['message'])) {
+      $data['message'] = $_POST['message'];
+    }
+
+    // $emails_str will be cleaned down the line.
+    $emails_str = $_POST['emails'];
+    $data['emails_str'] = $emails_str;
+
+    _prayvine_invitation_send_invites_to_gearman($data);
+
+    drupal_goto('/node/' . $nid);
+  }
+}
+
+/**
+ * Get all emails already in the database.
+ */
+function _prayvine_invitation_remove_already_invited($nid, $emails) {
+  $query = db_select('prayvine_invites', 'i');
+  $query->fields('i', ['mail']);
+  $query->condition('mail', $emails, 'IN');
+  $query->condition('nid', $nid);
+
+  $result = $query->execute();
+
+  $exclude = [];
+  while ($record = $result->fetchAssoc()) {
+    $exclude[] = $record['mail'];
+  }
+
+  return $exclude;
+}
+
+/**
+ * Submit handler for prayvine_invitation_main_form.
+ */
+function _prayvine_inivtation_send_invites_batch_submit_form($form, &$form_state) {
+  global $user;
+
+  // Setting up job data.
+  $nid = check_plain($form_state['values']['nid']);
+  $data['topic_nid'] = $nid;
+  $data['user'] = $user;
+
+  // No check_markup, this is will be escaped inside rules.
+  $data['message'] = '';
+  if (!empty($form_state['values']['message'])) {
+    $data['message'] = $form_state['values']['message'];
+  }
+
+  // $emails_str will be cleaned down the line.
+  $emails_str = $form_state['values']['emails'];
+  $data['emails_str'] = $emails_str;
+
+  _prayvine_invitation_send_invites_to_gearman($data);
+
+  drupal_goto('/node/' . $nid);
+}
+
+/**
+ * Sending data to gearman.
+ */
+function _prayvine_invitation_send_invites_to_gearman($data) {
+  global $conf;
+
+  $client = new GearmanClient();
+  $client->addServer();
+  $client->setTimeout(1000);
+
+  $path_live = variable_get('path_live', NULL);
+  $path_dev = variable_get('path_dev', NULL);
+
+  // Cleanup emails.
+  $emails_str = $data['emails_str'];
+  $emails = prayvine_extract_emails($emails_str);
+  // Remove duplicates.
+  $emails = array_unique($emails);
+  $emails = array_diff($emails, _prayvine_invitation_remove_already_invited($data['topic_nid'], $emails));
+  $data['emails'] = $emails;
+  unset($data['emails_str']);
+
+  // If all already invited, do not send to gearman.
+  if (count($emails) == 0) {
+    drupal_set_message(t('All added emails were already invited.'), 'status');
+  }
+  else {
+    // Serializing data for later consumption.
+    $json_data = json_encode($data);
+    // Send to Gearman.
+    // Local and Prod are using the same worker keys, with a slight gearman
+    // server disctinction.
+    // Dev and Staging are sharing gearman server, hence the need
+    // to distinguish the worker registered function.
+    if (isset($conf['gearman_server']) && $conf['gearman_server'] == 'local') {
+      $client->addServer($conf['gearman_local_server']);
+      $result = $client->doBackground("prayvine_invitation_gearman_invite", $json_data);
+    }
+    elseif ($_SERVER['SERVER_NAME'] === $path_dev && isset($conf['gearman_server']) &&
+      $conf['gearman_server'] == 'dev') {
+      $result = $client->doBackground("prayvine_invitation_gearman_invite_dev", $json_data);
+    }
+    elseif ($_SERVER['SERVER_NAME'] === $path_dev && isset($conf['gearman_server']) &&
+      $conf['gearman_server'] == 'staging') {
+      $result = $client->doBackground("prayvine_invitation_gearman_invite_staging", $json_data);
+    }
+    elseif ($_SERVER['SERVER_NAME'] === $path_live) {
+      $result = $client->doBackground("prayvine_invitation_gearman_invite", $json_data);
+    }
+    drupal_set_message(t('Thank you, your invitations have been sent.'), 'status');
+  }
+}

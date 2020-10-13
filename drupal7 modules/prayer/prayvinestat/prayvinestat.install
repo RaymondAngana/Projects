@@ -1,0 +1,97 @@
+<?php
+/**
+ * hook_install
+ * @return string
+ */
+function prayvinestat_schema(){
+  $schema['prayvinestat_user_actions'] = array(
+    'description' => 'Prayvine user actions',
+    'fields' => array(
+      'uid' => array(
+        'description' => 'User ID',
+        'type' => 'serial',
+        'unsigned' => 1,
+      ),
+      'action' => array(
+        'description' => 'User action',
+        'type' => 'varchar',
+        'length' => 100,
+      ),
+      'timestamp' => array(
+        'description' => 'Time of action',
+        'type' => 'int',
+        'unsigned' => 1,
+        'default' => 0,
+      ),
+    ),
+    'indexes' => array(
+      'uid' => array('uid'),
+    ),
+  );
+ 
+  $schema['prayvinestat_invitations'] = array(
+    'description' => 'Prayvines Invitations Stat',
+    'fields' => array(    
+      'nid' => array(
+        'description' => 'Prayer Node ID',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,        
+      ),
+      'uid' => array(
+        'description' => 'Send from User ID',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,        
+      ),
+      'mail' => array(
+        'description' => 'Mail address where invitaions is send',
+        'type' => 'varchar',
+        'length' => 100,
+      ),
+      'action' => array(
+        'description' => 'Action name that is performed by user',
+        'type' => 'varchar',
+        'length' => 100,
+      ),
+      'timestamp_send' => array(
+        'description' => 'Time of send',
+        'type' => 'int',
+        'unsigned' => 1,
+        'default' => 0,
+      ),
+      'timestamp_clicked' => array(
+        'description' => 'Time of clicked',
+        'type' => 'int',
+        'unsigned' => 1,
+        'default' => 0,
+      ),
+      'timestamp_action' => array(
+        'description' => 'Time of action',
+        'type' => 'int',
+        'unsigned' => 1,
+        'default' => 0,
+      ),
+      'register_user' => array(
+        'description' => 'Register users',
+        'type' => 'int',
+        'unsigned' => 1,
+      ),
+      'invite_id' => array(
+        'description' => 'Invite ID',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,        
+      ),
+    ),
+    'indexes' => array(
+      'nid' => array('nid'),
+      'uid' => array('uid'),
+      'invite_id' => array('invite_id'),
+    ),
+  );
+  
+ 
+  return $schema;
+}
+

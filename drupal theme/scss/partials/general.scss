@@ -1,0 +1,95 @@
+/* GENERAL STYLES
+-------------------------------------------------*/
+body {
+  background: $white;
+}
+input, button, select, optgroup, textarea {
+  border-radius: 0 !important;
+}
+
+/* COLORS
+--------------------------------------------------*/
+a {
+  color: $accent-shade;
+  &:hover {
+    color: $black;
+  }
+}
+
+.bg-inverse {
+  background: $primary-shade !important;
+}
+
+.site-footer {
+  background: $accent-shade !important;
+}
+
+.menu--main li a {
+  color: $primary-shade;
+}
+
+.menu--account li a {
+  color: $primary-shade;
+}
+
+.site-name-slogan a {
+  text-decoration: none;
+}
+
+.card-group img {
+  margin: 0;
+  width: 100%;
+  height: auto;
+}
+
+.card-group .field--type-image {
+  margin: 0
+}
+
+.slick {
+  width: 100%;
+}
+
+.slick>div {
+  margin: 0 15px;
+}
+
+.path-frontpage {
+  h1.title {
+    display: none;
+  }
+}
+
+.material-icons {
+  font-family: $font-family-google-material;
+  font-weight: normal;
+  font-style: normal;
+  font-size: $font-size-google-material-default;  /* Preferred icon size */
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+
+  /* Support for all WebKit browsers. */
+  -webkit-font-smoothing: antialiased;
+  /* Support for Safari and Chrome. */
+  text-rendering: optimizeLegibility;
+
+  /* Support for Firefox. */
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Support for IE. */
+  font-feature-settings: 'liga';
+}
+
+label,
+input[type=text],
+input[type=email] {
+  font-family: $font-hind-regular;
+  font-size: 16px;
+  letter-spacing: 0;
+  line-height: 26px;
+}

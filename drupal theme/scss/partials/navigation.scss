@@ -1,0 +1,14 @@
+#navbar-main {
+  display: block;
+  padding: 0;
+  position: static;
+
+  .left-navbar {
+    background-color: $black-light;
+    height: 100%;
+    position: absolute;
+    width: 73px;
+    text-transform: lowercase;
+  }
+
+}

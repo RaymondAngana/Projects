@@ -1,0 +1,50 @@
+{#
+/**
+ * @file
+ * Bootstrap Barrio's theme implementation for a branding block.
+ *
+ * Each branding element variable (logo, name, slogan) is only available if
+ * enabled in the block configuration.
+ *
+ * Available variables:
+ * - site_logo: Logo for site as defined in Appearance or theme settings.
+ * - site_name: Name for site as defined in Site information settings.
+ * - site_slogan: Slogan for site as defined in Site information settings.
+ */
+#}
+{% set attributes = attributes.addClass('site-branding') %}
+
+  <div class="left-navbar">
+
+    {% if site_logo or site_name %}
+      <a href="{{ path('<front>') }}" title="{{ 'Home'|t }}" rel="home" class="navbar-brand">
+        {% if site_logo %}
+          <img src="{{ site_logo }}" alt="{{ 'Home'|t }}" class="logo img-fluid d-inline-block align-top" />
+        {% endif %}
+        <span class="site-name ml-2 d-md-inline">{{ site_name }}</span>
+      </a>
+    {% endif %}
+   
+    <div class="buttons">
+
+      <button class="button-bar d-block navbar-toggler navbar-toggler-right" data-toggle="collapse" data-target="#CollapsingNavbar" aria-controls="CollapsingNavbar" aria-expanded="false" aria-label="Toggle navigation"><span class="fas fa-bars navbar-toggler-icon"></span></button>
+
+      <div class="contact-buttons">
+        <div class="contact-button phone">
+          <button aria-label="{{ 'Phone number'|t }}" class="d-block navbar-toggler navbar-toggler-right" data-toggle="collapse" data-target="#CollapsingNavbar" aria-controls="CollapsingNavbar" aria-expanded="false"><span class="fas fa-phone"></span></button>
+        </div>
+
+        <div class="contact-button email">
+          <button aria-label="{{ 'Email address'|t }}" class="d-block navbar-toggler navbar-toggler-right" data-toggle="collapse" data-target="#CollapsingNavbar" aria-controls="CollapsingNavbar" aria-expanded="false"><span class="fas fa-envelope"></span></button>
+        </div>
+      </div>
+      
+      {% if site_slogan %}
+        <div class="ml-2 d-none d-inline-block align-top site-name-slogan">
+          {{ site_slogan }}
+        </div>
+      {% endif %}
+
+    </div>
+
+  </div>

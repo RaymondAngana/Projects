@@ -1,0 +1,325 @@
+<?php
+
+/**
+ * @file
+ * Modifications for Main theme.
+ */
+
+use Drupal\main\PreprocessPluginManager;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\block\Entity\Block;
+use Drupal\views\ViewExecutable;
+use Drupal\views\Views;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+
+/**
+ * Implements hook_preprocess().
+ *
+ * @todo This is just a poor man's implementation of the service container
+ * thingy. :D
+ */
+function main_preprocess(&$variables, $hook) {
+  // Plugin ID is just the same as hook e.g. Block, Page, etc.
+  $plugin_id = $hook;
+
+  $preprocess_manager = new PreprocessPluginManager();
+  if ($preprocess_manager->hasDefinition($plugin_id)) {
+    $class = $preprocess_manager->createInstance($plugin_id);
+    $class->preprocess($variables, $hook);
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for block templates.
+ *
+ * @todo This is just a poor man's implementation of changing svg logo to png.
+ *
+ * @see https://www.drupal.org/node/2472127#comment-10458517
+ */
+function main_preprocess_block(&$variables) {
+  if (isset($variables['base_plugin_id'])) {
+    switch ($variables['base_plugin_id']) {
+      case 'system_branding_block':
+        $variables['site_logo'] = '';
+        if ($variables['content']['site_logo']['#access'] && isset($variables['content']['site_logo']['#uri'])) {
+          $variables['content']['site_logo']['#uri'] = $variables['site_logo'] = str_replace('.svg', '.png', $variables['content']['site_logo']['#uri']);
+        }
+        break;
+
+    }
+  }
+  if (isset($variables['elements']['#base_plugin_id'])) {
+    switch ($variables['elements']['#base_plugin_id']) {
+      case 'system_branding_block':
+        if (isset($variables['elements']['content']['site_logo']['#uri'])) {
+          $variables['elements']['content']['site_logo']['#uri'] = str_replace('.svg', '.png', $variables['elements']['content']['site_logo']['#uri']);
+        }
+        break;
+
+    }
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_alter().
+ */
+function main_theme_suggestions_alter(array &$suggestions, array $variables, $hook) {
+  $menus = ['services', 'industries', 'work', 'team', 'knowledge'];
+  if ($hook === 'menu' && in_array($variables['menu_name'], $menus)) {
+    $suggestions[] = 'menu__featured_bottom_third';
+  }
+
+  if ($hook === 'page') {
+    $node = \Drupal::routeMatch()->getParameter('node');
+    if ($node && $node->bundle() === 'blog') {
+      $suggestions[] = implode('__', [$hook, $node->bundle(), 'details', 'page']);
+    }
+  }
+
+  if ($hook === 'block' && ($block = Block::load($variables['elements']['#id']))) {
+    array_splice($suggestions, 1, 0, implode('__', ['block', $block->getRegion()]));
+    $suggestions[] = implode('__', [
+      $hook,
+      $variables['elements']['#base_plugin_id'],
+      $block->getRegion(),
+    ]);
+  }
+
+  if ($hook === 'page_title') {
+    if (\Drupal::service('path.current')->getPath() == '/training-classes') {
+      $suggestions[] = 'page_title__training_classes';
+    }
+
+    $node = \Drupal::routeMatch()->getParameter('node');
+    if ($node) {
+      $suggestions[] = implode('__', [$hook, $node->getType()]);
+    }
+
+    $user = \Drupal::routeMatch()->getParameter('user');
+    if ($user) {
+      $suggestions[] = implode('__', [$hook, 'user']);
+    }
+
+    // Let it burn when the 'blog_landing' view doesn't exist; otherwise do a
+    // check if the view exists.
+    $current_route_name = \Drupal::service('current_route_match')->getRouteName();
+
+    if (isset($current_route_name) && !empty($current_route_name)) {
+      switch ($current_route_name) {
+        case 'view.blog_landing.page_1':
+          $view = Views::getView('blog_landing');
+          if ($view && !$node) {
+            $view->setDisplay('page_1');
+            if (\Drupal::service('path.current')->getPath() === $view->getUrl()->toString()) {
+              $suggestions[] = implode('__', [$hook, 'blog']);
+            }
+          }
+          break;
+
+        case 'view.services_landing.page_1':
+          $view = Views::getView('services_landing');
+          if ($view && !$node) {
+            $suggestions[] = implode('__', [$hook, 'service_landing']);
+          }
+          break;
+
+        case 'entity.node.canonical':
+          if ($node->bundle() === 'blog') {
+            $suggestions[] = implode('__', [$hook, 'blog_details']);
+          }
+
+          break;
+
+        case 'entity.taxonomy_term.canonical':
+          $suggestions[] = implode('__', [$hook, 'taxonomy_term']);
+
+          break;
+      }
+    }
+
+  }
+
+  if ($hook === 'views_view') {
+    $view_training = Views::getView('training_classes');
+    if ($view_training) {
+      $view_training->setDisplay('page_training_classes');
+      if (\Drupal::service('path.current')->getPath() === $view_training->getUrl()->toString()) {
+        $suggestions[] = implode('__', [$hook, 'upcoming_classes']);
+      }
+    }
+  }
+
+  if ($hook === 'views_view_field' && Views::getView('taxonomy_term')) {
+    if (strpos(\Drupal::service('path.current')->getPath(), 'taxonomy/term')) {
+      $suggestions[] = implode('__', [$hook, 'terms_' . $variables['field']->field]);
+    }
+  }
+
+  if ($hook === 'input' && $variables['theme_hook_original'] === 'input__textfield') {
+    $view = Views::getView('blog_landing');
+    if ($view) {
+      $view->setDisplay('page_1');
+
+      if ($variables['element']['#name'] === 'combine' &&
+          \Drupal::service('path.current')->getPath() === $view->getUrl()->toString()) {
+        $suggestions[] = $variables['theme_hook_original'] . '__combine';
+      }
+    }
+  }
+
+  if ($hook == 'form') {
+    $suggestions[] = $variables['theme_hook_original'] . '__contact_message_let_s_talk_private_training_form';
+  }
+}
+
+/**
+ * Implements hook_views_pre_render().
+ */
+function main_views_pre_render(ViewExecutable $view) {
+  // Alter the text for the fields field_case_challenges and
+  // field_case_solutions although there's most likely a better implementation.
+  if ($view->id() === 'case_study') {
+    $fields = [
+      'field_case_challenges',
+      'field_case_solutions',
+    ];
+
+    foreach ($view->result as &$result) {
+      $entity = $result->_entity;
+
+      foreach ($fields as $field) {
+        foreach ($entity->get($field) as $key => $value) {
+          $text = t(
+            '<span>@index.</span> @text',
+            [
+              '@index' => str_pad($key + 1, 2, 0, STR_PAD_LEFT),
+              '@text' => $value->getValue()['value'],
+            ]
+          );
+
+          $value->setValue($text);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function main_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if ($form_id === 'views_exposed_form' && $form_state->get('view')->id() === 'blog_landing') {
+    $form['tid']['#wrapper_attributes']['class'][] = 'col-sm-3';
+    $form['tid']['#wrapper_attributes']['class'][] = 'col-sm-offset-3';
+    $form['tid']['#attributes']['title'] = t('Choose Topics');
+    $form['tid']['#options']['All'] = t('All Topics');
+
+    $form['combine']['#placeholder'] = t('Search');
+    $form['combine']['#attributes']['title'] = t('Search');
+    $form['combine']['#wrapper_attributes']['class'][] = 'col-sm-3';
+
+    $form['items_per_page']['#wrapper_attributes']['class'][] = 'col-sm-3';
+    $form['items_per_page']['#prefix'] = '<div class="form-inline">';
+    $form['items_per_page']['#suffix'] = '</div>';
+  }
+
+  if ($form_id === 'contact_message_contact_us_form') {
+    $form['title'] = [
+      '#markup' => '<h2>' . t('Send us a message:') . '</h2>',
+      '#weight' => -1,
+    ];
+
+    $form['#theme_wrappers'][] = 'contact_form';
+
+    $form['mail']['#title'] = t('Email Address');
+    $form['copy']['#access'] = FALSE;
+    $form['actions']['preview']['#access'] = FALSE;
+    $form['actions']['submit']['#value'] = t('Submit');
+    $form['actions']['submit']['#attributes']['class'][] = 'btn-send';
+  }
+
+  if ($form_id == 'contact_message_let_s_talk_private_training_form') {
+    // Update the label for the _none_ option of field_experience_level .
+    $form['field_experience_level']['widget']['#options']['_none'] = 'Please Select';
+
+    // Update the label for the _none_ option of field_training_category .
+    $form['field_training_category']['widget']['#options']['_none'] = 'Please Select';
+
+
+    // Add honeypot_time field.
+    honeypot_add_form_protection(
+      $form,
+      $form_state,
+      ['honeypot', 'time_restriction']
+    );
+
+    $form['actions']['submit']['#attributes']['class'][] = 'btn-form-submit';
+
+    // Modify field message.
+    $form['message']['widget'][0]['value']['#title'] = t('Enter any additional information');
+    $form['message']['widget'][0]['#required'] = FALSE;
+    $form['message']['widget'][0]['value']['#required'] = FALSE;
+    $form['message']['#required'] = FALSE;
+  }
+
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter().
+ */
+function main_form_contact_message_let_s_talk_private_training_form_alter(&$form, FormStateInterface &$form_state) {
+  $form['#theme'] = ['training_classes_form'];
+}
+
+/**
+ * Implements hook_theme().
+ */
+function main_theme($existing, $type, $theme, $path) {
+  return [
+    'contact_form' => [
+      'render element' => 'element',
+    ],
+    'training_classes_form' => [
+      'render element' => 'form',
+    ]
+  ];
+}
+
+/**
+ * Implements template_preprocess_html().
+ */
+function main_preprocess_html(&$variables) {
+  $current_path = \Drupal::service('path.current')->getPath();
+  $path_alias = \Drupal::service('path.alias_manager')->getAliasByPath($current_path);
+  $path_alias = ltrim($path_alias, '/');
+  $variables['attributes']['class'][] = \Drupal\Component\Utility\Html::cleanCssIdentifier($path_alias);
+
+  // Add Autopilot Tracking code.
+  // Steps in Applying the Autopilot Tracking code.
+  // 1. Copy the script and only the contents inside the script tag.
+  // 2. Go to https://www.freeformatter.com/json-escape.html#ad-output to escape special strings.
+  // 3. Get the result and assign it to the variable $autopilotWebCodeTracking.
+  $autopilotWebCodeTracking = '(function(o){var b="https://turbolion.io/anywhere/",t="8f02f1f8aa93440a8e2d2d0f859d0fcdf0c7a5a74e884cc09cff0417d459c9c1",a=window.AutopilotAnywhere={_runQueue:[],run:function(){this._runQueue.push(arguments);}},c=encodeURIComponent,s="SCRIPT",d=document,l=d.getElementsByTagName(s)[0],p="t="+c(d.title||"")+"&u="+c(d.location.href||"")+"&r="+c(d.referrer||""),j="text/javascript",z,y;if(!window.Autopilot) window.Autopilot=a;if(o.app) p="devmode=true&"+p;z=function(src,asy){var e=d.createElement(s);e.src=src;e.type=j;e.async=asy;l.parentNode.insertBefore(e,l);};y=function(){z(b+t+\'?\'+p,true);};if(window.attachEvent){window.attachEvent("onload",y);}else{window.addEventListener("load",y,false);}})({});';
+
+  $variables['autopilotcode'] = $autopilotWebCodeTracking;
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for paragraph.
+ */
+function main_preprocess_paragraph(&$variables) {
+  $paragraph = $variables['paragraph'];
+
+  switch ($paragraph->bundle()) {
+    case 'service_timeline':
+      if (isset($variables['content']['field_title_url'][0])) {
+        $timelineTitle = $variables['content']['field_service_timeline_title'][0]['#context']['value'];
+        $variables['content']['field_service_timeline_title'][0]['#context']['value'] = "<a href=\"{$variables['content']['field_title_url'][0]['#url']->toString()}\" title=\"{$timelineTitle}\">{$timelineTitle}</a>";
+      }
+      unset($variables['content']['field_title_url']);
+
+      break;
+  }
+}
+

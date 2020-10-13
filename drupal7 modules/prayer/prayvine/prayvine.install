@@ -1,0 +1,275 @@
+<?php
+
+/**
+ * implementation hook install
+ */
+function prayvine_schema() {
+  $schema['prayvine_invites'] = array(
+    'description' => 'Prayvines Invitations',
+    'fields' => array(
+      'inviteId' => array(
+        'description' => 'Invitations ID',
+        'type' => 'serial',
+        'unsigned' => 1,
+      ),
+      'mail' => array(
+        'description' => 'Mail address',
+        'type' => 'varchar',
+        'length' => 100,
+      ),
+      'nid' => array(
+        'description' => 'Node ID',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+      'inviter_uid' => array(
+        'description' => 'User ID',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+      'invite_code' => array(
+        'description' => 'Invite code',
+        'type' => 'varchar',
+        'length' => 10,
+      ),
+      'status' => array(
+        'description' => 'Status',
+        'type' => 'int',
+      ),
+      'sent' => array(
+        'description' => 'Time of sent',
+        'type' => 'int',
+        'unsigned' => 1,
+        'default' => 0,
+      ),
+      'first_access' => array(
+        'description' => 'Time of first access',
+        'type' => 'int',
+        'unsigned' => 1,
+      ),
+      'claimed_uid' => array(
+        'description' => 'Claimed uid',
+        'type' => 'int',
+        'unsigned' => 1,
+      ),
+    ),
+    'indexes' => array(
+      'invite_codeIndex' => array('invite_code'),
+      'nidIndex' => array('nid'),
+    ),
+  );
+  $schema['prayvine_subscriptions'] = array(
+    'description' => 'Prayvines Subscriptions',
+    'fields' => array(
+      'nid' => array(
+        'description' => 'Node ID',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'User ID',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+    ),
+    'indexes' => array(
+      'nidSubscriptions' => array('nid'),
+      'uidSubscriptions' => array('uid'),
+    ),
+  );
+  $schema['prayvine_prayer_amens'] = array(
+    'description' => 'Prayvines Invitations',
+    'fields' => array(
+      'nid' => array(
+        'description' => 'Node ID',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'User ID',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+      'status' => array(
+        'description' => 'status',
+        'type' => 'int',
+      ),
+      'updated' => array(
+        'description' => 'User ID',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+    ),
+    'indexes' => array(
+      'nidAmenIndex' => array('nid'),
+    ),
+  );
+  $schema['prayvine_anonymous_posts'] = array(
+    'description' => 'Prayvines Invitations',
+    'fields' => array(
+      'inviteId' => array(
+        'description' => 'Invitation ID',
+        'type' => 'serial',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+      'nid' => array(
+        'description' => 'node ID',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+      'cid' => array(
+        'description' => 'Comment ID',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+    ),
+    'indexes' => array(
+      'inviteIndex' => array('inviteId'),
+      'nidPostIndex' => array('nid'),
+      'cidPostIndex' => array('cid'),
+    ),
+  );
+
+
+  return $schema;
+}
+
+function prayvine_update_9003() {
+  $schema['prayvine_silent_log'] = array(
+    'description' => 'Prayvines slient prayer log',
+    'fields' => array(
+      'prid' => array(
+        'description' => 'Reminder ID',
+        'type' => 'serial',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+      'nid' => array(
+        'description' => 'node ID',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'user ID',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+      'created' => array(
+        'description' => 'created time',
+        'type' => 'timestamp',
+        'mysql_type' => 'TIMESTAMP',
+        'not null' => TRUE,
+      ),
+    ),
+    'indexes' => array(
+      'praySilentLogIndex' => array('prid'),
+      'nidPraySilentLogIndex' => array('nid'),
+      'uidPraySilentLogIndex' => array('uid'),
+    ),
+    'primary key' => array('prid'),
+  );
+  $schema['prayvine_reminder'] = array(
+    'description' => 'Prayvines Ministry Goal Reminder',
+    'fields' => array(
+      'prid' => array(
+        'description' => 'Reminder ID',
+        'type' => 'serial',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+      'nid' => array(
+        'description' => 'node ID',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'user ID',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+      'created' => array(
+        'description' => 'created time',
+        'type' => 'timestamp',
+        'mysql_type' => 'TIMESTAMP',
+        'not null' => TRUE,
+      ),
+    ),
+    'indexes' => array(
+      'reminderIndex' => array('prid'),
+      'nidReminderIndex' => array('nid'),
+      'uidReminderIndex' => array('uid'),
+    ),
+    'primary key' => array('prid'),
+  );
+
+  $schema['prayvine_prayer_reminder'] = array(
+    'description' => 'Prayvines Ministry Prayer Goal Reminder',
+    'fields' => array(
+      'prid' => array(
+        'description' => 'Reminder ID',
+        'type' => 'serial',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+      'pid' => array(
+        'description' => 'node ID',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'user ID',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+      'created' => array(
+        'description' => 'created time',
+        'type' => 'timestamp',
+        'mysql_type' => 'TIMESTAMP',
+        'not null' => TRUE,
+      ),
+    ),
+    'indexes' => array(
+      'prayerReminderIndex' => array('prid'),
+      'pidPrayerReminderIndex' => array('pid'),
+      'uidPrayerReminderIndex' => array('uid'),
+    ),
+    'primary key' => array('prid'),
+  );
+  db_create_table('prayvine_silent_log', $schema['prayvine_silent_log']);
+  db_create_table('prayvine_prayer_reminder', $schema['prayvine_prayer_reminder']);
+  db_create_table('prayvine_reminder', $schema['prayvine_reminder']);
+}
+
+/**
+ * Delete tokens for Hogan prayer community. PVS-146.
+ */
+function prayvine_update_9004() {
+  // Delete unused tokens.
+  // 5750 is Hogan's nid.
+  db_query("DELETE FROM {prayvine_invites} WHERE nid = 5750 AND mail = '' AND claimed_uid is NULL");
+}
+
+/**
+ * Re-Executing: Delete tokens for Hogan prayer community. PVS-146.
+ */
+function prayvine_update_9005() {
+  // Delete unused tokens.
+  // 5750 is Hogan's nid.
+  db_query("DELETE FROM {prayvine_invites} WHERE nid = 5750 AND mail = '' AND claimed_uid is NULL");
+}

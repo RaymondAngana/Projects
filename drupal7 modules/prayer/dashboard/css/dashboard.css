@@ -1,0 +1,8 @@
+.dashboard-main-metrics {
+  overflow-y: auto;
+}
+
+.dashboard-main-metrics td:nth-child(1),
+.dashboard-main-metrics th:nth-child(1) {
+  white-space: nowrap;
+}

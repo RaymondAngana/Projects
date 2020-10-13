@@ -1,0 +1,30 @@
+.btn-solid {
+  display: table;
+  min-height: 43px;
+  padding: 0 25px;
+  color: $white;
+  font-family: $font-hind-semibold;
+  @include rem(font-size, 13px);
+  letter-spacing: 1.86px;
+  line-height: 21px;
+  text-align: center;
+}
+.btn-solid--right-arrow {
+  padding: 0 45px;
+  border: 1px solid $grenadier;
+  border-radius: 0;
+  background-color: $grenadier-dark;
+
+  &:hover {
+    padding-left: 0;
+    border: 0;
+    background-color: transparent;
+    color: $grenadier;
+    text-transform: uppercase;
+  }
+}
+
+.btn-solid__label {
+  display: table-cell;
+  vertical-align: middle;
+}

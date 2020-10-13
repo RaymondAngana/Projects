@@ -1,0 +1,7 @@
+;$Id$
+
+name = Prayvine
+description = Module for Prayvine customizations
+package = Prayvine
+core = 7.x
+files[] = prayvine.module

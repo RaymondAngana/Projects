@@ -1,0 +1,230 @@
+/**
+ * FOOTER related SASS file.
+ * Includes Pre-footer elements, Ready to Get started form and
+ * Copyright.
+**/
+
+footer {
+  .pre-footer-container {
+    background: $grenadier;
+  }
+  .pre-footer {
+    background: $grenadier;
+    .region-pre-footer {
+      margin: 100px auto;
+
+      .block {
+        color: $white;
+
+        &.block-webform {
+          input, button {
+            border: 1px solid #a1a1a1;
+          }
+          label {
+            font-size: 16px;
+            font-family: $font-family-lato;
+          }
+          fieldset.form-item-phone-number,
+          fieldset.form-type-textfield {
+            width: 100%;
+            padding: 0;
+            clear: both;
+
+            @include media-breakpoint-up(md) {
+              width: 50%;
+              float: left;
+              padding: 0 15px;
+              clear: none;
+            }
+          }
+          fieldset.form-item-message,
+          fieldset.form-item-email {
+            @include media-breakpoint-down(sm) {
+              padding: 0;
+              clear: both;
+            }
+          }
+          fieldset.form-item-phone-number {
+            clear: left;
+          }
+          fieldset.form-item-name,
+          fieldset.form-item-company {
+            margin-top: -4px;
+          }
+          div.form-item-i-d-like-to-receive-updates-and-articles-from-promet-source {
+            width: 80%;
+            margin-top: 20px;
+            font-size: 10pt;
+            float: left;
+            font-family: $font-family-hind;
+
+            @include media-breakpoint-up(md) {
+              width: 55%;
+            }
+          }
+          div.form-actions {
+            width: 80%;
+            float: none;
+            margin: auto;
+            top: 20px;
+
+            @include media-breakpoint-up(md) {
+              width: 25%;
+              float: right;
+              margin-top: 20px;
+              top: 0;
+            }
+
+            input.btn-primary {
+              background: $black;
+              border: $black;
+              border-radius: 0;
+              text-transform: uppercase;
+              font-size: 10pt;
+              height: 45px;
+            }
+          }
+        }
+      }
+      #block-prefooterreadytogetstarted {
+        h2 {
+          font-family: $font-family-base;
+          font-size: 40px;
+          line-height: 55px;
+        }
+        h3 {
+          font-size: 16px;
+          font-family: $font-family-hind;
+          letter-spacing: 3.5px;
+          text-transform: uppercase;
+          margin-top: 30px;
+        }
+      }
+    }
+  }
+  .footer-container {
+    background: $black-light;
+  }
+  .region-footer {
+    .block {
+      color: $white;
+      font-family: $font-family-hind;
+      padding: 43px 0;
+      h2 {
+        font-size: 1rem;
+        font-weight: bold;
+        line-height: 28px;
+        letter-spacing: 2.33px;
+        margin-bottom: 1em;
+        text-transform: uppercase;
+      }
+      ul.nav {
+        li {
+          line-height: 19px;
+          width: 160px;
+          a {
+            color: $white;
+            display: inline-block;
+            font-size: 1rem;
+            padding-left: 0;
+            text-decoration: none;
+          }
+          a:focus,
+          a:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+    #block-footercontactus {
+      a {
+        color: $white;
+        &:hover,
+        &:focus,
+        &:active {
+          color: $white;
+          text-transform: underline;
+        }
+      }
+      span {
+        &::before {
+          @include google-material-styles();
+          content: "phone";
+          padding-right: 10px;
+        }
+      }
+    }
+    #block-followus {
+      li {
+        &:first-child {
+          &::before {
+            content: "\f39e";
+            font-family: $font-family-font-awesome-brands;
+            padding-right: 15px;
+          }
+        }
+        &:nth-child(2) {
+          &::before {
+            content: "\f099";
+            font-family: $font-family-font-awesome-brands;
+            padding-right: 10px;
+          }
+        }
+        &:nth-child(3) {
+          &::before {
+            content: "\f0e1";
+            font-family: $font-family-font-awesome-brands;
+            padding-right: 10px;
+          }
+        }
+        &:nth-child(4) {
+          &::before {
+            @include google-material-styles();
+            content: "work";
+            padding-right: 10px;
+          }
+        }
+        &:nth-child(5) {
+          &::before {
+            @include google-material-styles();
+            content: "email";
+            padding-right: 10px;
+          }
+        }
+      }
+    }
+    #block-footerignitingdigital {
+      padding-top: 0;
+      clear: both;
+      font-family: $font-family-base;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+    #block-accessibilitytermsprivacy {
+      padding-top: 0;
+      ul.nav {
+        li {
+          width: auto;
+          a.nav-link {
+            color: $gray-light;
+            display: inline-block;
+            padding-right: 8px;
+            padding-left: 3px;
+          }
+          &:first-child {
+            &::before {
+              color: $gray-light;
+              content: "accessible_forward";
+              @include google-material-styles();
+            }
+          }
+        }
+
+        li+li:before {
+          color: $gray-light;
+          content: '|';
+        }
+      }
+    }
+  }
+}

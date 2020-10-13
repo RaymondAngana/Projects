@@ -1,0 +1,5 @@
+name = Prayvine Wizard
+description = Module for Prayvine Wizard customizations
+package = Prayvine
+core = 7.x
+dependencies[] = prayvine_invitation

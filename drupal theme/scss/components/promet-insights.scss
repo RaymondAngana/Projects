@@ -1,0 +1,107 @@
+.paragraph--type--views-block {
+  &.blog.block_1 {
+    padding-bottom: 150px;
+    padding-top: 60px;
+
+    .viewsreference--view-title {
+      font-size: 40px;
+    }
+
+   .views-element-container {
+     margin-top: 41px;
+     padding-left: 0;
+     padding-right: 0;
+   }
+
+  .view-content {
+    .views-row {
+      box-shadow: 0 0px 5px 4px rgba(0,0,0,0.05);
+      margin-right: 30px;
+      max-width: 350px;
+      padding-bottom: 58px;
+      &:first-child {
+        box-shadow: 5px 5px 5px rgba(0,0,0,0.05);
+      }
+      &:last-child {
+        box-shadow: -5px 5px 5px rgba(0,0,0,0.05);
+        margin-right: 0;
+      }
+    }
+
+    .views-field-field-blog-headimg {
+      margin-bottom: 36px;
+      a:focus,
+      a:hover {
+        outline: 2px dotted $grenadier;
+      }
+    }
+
+    .views-field-field-user-image {
+      position: absolute;
+      top: 160px;
+      img {
+        border: 2px solid $white;
+        border-radius: 50%;
+      }
+    }
+
+    .views-field-field-user-first-name {
+      float: left;
+      margin-right: 5px;
+    }
+
+    .views-field-field-user-first-name,
+    .views-field-field-user-last-name {
+      .field-content {
+        color: $grenadier;
+        font-size: 14px;
+      }
+    }
+
+    .views-field-created {
+      .field-content {
+        color: $gray-darker;
+        font-size: 12px;
+      }
+    }
+
+    .views-field-field-user-image,
+    .views-field-field-user-first-name,
+    .views-field-created,
+    .views-field-title {
+      margin-left: 20px;
+    }
+
+    .views-field-title {
+      margin-top: 5px;
+      a {
+        color: $black;
+        font-size: 22px;
+        line-height: 30px;
+      }
+    }
+  }
+
+  .more-link {
+    margin-top: 46px;
+    margin-right: 55px;
+    position: absolute;
+    right: 0;
+    a {
+      border-bottom: 2px solid $cod-gray;
+      color: $cod-gray;
+      font-size: 13px;
+      padding: 5px;
+      text-transform: uppercase;
+
+      &:focus,
+      &:hover {
+        border-bottom: none;
+        outline: 3px solid $cod-gray;
+        text-decoration: none;
+      }
+    }
+  }
+
+  }
+}

@@ -1,0 +1,1081 @@
+<?php
+
+/**
+ * @file
+ * Functions to support theming in the d8 theme.
+ */
+
+use Drupal\block\Entity\Block;
+use Drupal\Component\Utility\Html;
+use Drupal\Core\Breadcrumb;
+use Drupal\Core\Link;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Url;
+use Drupal\node\Entity\Node;
+use Drupal\views\ViewExecutable;
+use Drupal\Component\Utility\Crypt;
+use Symfony\Cmf\Component\Routing\RouteObjectInterface;
+
+/**
+ * Custom function to limit words based on passed max characters.
+ * @arguments: $message - The word to truncate.
+ * @arguments: $max - The maximum number of charcters for the word.
+ * @return $message trimmed based on the $max argument.
+ *
+ */
+function d8_trim($message, $max) {
+  // Truncate message is it's beyond our $max character.
+  if (mb_strlen($message)  > $max) {
+    $string = wordwrap($message, $max);
+    $message = mb_substr($string, 0, mb_strpos($string, "\n"));
+
+    $message .= '...';
+  }
+  return $message;
+}
+
+/**
+ * Implements hook_preprocess_html().
+ */
+function d8_preprocess_html(&$variables) {
+  $path = \Drupal::service('path.current')->getPath();
+  $alias = trim(\Drupal::service('path.alias_manager')->getAliasByPath($path), '/');
+  $alias_class = preg_replace("/\//", '-', $alias);
+  if (!empty($alias_class) && strpos($alias_class, 'node') !== 0) {
+    $variables['attributes']['class'][] = Html::cleanCssIdentifier('alias--' . $alias_class);
+  }
+  $config = \Drupal::config('d8_site_config.theme_variations.settings');
+  $variation = $config->get('variation');
+  $variables['attributes']['class'][] = $variation;
+
+  return $variables;
+}
+
+/**
+ * Implements hook_preprocess_page().
+ */
+function d8_preprocess_page(&$variables) {
+  // Get accessibility block configuration.
+  $accessibilityConfig = \Drupal::config('d8_site_config.accessibility.settings');
+  $accessibilityDisplay = $accessibilityConfig->get('accessibility_display');
+  $accessibilityTitle = $accessibilityConfig->get('accessibility_title');
+  if (empty($accessibilityTitle)) {
+    $accessibilityTitle = NULL;
+  }
+  $accessibilityDescription = $accessibilityConfig->get('accessibility_body');
+  if (empty($accessibilityDescription)) {
+    $accessibilityDescription = NULL;
+  }
+  $variables['accessibility_display'] = $accessibilityDisplay;
+  $variables['accessibility_title'] = $accessibilityTitle;
+  $variables['accessibility_body'] = $accessibilityDescription;
+
+  $config = \Drupal::config('d8_breadcrumb.settings');
+  $main_site = $config->get('main_site');
+  $variables['main_site'] = $main_site;
+
+  if ($main_site) {
+    if (isset($variables['page']['alerts']['views_block__pdx_automatic_alert_display_multi_sites_block_1'])) {
+      unset($variables['page']['alerts']['views_block__pdx_automatic_alert_display_multi_sites_block_1']);
+    }
+  }
+  else {
+    if (isset($variables['page']['alerts']['views_block__pdx_automatic_alert_display_block_1'])) {
+      unset($variables['page']['alerts']['views_block__pdx_automatic_alert_display_block_1']);
+    }
+  }
+
+  // JS variables for alert sessions.
+  $user_id = \Drupal::currentUser()->id();
+  $variables['#attached']['drupalSettings']['user_id'] = $user_id;
+  $variables['#attached']['drupalSettings']['show_alert'] = TRUE;
+
+  return $variables;
+}
+
+/**
+ * Implements hook_preprocess_image().
+ */
+function d8_preprocess_image(&$variables) {
+  if ($variables['alt'] == 'null' || $variables['alt'] == 'NULL' || $variables['alt'] == NULL) {
+    $variables['attributes']['alt'] = '';
+  }
+  // Add class for image set wtih parallax styling.
+  // Check the image style.
+  if ($variables['style_name'] == 'parallax_large_hero_3150x1450') {
+    // Set class.
+    $variables['attributes']['class'][] = 'parallax-window';
+  }
+  return $variables;
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter() for page_title templates.
+ *
+ * Add content type suggestions, e.g. page-title--basic-page.html.twig.
+ */
+function d8_theme_suggestions_page_title_alter(array &$suggestions, array $variables) {
+  $node = \Drupal::routeMatch()->getParameter('node');
+  // Verification in order to add the suggestions only for nodes.
+  if (!empty($node) && is_object($node)) {
+    array_splice($suggestions, 1, 0, 'page_title__' . $node->getType());
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter() for page templates.
+ *
+ * Add content type suggestions, e.g. page--basic-page.html.twig.
+ */
+function d8_theme_suggestions_page_alter(array &$suggestions, array $variables) {
+  $node = \Drupal::routeMatch()->getParameter('node');
+  // Verification in order to add the suggestions only for nodes.
+  if (!empty($node) && is_object($node)) {
+    array_splice($suggestions, 1, 0, 'page__' . $node->getType());
+  }
+
+  $view = \Drupal::routeMatch()->getParameter('view_id');
+  if (!empty($view)) {
+    array_splice($suggestions, 1, 0, 'page__' . $view);
+  }
+
+  // 404/403 template suggestion.
+  if (!is_null(Drupal::requestStack()->getCurrentRequest()->attributes->get('exception'))) {
+    $status_code = Drupal::requestStack()->getCurrentRequest()->attributes->get('exception')->getStatusCode();
+    switch ($status_code) {
+      case 404:
+        $suggestions[] = 'page__' . (string) $status_code;
+        break;
+
+      case 403:
+        $suggestions[] = 'page__' . (string) $status_code;
+        break;
+
+      default:
+        break;
+    }
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter() for form templates.
+ *
+ * Add form specific suggestions, e.g. form--search-block-form.html.twig.
+ */
+function d8_theme_suggestions_form_alter(array &$suggestions, array $variables) {
+  if ($variables['element']['#form_id']) {
+    $suggestions[] = 'form__' . $variables['element']['#form_id'];
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter() for page_title.
+ *
+ * Add block suggestions specific to region, e.g. block--pre-footer.html.twig.
+ */
+function d8_theme_suggestions_block_alter(array &$suggestions, array $variables) {
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  if (!empty($variables['elements']['#id'])) {
+    $block = Block::load($variables['elements']['#id']);
+    $suggestions[] = 'block__' . $block->getRegion();
+    $suggestions[] = 'block__' . $block->getRegion() . '__' . $variables['elements']['#id'];
+  }
+
+  switch ($route_name) {
+    case 'system.403':
+      // Access Denied.
+      $error = 403;
+      break;
+
+    case 'system.404':
+      // Page Not Found.
+      $error = 404;
+      break;
+  }
+  if (isset($error) && isset($variables['elements']['content']['#markup']) && !empty($block)) {
+    $suggestions[] = 'block__' . $block->getRegion() . '__' . $route_name;
+  }
+
+  return $suggestions;
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ *
+ * Pass block region value to content so this can be used in
+ * MYTHEME_theme_suggestions_menu_alter.
+ */
+function d8_preprocess_block(&$variables) {
+  // Get contact information block configuration.
+  $contactInformationConfig = \Drupal::config('d8_site_config.contact_information.settings');
+  $contactInformation = $contactInformationConfig->get('contact_information');
+  $config = \Drupal::config('d8_breadcrumb.settings');
+  $variables['title_override'] = $config->get('title_override');
+  $variables['main_site'] = $config->get('main_site');
+  $variables['is_organization'] = $config->get('organization');
+  $variables['base_path'] = base_path();
+
+  if (empty($contactInformation)) {
+    $contactInformation = NULL;
+  }
+  $variables['contact_information'] = $contactInformation;
+
+  // Disable cache for secondary menu to load alert icon correctly.
+  if ($variables['derivative_plugin_id'] == 'psu-secondary-menu') {
+    $variables['#cache']['max-age'] = 0;
+  }
+
+}
+
+/**
+ * Implements template_preprocess_block() for menu_block__psu_secondary_menu block.
+ *
+ * Get main_site configuration and pass as variable to the template.
+ */
+function d8_preprocess_block__menu_block__psu_secondary_menu(&$variables) {
+  $config_breadcrumb = \Drupal::config('d8_breadcrumb.settings');
+  $variables['main_site'] = $config_breadcrumb->get('main_site');
+}
+
+/**
+ * Implements template_preprocess_block() for menu_block__psu_primary_menu block.
+ *
+ * Get breadcrumb configuration and pass as variable to the template.
+ */
+function d8_preprocess_block__menu_block__psu_primary_menu(&$variables) {
+  $config = \Drupal::config('d8_breadcrumb.settings');
+  $parent_organizations = \Drupal::config('d8_breadcrumb.organizations')->get();
+  $variables['parent_organization'] = $config->get('organization');
+
+  if ($config->get('organization')) {
+    $organizations_url = array_keys($parent_organizations);
+    $organization_url = $organizations_url[$config->get('organization_id')];
+    $organization_url_arrow = t('← ');
+    $organization_url_t = t('Return to @organization', ['@organization' => $organization_url]);
+    $variables['parent_organization_arrow'] = $organization_url_arrow;
+    $variables['parent_organization_text'] = $organization_url_t;
+    $variables['parent_organization_link'] = Url::fromUri($parent_organizations[$organization_url]);
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter() for form element templates.
+ *
+ * Add form specific suggestions, e.g. form-element--search.html.twig.
+ */
+function d8_theme_suggestions_form_element_alter(array &$suggestions, array $variables) {
+  if ($variables['element']['#type']) {
+    $suggestions[] = 'form_element__' . $variables['element']['#type'];
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter() for input element templates.
+ *
+ * Add form specific suggestions, e.g. form-element--search.html.twig.
+ */
+function d8_theme_suggestions_input_alter(array &$suggestions, array $variables) {
+  $element = $variables['element'];
+
+  if (isset($element['#id'])) {
+    if ($element['#id'] === 'edit-search-api-fulltext'
+      || $element['#id'] === 'edit-search'
+    ) {
+      $suggestions[] = 'input__textfield__search';
+    }
+
+    if ($element['#id'] === 'edit-faculty-name') {
+      $suggestions[] = 'input__textfield__faculty_name';
+    }
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter().
+ *
+ * Provide region based menu suggestions.
+ */
+function d8_theme_suggestions_menu_alter(&$suggestions, array $variables) {
+  if (isset($variables['attributes']['region'])) {
+    $suggestions[] = 'menu__' . $variables['attributes']['region'];
+    $suggestions[] = 'menu__' . $variables['menu_name'] . '__' . $variables['attributes']['region'];
+  }
+}
+
+/**
+ * Implements template_preprocess_input() for form element templates.
+ *
+ * Updates search form elements attributes.
+ */
+function d8_preprocess_input(&$variables) {
+  $search_btn_ids = [
+    'edit-submit-search',
+    'edit-submit-academic-programs-index',
+  ];
+
+  // Changes the input type to image if it's the search button.
+  if (isset($variables['attributes']['id'])
+    && in_array($variables['attributes']['id'], $search_btn_ids)) {
+    $variables['attributes']['value'] = html_entity_decode('&#xf002;');
+    $variables['attributes']['class'][] = 'search-button';
+  }
+
+  // Changes the input type to image if it's the search button.
+  if (isset($variables['attributes']['value']) && $variables['attributes']['value'] == 'Search') {
+    $variables['attributes']['type'] = 'image';
+    $variables['attributes']['alt'] = t("Search");
+    $variables['attributes']['src'] = "/themes/custom/d8/images/search.png";
+    $variables['attributes']['aria-label'] = $variables['attributes']['value'];
+    $variables['attributes']['value'] = '';
+    $variables['attributes']['class'] = [
+      'btn-search-toggler-icon',
+      'align-midle',
+    ];
+  }
+}
+
+/**
+ * Implements template_preprocess_paragraph() for tuition calculator.
+ *
+ * Gets and assign value for the iFrame URL.
+ */
+function d8_preprocess_paragraph__tuition_calculator(&$variables) {
+  $variables['iframe_url'] = \Drupal::state()->get('d8_tuition_iframe', 'https://pdx.prometdev.com');
+}
+
+/**
+ * Implements template_preprocess_paragraph() for 3 buttons CTA templates.
+ *
+ * Updates 3 buttons CTA elements attributes.
+ */
+function d8_preprocess_paragraph__3_buttons_call_to_action(&$variables) {
+  $content = $variables['content'];
+  $content['field_call_to_action_1_of_3'][0]['#options']['attributes']['role'] = 'button';
+  $content['field_call_to_action_1_of_3'][0]['#options']['attributes']['class'] = [
+    'btn',
+    'btn-cta-' . strtolower($content['field_color_scheme_1_of_3'][0]['#plain_text']),
+  ];
+  $content['field_call_to_action_2_of_3'][0]['#options']['attributes']['role'] = 'button';
+  $content['field_call_to_action_2_of_3'][0]['#options']['attributes']['class'] = [
+    'btn',
+    'btn-cta-' . strtolower($content['field_color_scheme_2_of_3'][0]['#plain_text']),
+  ];
+  $content['field_call_to_action_3_of_3'][0]['#options']['attributes']['role'] = 'button';
+  $content['field_call_to_action_3_of_3'][0]['#options']['attributes']['class'] = [
+    'btn',
+    'btn-cta-' . strtolower($content['field_color_scheme_3_of_3'][0]['#plain_text']),
+  ];
+  $variables['content'] = $content;
+}
+
+/**
+ * Implements template_preprocess_paragraph() for Short hero image templates.
+ *
+ * Updates Short hero image element attributes.
+ */
+function d8_preprocess_paragraph__short_hero(&$variables) {
+  $content = $variables['content'];
+  $content['field_short_hero_image'][0]['#item_attributes']['data-source'] = 'short_hero_image';
+  $variables['content'] = $content;
+}
+
+/**
+ * Implements template_preprocess_paragraph() for Full width image link templates.
+ *
+ * Updates Full width image element attributes.
+ */
+function d8_preprocess_paragraph__full_width_image_link(&$variables) {
+  $content = $variables['content'];
+  $content['field_full_width_image'][0]['#item_attributes']['data-source'] = 'full_width_image_link';
+  $content['field_full_width_image'][0]['#item_attributes']['data-cta'] = $content['field_call_to_action'][0]['#title'];
+  $content['field_full_width_image'][0]['#url'] = $content['field_call_to_action'][0]['#url'];
+  $variables['content'] = $content;
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter() for image formatter templates.
+ *
+ * Add content type suggestions, e.g. image--basic-page.html.twig.
+ */
+function d8_theme_suggestions_image_formatter_alter(array &$suggestions, array $variables) {
+  $node = \Drupal::routeMatch()->getParameter('node');
+  // Verification in order to add the suggestions only for nodes.
+  if (!empty($node) && is_object($node)) {
+    $suggestions[] = 'image_formatter__' . $node->getType();
+    if (isset($variables['item_attributes']['data-source'])) {
+      $suggestions[] = 'image_formatter__' . $node->getType() . '__' . $variables['item_attributes']['data-source'];
+    }
+  }
+  if (isset($variables['item_attributes']['data-source'])) {
+    $suggestions[] = 'image_formatter__' . $variables['item_attributes']['data-source'];
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter() for page_title templates.
+ *
+ * Add content type suggestions, e.g. image--basic-page.html.twig.
+ */
+function d8_theme_suggestions_image_alter(array &$suggestions, array $variables) {
+  $node = \Drupal::routeMatch()->getParameter('node');
+  // Verification in order to add the suggestions only for nodes.
+  if (!empty($node) && is_object($node)) {
+    $suggestions[] = 'image__' . $node->getType();
+    if (isset($variables['attributes']['data-source'])) {
+      $suggestions[] = 'image__' . $node->getType() . '__' . $variables['attributes']['data-source'];
+    }
+  }
+  if (isset($variables['attributes']['data-source'])) {
+    $suggestions[] = 'image__' . $variables['attributes']['data-source'];
+  }
+}
+
+/**
+ * Implements template_preprocess_paragraph() for Quicklinks item templates.
+ *
+ * Updates Quicklinks item element attributes.
+ */
+function d8_preprocess_paragraph__quicklinks_item(&$variables) {
+  $content = $variables['content'];
+  $content['field_quicklinks_item_image'][0]['#item_attributes']['data-source'] = 'field_quicklinks_item_link';
+  $content['field_quicklinks_item_image'][0]['#item_attributes']['data-link'] = $content['field_quicklinks_item_link'][0]['#title'];
+  $content['field_quicklinks_item_image'][0]['#url'] = $content['field_quicklinks_item_link'][0]['#url'];
+  $variables['content'] = $content;
+}
+
+/**
+ * Implements template_preprocess_paragraph() for Link Group item templates.
+ *
+ * Updates Link Group item element attributes.
+ */
+function d8_preprocess_paragraph__link_group_image_item(&$variables) {
+  $content = $variables['content'];
+  $content['field_link_image'][0]['#item_attributes']['data-source'] = 'field_link_image_link';
+  $content['field_link_image'][0]['#item_attributes']['data-link'] = $content['field_link_image_link'][0]['#title'];
+  $content['field_link_image'][0]['#url'] = $content['field_link_image_link'][0]['#url'];
+  $variables['content'] = $content;
+}
+
+/**
+ * Implements template_preprocess_paragraph() for Award item templates.
+ *
+ * Adds variable "show" to the element.
+ */
+function d8_preprocess_paragraph__ranking_badges_accolades(&$variables) {
+  $variables['show'] = TRUE;
+  $content = $variables['content'];
+  if (isset($content['field_expiry_date'][0])) {
+    $expiry = new DateTime($content['field_expiry_date'][0]['#markup']);
+    $today = new DateTime("now");
+
+    // Compare expiry date with today.
+    // If expiry date is in the past, we don't show the award.
+    // @see paragraph--ranking-badges-accolades.html.twig.
+    if (!empty($expiry) && $expiry < $today) {
+      $variables['show'] = FALSE;
+    }
+  }
+}
+
+/**
+ * Implements template_preprocess_paragraph() for 3 images CTA templates.
+ *
+ * Updates 3 images CTA elements attributes.
+ */
+function d8_preprocess_paragraph__3_images_call_to_action(&$variables) {
+  $content = $variables['content'];
+  $content['field_call_to_action_1_of_3'][0]['#options']['attributes']['role'] = 'button';
+  $content['field_call_to_action_1_of_3'][0]['#options']['attributes']['class'] = [
+    'btn',
+    'btn-cta-' . strtolower($content['field_color_scheme_1_of_3'][0]['#plain_text']),
+  ];
+  $content['field_call_to_action_2_of_3'][0]['#options']['attributes']['role'] = 'button';
+  $content['field_call_to_action_2_of_3'][0]['#options']['attributes']['class'] = [
+    'btn',
+    'btn-cta-' . strtolower($content['field_color_scheme_2_of_3'][0]['#plain_text']),
+  ];
+  $content['field_call_to_action_3_of_3'][0]['#options']['attributes']['role'] = 'button';
+  $content['field_call_to_action_3_of_3'][0]['#options']['attributes']['class'] = [
+    'btn',
+    'btn-cta-' . strtolower($content['field_color_scheme_3_of_3'][0]['#plain_text']),
+  ];
+  $variables['content'] = $content;
+}
+
+/**
+ * Implements template_preprocess_paragraph() for Link Group with item templates.
+ *
+ * Updates Link Group item element attributes.
+ */
+function d8_preprocess_paragraph__link_group_images_with_title_sub(&$variables) {
+  $content = $variables['content'];
+  if (isset($content['field_color_scheme'][0]['#title'])) {
+    $content['field_image'][0]['#item_attributes']['color-scheme'] = 'color-scheme-' . strtolower($content['field_color_scheme'][0]['#title']);
+  }
+  $variables['content'] = $content;
+}
+
+/**
+ * Implements template_preprocess_paragraph() for Feature Stats with item templates.
+ *
+ * Updates Stats Item element attributes.
+ */
+function d8_preprocess_paragraph__stats_item(&$variables) {
+  $content = $variables['content'];
+  if (isset($content['field_color_scheme'][0]['#title'])) {
+    $content['field_text'][0]['#item_attributes']['color-scheme'] = 'color-scheme-' . strtolower($content['field_color_scheme'][0]['#title']);
+  }
+  $variables['content'] = $content;
+}
+
+/**
+ * Modify news view pager to conform with PSU style guide.
+ *
+ * Updates prev/next links with images and the pages array with text (uses key)
+ */
+function d8_preprocess_pager(&$variables) {
+  $pager_ids = [
+    'pager__news__news',
+    'pager__research_units__page',
+    'pager__search__page_1',
+    'pager__academic_programs_index',
+    'pager__portfolio_class_gallery',
+    'pager__portfolio_all_galleries',
+    'pager__portfolio_project_tag_gallery',
+    'pager__departments',
+    'pager__blog__blog',
+    'pager__items_for_sale',
+    'pager__campus_buildings',
+    'pager__faculty_experts',
+    'pager__news__news_archives',
+  ];
+
+  $need_theme_pager = FALSE;
+  foreach ($pager_ids as $key => $value) {
+    if (is_array($variables['pager']['#theme'])) {
+      if (in_array($value, $variables['pager']['#theme'])) {
+        $need_theme_pager = TRUE;
+        break;
+      }
+    }
+  }
+
+  if ($need_theme_pager) {
+    $element = $variables['pager']['#element'];
+    global $pager_page_array, $pager_total;
+    $pager_current = $pager_page_array[$element] + 1;
+    $pager_max = $pager_total[$element];
+    unset($variables['ellipses']);
+
+    $variables['items']['first']['text'] = 'First';
+    $variables['items']['previous']['text'] = html_entity_decode('&#xf0a8;');
+    $variables['items']['last']['text'] = 'Last';
+    $variables['items']['next']['text'] = html_entity_decode('&#xf0a9;');
+
+    if ($pager_max == 1) {
+      unset($variables['items']['first']);
+      unset($variables['items']['next']);
+      unset($variables['items']['previous']);
+      unset($variables['items']['last']);
+    }
+
+    unset($variables['items']['pages']);
+    if ($pager_max != 0) {
+      $key = 'Page ' . $pager_current . ' / ' . $pager_max;
+      $variables['items']['pages'][$key] = $key;
+    }
+  }
+}
+
+/**
+ * Implements template_preprocess_views_view() for Event calendar day.
+ *
+ * Add day links for Events Calendar day view.
+ */
+function d8_preprocess_views_view__events_calendar__event_calendar_day(&$variables) {
+  // Retrieve an array which contains the path pieces.
+  $current_path = \Drupal::service('path.current')->getPath();
+  $paths = explode('/', $current_path);
+  if (!isset($paths[3])) {
+    $now = time();
+  }
+  else {
+    $now = strtotime($paths[3]);
+  }
+  $previous = date('Ymd', strtotime('-1 day', $now));
+  $next = date('Ymd', strtotime('+1 day', $now));
+
+  $variables['previous'] = \Drupal::l(t('Previous'), Url::fromUri('internal:/calendar/day/' . $previous, ['attributes' => ['class' => 'fa fa-angle-left button', 'aria-label' => 'Previous Day', 'data-drupal-link-system-path' => '/calendar/day']]));
+  $variables['day'] = date('l F d, Y', $now);
+  $variables['next'] = \Drupal::l(t('Next'), Url::fromUri('internal:/calendar/day/' . $next, ['attributes' => ['class' => 'fa fa-angle-right button', 'aria-label' => 'Next Day', 'data-drupal-link-system-path' => '/calendar/day']]));
+}
+
+/**
+ * Implements template_preprocess_views_view() for Event calendar day filtererd.
+ *
+ * Add day links for Events Calendar day view.
+ */
+function d8_preprocess_views_view__events_calendar__event_calendar_day_filtered(&$variables) {
+  // Retrieve an array which contains the path pieces.
+  $current_path = \Drupal::service('path.current')->getPath();
+  $paths = explode('/', $current_path);
+  if (!isset($paths[3])) {
+    $now = time();
+  }
+  else {
+    $now = strtotime($paths[3]);
+  }
+  $previous = date('Ymd', strtotime('-1 day', $now));
+  $next = date('Ymd', strtotime('+1 day', $now));
+
+  $variables['previous'] = \Drupal::l(t('Previous'), Url::fromUri('internal:/calendar/day/' . $previous, ['attributes' => ['class' => 'fa fa-angle-left button', 'aria-label' => 'Previous Day', 'data-drupal-link-system-path' => '/calendar/day']]));
+  $variables['day'] = date('l F d, Y', $now);
+  $variables['next'] = \Drupal::l(t('Next'), Url::fromUri('internal:/calendar/day/' . $next, ['attributes' => ['class' => 'fa fa-angle-right button', 'aria-label' => 'Next Day', 'data-drupal-link-system-path' => '/calendar/day']]));
+}
+
+/**
+ * Implements template_preprocess_menu() for Browse Programs menu.
+ *
+ * Add description to menu item.
+ */
+function d8_preprocess_menu__browse_programs(array &$variables) {
+  foreach ($variables['items'] as $idx => $item) {
+    $link_attributes = $item['url']->getOption('attributes');
+    unset($link_attributes['title']);
+    $link_attributes['class'] = ['menu-item-link icon browse-program'];
+    $link_attributes['data-icon'] = $item['original_link']->getDescription();
+    $item['url']->setOption('attributes', $link_attributes);
+    $variables['items'][$idx]['description'] = $item['original_link']->getDescription();
+  }
+}
+
+/**
+ * Implements template_preprocess_paragraph() for Large Hero Video Embed.
+ *
+ * Load videos/images from gfycat provided by the Gfycat field in Hero Item
+ * paragraph type.
+ */
+function d8_preprocess_paragraph__hero_item(&$variables) {
+  $content = $variables['content'];
+  if (isset($content['field_media'][0])) {
+    $content['media'] = $content['field_media'];
+  }
+  // Attach gfycat URL paths for provided video/image.
+  elseif (isset($content['field_gfycat'][0])) {
+    // Gyfcat thumbnail image and mobile MP4.
+    $gfycat_zippy_thumb_url = 'https://thumbs.gfycat.com/';
+    $content['gfycat_thumb'] = $gfycat_zippy_thumb_url . $content['field_gfycat'][0]['#context']['value'] . '-poster.jpg';
+    $content['gfycat_thumb_mobile'] = $gfycat_zippy_thumb_url . $content['field_gfycat'][0]['#context']['value'] . '-mobile.mp4';
+    // Gyfcat hosts files less than 1mb on the subdomain zippy.
+    $gfycat_zippy_video_url = 'https://zippy.gfycat.com/';
+    $content['gfycat_zippy_mp4'] = $gfycat_zippy_video_url . $content['field_gfycat'][0]['#context']['value'] . '.mp4';
+    $content['gfycat_zippy_webm'] = $gfycat_zippy_video_url . $content['field_gfycat'][0]['#context']['value'] . '.webm';
+    // Gycat hosts files betweeen 1mb and 3mb on the subdomain fat.
+    $gfycat_fat_video_url = 'https://fat.gfycat.com/';
+    $content['gfycat_fat_mp4'] = $gfycat_fat_video_url . $content['field_gfycat'][0]['#context']['value'] . '.mp4';
+    $content['gfycat_fat_webm'] = $gfycat_fat_video_url . $content['field_gfycat'][0]['#context']['value'] . '.webm';
+    // Gycat hosts files above 3mb on the subdomain giant.
+    $gfycat_giant_video_url = 'https://giant.gfycat.com/';
+    $content['gfycat_giant_mp4'] = $gfycat_giant_video_url . $content['field_gfycat'][0]['#context']['value'] . '.mp4';
+    $content['gfycat_giant_webm'] = $gfycat_giant_video_url . $content['field_gfycat'][0]['#context']['value'] . '.webm';
+  }
+  $variables['content'] = $content;
+}
+
+/**
+ * Implements template_preprocess_paragraph() for Twitter Block.
+ *
+ * Makes twitter username available on template.
+ */
+function d8_preprocess_paragraph__twitter_block(&$variables) {
+  $variables['twitter_username'] = \Drupal::config('d8_site_config.twitter.settings')->get('twitter_username');;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function d8_form_views_exposed_form_alter(&$form, $form_state, $form_id) {
+  // Creates hidden fields for each URL querystring arguments to merge two
+  // differents forms from a same page. That way, all the necessary fields
+  // for the searches will be in the GET and represented in the subsequent
+  // queries.
+  $params = \Drupal::request()->query->all();
+  $viewID = str_replace('edit-submit-', '', $form['actions']['submit']['#id']);
+  $form['#attributes']['data-view-id'] = $viewID;
+  if ($viewID == 'academic-programs-index' &&
+    $form_id != 'views-exposed-form-search-page-1') {
+    if (isset($params)) {
+      foreach ($params as $key => $value) {
+        if (!isset($form[$key])) {
+          $form[$key] = [
+            '#type' => 'hidden',
+            '#value' => $value,
+          ];
+        }
+      }
+    }
+  }
+  // Change "Any" default select value in "Events Calendar" to "Select a
+  // Topic".
+  if ($viewID == 'events-calendar') {
+    foreach ($form['field_tags_target_id']['#options'] as $key => $value) {
+      if ($key == 'All') {
+        $form['field_tags_target_id']['#options'][$key] = t('All topics');
+      }
+    }
+    // Add aria-label attribute for accessibility.
+    $form['combine']['#attributes']['aria-label'] = t('Event Description');
+  }
+
+  if ($form['#id'] == 'views-exposed-form-news-news-archives') {
+    $form['#action'] = '/news-archives';
+  }
+
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter().
+ */
+function d8_theme_suggestions_paragraph_alter(&$suggestions, $variables) {
+  $paragraph = $variables['elements']['#paragraph'];
+  $parent = $paragraph->getParentEntity();
+  if ($parent) {
+    $suggestions[] = 'paragraph__' . $paragraph->bundle() . '__' . $parent->bundle();
+  }
+}
+
+/**
+ * Implements template_preprocess_views_view() for Event calendar week mobile.
+ */
+function d8_preprocess_views_view_fullcalendar(array &$variables) {
+  $entries = [];
+  foreach ($variables['#attached']['drupalSettings']['fullCalendarView'] as $entry) {
+    $nid = $entry['id'];
+    $node = Node::load($nid);
+    $dateValues = $node->field_event_datetime_range_all->getValue();
+    $startAllDay = $dateValues[0]['value'];
+    $endAllDay = $dateValues[0]['end_value'];
+    if ($startAllDay == '1' and $endAllDay == '1') {
+      $entry['className'] = "fc-all-day";
+      $entry['allDay'] = TRUE;
+    }
+    $entries[] = $entry;
+  }
+  $variables['#attached']['drupalSettings']['fullCalendarView'] = $entries;
+  return $variables;
+}
+
+/**
+ * Implements template_preprocess_block__d8_branding() for Add return link.
+ */
+function d8_preprocess_block__d8_branding(array &$variables) {
+  $config = \Drupal::config('d8_breadcrumb.settings');
+  $parent_organizations = \Drupal::config('d8_breadcrumb.organizations')->get();
+  $variables['parent_organization'] = $config->get('organization');
+
+  if ($config->get('organization')) {
+    $organizations_url = array_keys($parent_organizations);
+    $organization_url = $organizations_url[$config->get('organization_id')];
+    $organization_url_arrow = t('← ');
+    $organization_url_t = t('Return to @organization', ['@organization' => $organization_url]);
+    $variables['parent_organization_arrow'] = $organization_url_arrow;
+    $variables['parent_organization_text'] = $organization_url_t;
+    $variables['parent_organization_link'] = Url::fromUri($parent_organizations[$organization_url]);
+  }
+}
+
+/**
+ * Implements template_views_pre_render() for Event calendar.
+ */
+function d8_views_pre_render(ViewExecutable $view) {
+  if ($view->id() == 'events_calendar') {
+    $view->exposed_widgets['actions']['#attributes']['data-drupal-selector'] = 'edit-actions-events-calendar';
+    $view->exposed_widgets['actions']['#attributes']['id'] = 'edit-actions-events-calendar';
+  }
+}
+
+/**
+ * Implements template_preprocess_menu() for Global menu settings.
+ */
+function d8_preprocess_menu(array &$variables) {
+  if ($variables['menu_name'] == 'psu-secondary-menu' && $variables['menu_block_configuration']['suggestion'] == 'psu_secondary_menu_mobile') {
+    $variables['attributes']['id'] = 'psu-secondary-menu-mobile';
+  }
+}
+
+/**
+ * Implements template_preprocess_views_view().
+ *
+ * Add Departments Block to departments view page.
+ */
+function d8_preprocess_views_view__departments__departments(&$variables) {
+  $title = '';
+  $body = '';
+  // Get Departments block configuration.
+  $config = \Drupal::config('d8_site_config.departments.settings');
+  if (!empty($config->get('departments_title'))) {
+    $title = $config->get('departments_title');
+  }
+  if (!empty($config->get('departments_body'))) {
+    $body = $config->get('departments_body');
+  }
+  $variables['departments_title'] = $title;
+  $variables['departments_body'] = $body;
+}
+
+/**
+ * Implements hook_views_post_render().
+ *
+ * Set Departments page title and breadcrumb based on site config.
+ */
+function d8_views_post_render($view) {
+  // Departments view page title overrides.
+  if ($view->id() == 'departments' && $view->current_display == 'departments') {
+    $config = \Drupal::config('d8_site_config.departments.settings');
+    // Set the view title.
+    $title = $config->get('departments_title');
+    $view->setTitle($title);
+
+    $request = \Drupal::request();
+    if ($route = $request->attributes->get(RouteObjectInterface::ROUTE_OBJECT)) {
+      $route->setDefault('_title', $title);
+    }
+  }
+}
+
+/**
+ * Implements template_preprocess_node().
+ *
+ * Format created date for Alert Notification teasers.
+ */
+function d8_preprocess_node(&$variables) {
+  if ($variables['node']->getType() == 'alert_notification' && $variables['view_mode'] == 'teaser') {
+    $formatter = \Drupal::service('date.formatter');
+    $time = $variables['node']->get('created')->value;
+    $diff = $formatter->formatTimeDiffSince($time, ['granularity' => 1]);
+    $variables['createdTimeAgo'] = t('@diff ago', ['@diff' => $diff]);
+  }
+  // Get Default Featured News Image settings.
+  $defaultNewsImagConfig = \Drupal::config('d8_site_config.default_news_image.settings');
+  $defaultNewsImage = $defaultNewsImagConfig->get('news_default_image');
+
+  if (isset($defaultNewsImage[0])) {
+    $file = file_load($defaultNewsImage[0]);
+    if ($file) {
+      $variables['default_news_image'] = [
+        '#theme' => 'responsive_image',
+        '#responsive_image_style_id' => 'news_featured_article',
+        '#uri' => $file->getFileUri(),
+      ];
+    }
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter().
+ *
+ * Add a template suggestion for "PSU Alerts" Aggregator Item.
+ */
+function d8_theme_suggestions_aggregator_item_alter(&$suggestions, &$variables) {
+  $item = $variables['elements']['#aggregator_item'];
+  $fid = $item->get('fid')->getValue()[0]['target_id'];
+  $feed = entity_load('aggregator_feed', $fid);
+  $title = $feed->label();
+
+  if ($title == 'PSU Alerts') {
+    $suggestions[] = 'aggregator_item__alert';
+  }
+}
+
+/**
+ * Implements template_preprocess_aggregator_item() for "alert" template.
+ *
+ * Format created date for "PSU Alerts" Aggregator Item.
+ */
+function d8_preprocess_aggregator_item__alert(&$variables) {
+  $item = $variables['elements']['#aggregator_item'];
+  $formatter = \Drupal::service('date.formatter');
+  $time = $item->get('timestamp')->value;
+  $diff = $formatter->formatTimeDiffSince($time, ['granularity' => 1]);
+  $variables['createdTime'] = $time;
+  $variables['createdTimeAgo'] = t('@diff ago', ['@diff' => $diff]);
+}
+
+/**
+ * Implements template_preprocess_views_view().
+ *
+ * Get Items for sale page description from configuration.
+ */
+function d8_preprocess_views_view__items_for_sale__items_for_sale_page(&$variables) {
+  $body = '';
+  $contact = '';
+  // Get Items for sale page description.
+  $config = \Drupal::config('d8_site_config.items_for_sale.settings');
+  if (!empty($config->get('items_for_sale_description'))) {
+    $body = $config->get('items_for_sale_description');
+  }
+  if (!empty($config->get('items_for_sale_contact'))) {
+    $contact = $config->get('items_for_sale_contact');
+  }
+  $variables['page_description'] = $body;
+  $variables['page_contact'] = $contact;
+  return $variables;
+}
+
+/**
+ * Implements template_preprocess_views_view().
+ *
+ * Change empty variable value if the entered filter text is 1 character only.
+ */
+function d8_preprocess_views_view__search__page_1(&$variables) {
+  $view = $variables['view'];
+
+  $values = $view->getExposedInput();
+  $variables['no_results'] = FALSE;
+  if (isset($values['search_api_fulltext']) && mb_strlen(trim($values['search_api_fulltext'])) < 2) {
+    unset($variables['header']);
+    unset($variables['empty']['area_text_custom']);
+    $variables['no_results'] = TRUE;
+  }
+  else {
+    unset($variables['empty']['area']);
+  }
+}
+
+/**
+ * Implements template_preprocess_views_view().
+ *
+ * Get Campus Buildings page description from configuration.
+ */
+function d8_preprocess_views_view__campus_buildings__campus_buildings(&$variables) {
+  $body = '';
+  // Get Campus Buildings page description.
+  $config = \Drupal::config('d8_site_config.campus_buildings.settings');
+  if (!empty($config->get('campus_buildings_description'))) {
+    $body = $config->get('campus_buildings_description');
+  }
+  $variables['page_description'] = $body;
+  return $variables;
+}
+
+/**
+ * Implements template_preprocess_views_view().
+ *
+ * Set the no results behavior base on the input.
+ */
+function d8_preprocess_views_view__news__news(&$variables) {
+  $view = $variables['view'];
+  $values = $view->getExposedInput();
+  if (isset($values['search']) && mb_strlen(trim($values['search'])) < 2) {
+    unset($variables['empty']['area']);
+  }
+  else {
+    unset($variables['empty']['area_1']);
+  }
+}
+
+/**
+ * Implements hook_preprocess_container().
+ *
+ * This is done to remove duplicate ID's for edit-actions and edit submits.
+ */
+function d8_preprocess_container(&$variables) {
+  if (isset($variables['element']['#id'])) {
+    $id = $variables['element']['#id'];
+    if (in_array($id, ['edit-actions'])) {
+      $id = Html::getUniqueId($id);
+    }
+    if (in_array($id, ['edit-submit-search'])) {
+      $id = Html::getUniqueId($id);
+    }
+    if (in_array($id, ['edit-keys'])) {
+      $id = Html::getUniqueId($id);
+    }
+    if (in_array($id, ['edit-submit'])) {
+      $id = Html::getUniqueId($id);
+    }
+    if (in_array($id, ['views-exposed-form-academic-calendar-page-1'])) {
+      $id = Html::getUniqueId($id);
+    }
+
+    $variables['element']['#id'] = $id;
+    $variables['attributes']['id'] = $id;
+  }
+}
+
+/**
+ * Implements hook_preprocess_details().
+ *
+ * This is done to create an ID to group of checkboxes.
+ */
+function d8_preprocess_details(&$variables) {
+  if (isset($variables['element']['#theme_wrappers']['details'])) {
+    $title = $variables['element']['#theme_wrappers']['details']['#title'];
+    $summary_title = str_replace([' ', ':'], ['-', ''], strtolower($title));
+
+    if (isset($variables['summary_attributes'])) {
+      $variables['summary_attributes']['id'] = $summary_title . '-' . Crypt::randomBytesBase64(8);
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess() to truncate the FB message correctly.
+ */
+function d8_preprocess_facebook_4_post(&$variables) {
+  $max = 120;
+  $message = $variables['message'];
+  $pic = $variables['picture'];
+
+  if (empty($pic)) {
+    $max = 500;
+  }
+
+  // Truncate message is it's beyond our $max character.
+  $message = d8_trim($message, $max);
+  $variables['message'] = $message;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function d8_theme($existing, $type, $theme, $path) {
+  return [
+    'facebook_4_post' => [
+      'path' => $path . '/templates/layout',
+      'variables' => [
+        'id' => NULL,
+        'created_time' => NULL,
+        'message' => NULL,
+        'picture' => NULL,
+        'link' => NULL,
+        'show_socials' => NULL,
+        'num_likes' => NULL,
+        'num_comments' => NULL,
+        'num_shares' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements template_preprocess_paragraph().
+ *
+ * Set a default image for paragraph types.
+ */
+function d8_preprocess_paragraph(&$variables) {
+  // Get Default Paragraph Types Image settings.
+  $defaultParagraphTypesImagConfig = \Drupal::config('d8_site_config.paragraph_types_image.settings');
+  $defaultParagraphTypesImage = $defaultParagraphTypesImagConfig->get('paragraph_types_default_image');
+
+  if (isset($defaultParagraphTypesImage[0])) {
+    $file = file_load($defaultParagraphTypesImage[0]);
+    if ($file) {
+      $variables['paragraph_types_default_image'] = [
+        '#theme' => 'responsive_image',
+        '#responsive_image_style_id' => 'news_featured_article',
+        '#uri' => $file->getFileUri(),
+      ];
+    }
+  }
+}

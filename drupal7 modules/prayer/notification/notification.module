@@ -1,0 +1,327 @@
+<?php
+
+
+/**
+ * implement hook_menu - each menu tab needs to be page not using drupal_get_form function
+ * @return array
+ */
+function prayvine_notification_menu() {
+  $items['node/%node/topic_notification'] = array(
+    'title' => 'Notifications',
+    'page callback' => 'prayvine_notification_page',
+    'page arguments' => array(1),
+    'access callback' => 'prayvine_notification_access',
+    'access arguments' => array(1),
+    'weight' => 1,
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['facebook'] = array(
+    'title' => 'Facebook Integration',
+    'page callback' => 'prayvine_facebook_page',
+    'access arguments' => array('access content'),
+    'weight' => 1,
+    'type' => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_cron();
+ */
+function prayvine_notification_cron() {
+	prayvine_notification_non_ministry_post_reminder();
+}
+
+/**
+ * Function for hook_cron which will facilitate the reminder email for ministry community
+ */
+function prayvine_notification_non_ministry_post_reminder() {
+
+	$sql = "SELECT r.* FROM {node} n " .
+			" INNER JOIN {prayvine_topic_reminder_settings} r ON r.nid = n.nid AND r.want_reminder = 1".
+			" LEFT JOIN {field_data_field_ministry} m ON m.entity_id = n.nid AND m.bundle ='topic' " .
+			" WHERE n.type = 'topic' AND n.status = 1" .
+			" AND (m.field_ministry_value IS NULL OR  m.field_ministry_value = 0)" .
+			" AND DATE_ADD(FROM_UNIXTIME(n.created), INTERVAL IFNULL(r.email_reminder,14) DAY) < now() "; //initially it was 30 now changed to 14 after pray-107
+
+	$query = db_query($sql);
+	$result = $query->fetchAllAssoc('prid');
+	if (!empty($result)) {
+		foreach ($result as $prid => $row) {
+			//END Checking ministry communicators
+
+			if (prayvine_notification_non_ministry_validate_reminder($row) === true) {
+				//send reminder email
+				prayvine_notification_non_ministry_send_reminder($row);
+			}
+
+		}//end of for loop
+	}//end of if condition
+}
+
+/**
+ * Function validate reminder required for user
+ * @param object $row
+ * @return boolean
+ */
+function prayvine_notification_non_ministry_validate_reminder($row) {
+	$owners = $row->uid;
+	$settingdays = $row->email_reminder;
+	$nodeId = $row->nid;
+	//SQL for checking prayer and request prayer last post
+	$reminderSQL = 'SELECT IFNULL(DATE_ADD(FROM_UNIXTIME(max(n.created)), INTERVAL :settingdays DAY) < now(), 1) AS reminder FROM {node} n
+     LEFT JOIN {field_data_field_topic_id} topic on topic.entity_id = n.nid and topic.bundle = n.type
+     WHERE n.type in (\'prayer\', \'prayer_request\') and topic.field_topic_id_value = :nodeid and uid in( :userid )';
+
+	$reminderResult = db_query($reminderSQL, array(':settingdays' => $settingdays, ':userid' => $owners, ':nodeid' => $nodeId))->fetchObject();
+
+	// SQL for checking last comment posted
+	$reminderCommentSQL = 'SELECT IFNULL(DATE_ADD(FROM_UNIXTIME(max(c.created)), INTERVAL :settingdays DAY) < now(), 1) AS reminder FROM {comment} c where uid in ( :userid ) and nid = :nodeid';
+	$reminderCommentResult = db_query($reminderSQL, array(':settingdays' => $settingdays, ':userid' => $owners, ':nodeid' => $nodeId))->fetchObject();
+
+	//checking last reminder email sent to the user
+	$freqdays = $row->email_reminder_frequency;
+	if ($freqdays > 0) {
+		$frequencySQL = 'SELECT IFNULL(DATE_ADD(max(n.created), INTERVAL :settingdays DAY) < now(), 1) as reminder from {prayvine_reminder} n where nid = :nodeid and uid in ( :userid )';
+		$freResult = db_query($frequencySQL, array(':settingdays' => $freqdays, ':userid' => $owners, ':nodeid' => $nodeId))->fetchObject();
+	}
+	else {
+		return ($reminderResult->reminder == 1 && $reminderCommentResult->reminder == 1) ? true : false;
+	}
+	if ($reminderResult->reminder == 1 && $reminderCommentResult->reminder == 1 && $freResult->reminder == 1) {
+		return true;
+	}
+	return false;
+}
+
+/**
+ * This function will send reminder email to selected users.
+ *
+ * @param object $row
+ *   Query item.
+ * @param string $lang
+ *   Language.
+ */
+function prayvine_notification_non_ministry_send_reminder($row, $lang = 'und') {
+  $uid = $row->uid;
+  $author_name = '';
+  $author_name_first = '';
+
+  // Setting variables for event.
+  $topic_node = node_load($row->nid);
+  $subscriber = user_load($uid);
+
+  if (isset($subscriber->uid) && isset($topic_node->nid)) {
+    // Set author name.
+    if (isset($subscriber->field_first_name[$lang][0]['value'])) {
+      $author_name = $subscriber->field_first_name[$lang][0]['value'] . ' ';
+    }
+    if (isset($subscriber->field_last_name[$lang][0]['value'])) {
+      $author_name = $subscriber->field_last_name[$lang][0]['value'];
+    }
+
+    // Set the author first name.
+    if (isset($subscriber->field_first_name[$lang][0]['value'])) {
+      $author_name_first = $subscriber->field_first_name[$lang][0]['value'];
+    }
+
+    $topic = $topic_node->title;
+    $freqdays = $row->email_reminder_frequency;
+    $days = $row->email_reminder;
+    $footer = prayvine_get_email_footer($subscriber->mail, $subscriber, $topic);
+
+    // Inserting values in reminder table.
+    db_insert('prayvine_reminder')->fields(array(
+      'nid' => $row->nid,
+      'uid' => $uid,
+    ))->execute();
+
+    if ($days > 0) {
+      rules_invoke_event('prayvine_notification_non_ministry_goal_reminder', $subscriber, $author_name, $author_name_first, $topic, $footer, $topic_node, $days, $freqdays);
+
+    }
+  }
+}
+
+/**
+ * handling notifications of each topic
+ */
+function prayvine_notification_page($topic) {
+
+  $settings_page = drupal_get_form('prayvine_notification_page_form',$topic);
+  $page = '<h2>'.t('Notifications about @topic',array('@topic'=>$topic->title)).'</h2>';
+  $page .= drupal_render($settings_page);
+  return $page;
+}
+/**
+ * create notification form
+ * @param type $form
+ * @param type $form_state
+ * @param type $topic_id
+ */
+function prayvine_notification_page_form($form, &$form_state, $topic) {
+  global $user;
+  $form_state['storage']['topic'] = $topic;
+  $topic_settings = unserialize($topic->field_settings['und'][0]['value']);
+  if (!empty($topic->field_ministry) && $topic->field_ministry['und'][0]['value'] == 1) {
+  	$posting = array(0 => t('Ministry and prayer partners').' ('.t('default').')', 1 => t('Ministry only'));
+	$form['posting'] = array(
+	    '#type' => 'radios',
+	    '#default_value' => isset($topic_settings['notification'][$user->uid]['posting']) ? $topic_settings['notification'][$user->uid]['posting'] : 0,
+	    '#options' => $posting,
+	    '#title' => t('Whose prayers, prayers requests and updates about @topic do you want to be notified about?',array('@topic'=>$topic->title)),
+	    '#access' => true,
+	    '#description' => t(' Note: We recommend the default setting: Seeing other peoples\' prayers can inspire your own prayer life and relationship with God. There is power in praying together, and Prayvine is designed for you to experience corporate prayer for this ministry.'),
+	  );
+  } else {
+  	$result = db_query('SELECT prid,want_reminder,email_reminder,email_reminder_frequency FROM {prayvine_topic_reminder_settings} where uid = :userId AND nid = :nodeId', array(':userId' => $user->uid, ':nodeId' => $topic->nid))->fetchAssoc();
+
+  	$form['reminder_fieldset'] = array(
+  			'#type' => 'fieldset',
+  			'#title' => t('<h3>Set Prayer Goal</h3>'),
+  			'#collapsible' => false,
+  			'#collapsed' => false,
+  	);
+
+  	$form['reminder_fieldset']['want_reminder'] = array(
+  			'#type' => 'radios',
+  			'#default_value' =>  ($result) ? $result['want_reminder'] : 0,
+  			'#options' => array(1 => t('Yes, I\'d like reminders to help me pray consistently and share prayer requests'),
+  								 0 => t('No, I don\'t want reminders to help me pray and share prayer requests')),
+  			'#title' => t('Do you want reminder to help you pray consistently and share prayer requests about '.$topic->title .' ?'),
+  			'#access' => true,
+  	);
+
+  	$form['reminder_fieldset']['email_reminder'] = array(
+  			'#prefix' => '<label>'.t('How often do you want to pray or share a prayer request about '.$topic->title.' ? Prayvine will send you a'
+  			. ' reminder whenever this number of days passes since your last activity.').'</label>',
+  			'#type' => 'textfield',
+  			'#size' => 10,
+  			'#default_value' =>  ($result) ? $result['email_reminder'] : 30,
+  			'#title' => '<strong>' . t('Days') . '</strong>',
+  			'#title_display' => 'after',
+  			'#access' => true,
+  	);
+
+  	$form['reminder_fieldset']['email_reminder_frequency'] = array(
+  			'#prefix' => '<label>'.t('Once you\'ve missed your goal, how often do you want a reminder?').'</label>',
+  			'#type' => 'textfield',
+  			'#size' => 10,
+  			'#default_value' =>  ($result) ? $result['email_reminder_frequency'] : 2,
+  			'#title' => '<strong>' . t('Days') . '</strong>',
+  			'#title_display' => 'after',
+  			'#access' => true,
+  	);
+
+  }
+  $amens = array(0 => t('Yes'), 1 => t('No'));
+  $form['amens'] = array(
+    '#type' => 'radios',
+    '#default_value' => isset($topic_settings['notification'][$user->uid]['amens']) ? $topic_settings['notification'][$user->uid]['amens'] : 0,
+    '#options' => $amens,
+    '#title' => t('Do you want to receive an email notification when someone clicks "Amen" to prayers you write?'),
+    '#access' => true,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save settings'),
+    '#submit' => array('prayvine_notification_page_submit'),
+    '#validate' => array('prayvine_notification_page_validate'),
+  );
+  return $form;
+}
+/**
+ * validate notification settings
+ * @param type $form
+ * @param type $form_state
+ * @param type $topic - topic node
+ */
+function prayvine_notification_page_validate($form, &$form_state) {
+
+}
+/**
+ * submit notification settings
+ * @param type $form
+ * @param type $form_state
+ * @param type $topic -topic node
+ */
+function prayvine_notification_page_submit($form, &$form_state) {
+  global $user;
+  $topic = $form_state['storage']['topic'];
+  $posting = $form_state['values']['posting'];
+  $amens = $form_state['values']['amens'];
+  $topic_settings_un = $topic->field_settings['und'][0]['value'];
+  $topic_seetings = unserialize($topic_settings_un);
+
+  if (!empty($topic->field_ministry) && $topic->field_ministry['und'][0]['value'] == 1) {
+  	$topic_seetings['notification'][$user->uid]['posting'] = $posting;
+  }
+
+  $topic_seetings['notification'][$user->uid]['amens'] = $amens;
+  $topic->field_settings['und'][0]['value'] = serialize($topic_seetings);
+  node_save($topic);
+
+  if (empty($topic->field_ministry) || $topic->field_ministry['und'][0]['value'] == 0) {
+  	$result = db_query('SELECT prid FROM {prayvine_topic_reminder_settings} where uid = :userId AND nid = :nodeId', array(':userId' => $user->uid, ':nodeId' => $topic->nid))->fetchAssoc();
+  	if ($result) {
+
+  		db_update('prayvine_topic_reminder_settings') // Table name no longer needs {}
+  		->fields(array(
+  		'want_reminder' => $form_state['values']['want_reminder'],
+  		'email_reminder' => $form_state['values']['email_reminder'],
+  		'email_reminder_frequency' => $form_state['values']['email_reminder_frequency'],
+  		))->condition('prid', $result['prid'])->execute();
+
+  	} else {
+  		db_insert('prayvine_topic_reminder_settings') // Table name no longer needs {}
+      		->fields(array(
+      			'nid' => $topic->nid,
+        		'uid' => $user->uid,
+        		'want_reminder' => $form_state['values']['want_reminder'],
+        		'email_reminder' => $form_state['values']['email_reminder'],
+        		'email_reminder_frequency' => $form_state['values']['email_reminder_frequency'],
+        		))->execute();
+  	}
+  }
+  drupal_goto('node/'.$topic->nid);
+}
+/**
+ * access function to notification page
+ * @param type $topic_id
+ */
+function prayvine_notification_access($topic) {
+  global $user;
+  //only visible to ministry
+//   if (empty($topic->field_ministry['und'][0]['value'])) {
+//     return false;
+//   }
+  if (prayvine_has_permission($user->uid, $topic->nid, '')){
+    return true;
+  } else {
+    return false;
+  }
+
+}
+
+function prayvine_facebook_page(){
+  $path = drupal_get_path('module', 'prayvine_notification');
+  drupal_add_js($path.'/facebook.js');
+  $output = '<h2>'.t('Facebook get profile picture').'</h2>';
+  $output .= '<fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
+</fb:login-button>';
+  $output .= '<div id="fb-picture"></div>';
+
+  return $output;
+}
+/**
+ * load fontawsome library
+ */
+function prayvine_notification_flush_caches() {
+   drupal_load('module', 'libraries');
+    $fontawesome = libraries_detect('fontawesome');
+    $requirements['fontawesome'] = array(
+      'title' => $fontawesome['name'],
+      'severity' => $fontawesome['installed'] ? REQUIREMENT_OK : REQUIREMENT_WARNING,
+      'value' => $fontawesome['installed'] ? $fontawesome['version'] : $fontawesome['error message'],
+    );
+}

@@ -1,0 +1,5 @@
+name = Prayvine Notification
+description = Module for Prayvine Notification Handling
+package = Prayvine
+core = 7.x
+files[] = prayvine_notification.module

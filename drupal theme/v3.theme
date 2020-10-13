@@ -1,0 +1,108 @@
+<?php
+
+/**
+ * @file
+ * Functions to support theming in the Promet Source V3.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_form_system_theme_settings_alter() for settings form.
+ *
+ * Replace Barrio setting options with subtheme ones.
+ */
+function promet_v3_form_system_theme_settings_alter(&$form, FormStateInterface $form_state) {
+  $form['components']['navbar']['bootstrap_barrio_navbar_top_background']['#options'] = array(
+      'bg-primary' => t('Primary'),
+      'bg-secondary' => t('Secondary'),
+      'bg-light' => t('Light'),
+      'bg-dark' => t('Dark'),
+      'bg-white' => t('White'),
+      'bg-transparent' => t('Transparent'),
+  );
+  $form['components']['navbar']['bootstrap_barrio_navbar_background']['#options'] = array(
+      'bg-primary' => t('Primary'),
+      'bg-secondary' => t('Secondary'),
+      'bg-light' => t('Light'),
+      'bg-dark' => t('Dark'),
+      'bg-white' => t('White'),
+      'bg-transparent' => t('Transparent'),
+  );
+
+  // Add option "Disable".
+  $form['components']['navbar']['bootstrap_barrio_navbar_toggle']['#options'] = array(
+    'navbar-expand' => t('Disable'),
+    'navbar-toggleable-lg' => t('Large'),
+    'navbar-toggleable-md' => t('Medium'),
+    'navbar-toggleable-sm' => t('Small'),
+    'navbar-toggleable-xs' => t('Extra Small'),
+  );
+
+  $form['fonts']['icons']['bootstrap_barrio_icons']['#options']['fontawesome_5'] = 'Font Awesome 5';
+
+  // Supporting Fontawesome.
+  $icons = theme_get_setting('bootstrap_barrio_icons');
+  if ($icons) {
+    $variables['#attached']['library'][] = ($icons == 'fontawesome_5' ? 'promet_v3' : 'bootstrap_barrio') . '/' . $icons;
+  }
+}
+
+/**
+ * Implements template_preprocess_html().
+ *
+ */
+function promet_v3_preprocess_html(&$variables) {
+  $autopilot = '<!-- Start Autopilot code -->
+    <script type="text/javascript">(function(o){var b="https://turbolion.io/anywhere/",t="8f02f1f8aa93440a8e2d2d0f859d0fcdf0c7a5a74e884cc09cff0417d459c9c1",a=window.AutopilotAnywhere={_runQueue:[],run:function(){this._runQueue.push(arguments);}},c=encodeURIComponent,s="SCRIPT",d=document,l=d.getElementsByTagName(s)[0],p="t="c(d.title||"")"&u="c(d.location.href||"")"&r="c(d.referrer||""),j="text/javascript",z,y;if(!window.Autopilot) window.Autopilot=a;if(o.app) p="devmode=true&"+p;z=function(src,asy){var e=d.createElement(s);e.src=src;e.type=j;e.async=asy;l.parentNode.insertBefore(e,l);};y=function(){z(b+t\'?\'+p,true);};if(window.attachEvent){window.attachEvent("onload",y);}else{window.addEventListener("load",y,false);}})({});</script>';
+
+  $variables['autopilot'] = \Drupal::service('path.matcher')->isFrontPage() ? $autopilot : '';
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for page templates.
+ */
+function promet_v3_preprocess_page(&$variables) {
+
+  // Define navigation toggle size.
+  switch (theme_get_setting('bootstrap_barrio_navbar_toggle')) {
+    case 'navbar-expand':
+      // If disable toggle is selected, ensure "navbar-expand" CSS class will
+      // be added. Otherwise, navbar toggle will be activated on medium screen
+      // sizes.
+      $variables['navbar_attributes']['class'][] = 'navbar-expand';
+      break;
+  }
+  // Enabling Fontawesome.
+  $icons = theme_get_setting('bootstrap_barrio_icons');
+  if ($icons) {
+    $variables['#attached']['library'][] = ($icons == 'fontawesome_5' ? 'promet_v3' : 'bootstrap_barrio') . '/' . $icons;
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter() for form templates.
+ *
+ * Add form specific suggestions, e.g. form--search-block-form.html.twig.
+ */
+function promet_v3_suggestions_form_alter(array &$suggestions, array $variables) {
+  if ($variables['element']['#form_id']) {
+    $suggestions[] = 'form__' . $variables['element']['#form_id'];
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter() for page_title.
+ *
+ * Add block suggestions specific to region, e.g. block--pre-footer.html.twig.
+ */
+function promet_v3_suggestions_block_alter(array &$suggestions, array $variables) {
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  if (!empty($variables['elements']['#id'])) {
+    $block = Block::load($variables['elements']['#id']);
+    $suggestions[] = 'block__' . $block->getRegion();
+    $suggestions[] = 'block__' . $block->getRegion() . '__' . $variables['elements']['#id'];
+  }
+
+  return $suggestions;
+}

@@ -1,0 +1,4 @@
+name = Propco Encryption Module
+description = encryption module for redemption and pin
+package = "Propco Rewards"
+core = 7.x

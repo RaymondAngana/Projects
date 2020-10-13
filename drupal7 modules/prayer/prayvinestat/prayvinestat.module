@@ -1,0 +1,425 @@
+<?php
+/**
+ * Implements hook_views_api().
+ */
+function prayvinestat_views_api() {
+  return array(
+    'api' => 3.0,
+    'path' => drupal_get_path('module', 'prayvinestat'),
+  );
+}
+/**
+ * Implements hook_init();
+ */
+function prayvinestat_init() {
+  //user start to interact with invitation
+  prayvinestat_invitations('unknown',NULL,NULL,TRUE);
+  
+}
+
+//stats functions
+/**
+ * function that is called when statistics event is triggered - record stat data
+ * @param type $event - event name (used to saved in right field)
+ * @param type $var - parameters 
+ */
+function prayvinestat_stat_event($event,$var=null){
+  prayvinestat_create_stat_snapshot();
+  if ($event == 'general'){
+    $users = prayvinestat_count_users();
+    $topics = prayvinestat_count_nodes('topic');
+    prayvinestat_stat_record('field_new_topics_created',$topics);
+    $prayers = prayvinestat_count_nodes('prayer');
+    prayvinestat_stat_record('field_new_prayers_posted',$prayers);
+    //comments
+    $comments = prayvinestat_count_comments();
+    prayvinestat_stat_record('field_new_comments_posted',$comments);
+    
+    //profile fields
+    $data = prayvinestat_count_profile('current_church');
+    prayvinestat_stat_record('field_profiles_with_current_chur',$data);
+    
+    $data = prayvinestat_count_profile('previous_church');
+    prayvinestat_stat_record('field_profiles_with_previous_chu',$data);
+    
+    $data = prayvinestat_count_profile('favorite_bible_verses');
+    prayvinestat_stat_record('field_profiles_with_favorite_ver',$data);
+    
+    $data = prayvinestat_count_profile('favorite_hymns_and_worship');
+    prayvinestat_stat_record('field_profiles_with_favorite_mus',$data);
+    
+    $data = prayvinestat_count_profile('ministries_i_care_about');
+    prayvinestat_stat_record('field_profiles_with_ministries',$data);
+    
+    $data = prayvinestat_count_profile('books_i_like');
+    prayvinestat_stat_record('field_profiles_with_books',$data);
+    
+    $data = prayvinestat_count_photos();
+    prayvinestat_stat_record('field_profiles_with_photo',$data);
+    
+    $data = prayvinestat_count_blank();
+    prayvinestat_stat_record('field_blank_profiles',$data);
+    
+    $data = prayvinestat_daily_active();
+    prayvinestat_stat_record('field_daily_active_users',$data);
+    
+    $data = prayvinestat_monthly_active();
+    prayvinestat_stat_record('field_past_30_days_active_users',$data);
+  }
+  //incremental events
+  if ($event == 'create-topic') {
+    prayvinestat_user_action($event);
+    prayvinestat_stat_record('field_new_topics_created');
+  }
+  if ($event == 'delete-topic') {
+    prayvinestat_user_action($event);
+    prayvinestat_stat_record('field_topics_deleted');
+  }
+  if ($event == 'create-prayer') {
+    prayvinestat_user_action($event);
+    prayvinestat_stat_record('field_new_prayers_posted');
+  }
+  if ($event == 'delete-prayer') {
+    prayvinestat_user_action($event);
+    prayvinestat_stat_record('field_prayers_deleted');
+  }
+  if ($event == 'create-comment') {
+    prayvinestat_user_action($event);
+    prayvinestat_stat_record('field_new_comments_posted');
+  }
+  if ($event == 'delete-comment') {
+    prayvinestat_user_action($event);
+    prayvinestat_stat_record('field_comments_deleted');
+  }
+  if ($event == 'say-amen') {
+    prayvinestat_user_action($event);
+    prayvinestat_stat_record('field_new_say_amens_clicked');
+  }
+  if ($event == 'userlogin-prayer') {
+    prayvinestat_user_action($event);
+    prayvinestat_stat_record('field_prayer_posted_emails_sent');
+  }
+  if ($event == 'userlogin-comment') {
+    prayvinestat_user_action($event);
+    prayvinestat_stat_record('field_comment_posted_emails_sent');
+  }
+  if ($event == 'user-signin') {
+    prayvinestat_user_action($event);
+    prayvinestat_stat_record('field_daily_sign_ins');
+  }
+  if ($event == 'inivite-emails-clicked') {
+    prayvinestat_user_action($event);
+    prayvinestat_stat_record('field_invitation_emails_clicked');
+  }
+  if ($event == 'prayer-posted-email') {
+    prayvinestat_user_action($event);
+    prayvinestat_stat_record('field_prayer_posted_emails_sent');
+  }
+  if ($event == 'comment-posted-email') {
+    prayvinestat_user_action($event);
+    prayvinestat_stat_record('field_comment_posted_emails_sent');
+  }
+  if ($event == 'email-sent') {
+    prayvinestat_user_action($event);
+    prayvinestat_stat_record('field_comment_posted_emails_sent');
+  }
+}
+/**
+ * save record to field on last created statistics node 
+ * @param type $field_name - field that will increment for ++1
+ */
+function prayvinestat_stat_record($field_name,$value= NULL) {
+  $query = db_select('node','n');
+  $query->fields('n',array('nid','type','created'))
+        ->condition('type','statistics')
+        ->orderBy('created', 'DESC')//ORDER BY created
+        ->range(0,1);//LIMIT to 2 records
+  $results = $query->execute();
+  foreach ($results as $record) {
+    $nid = $record->nid;
+  }
+  $last_stat_node = node_load($nid);
+  if ($value != NULL) {
+    $last_stat_node->{$field_name}['und'][0]['value'] = $value;
+  } else {
+    if (!empty($last_stat_node->{$field_name}['und'][0]['value'])){
+      $last_stat_node->{$field_name}['und'][0]['value']++;
+    } else {
+      $last_stat_node->{$field_name}['und'][0]['value'] = 1;
+    } 
+    
+  }
+  node_save($last_stat_node);
+  
+}
+/**
+ * create daily snapshot of data
+ */
+function prayvinestat_create_stat_snapshot() {
+  $date = getdate();
+  $created = 0;
+  $query = db_select('node','n');
+  $query->fields('n',array('nid','type','created'))
+        ->condition('type','statistics')
+        ->orderBy('created', 'DESC')//ORDER BY created
+        ->range(0,1);//LIMIT to 2 records
+  $results = $query->execute();
+  foreach ($results as $record) {
+    $created = $record->created;
+  }
+  
+  
+  if (($date['hours'] == 0 && (time()-$created)>3*60*60) || $created == 0) {
+    //create new stat node
+    $node = new stdClass();
+    $node->type = 'statistics';
+		$node->status = 1;
+		$node->uid = 1;
+		$node->title = t('Statistics - ').date('m.d.Y');
+		$node->promote = 0;
+		$node->created = time();
+		$node->timestamp = time();
+		$node->sticky = 0;
+		$node->language = 'en';
+		$node->revision = 0;
+    $node = node_submit($node);
+		node_save($node);
+  }
+  
+   
+}
+//count functions
+/**
+ * count total register users
+ * @return type
+ */
+function prayvinestat_count_users() {
+  $query = db_select('users','u');
+  $query->fields('u', array('uid'));
+  $count = $query->execute()->rowCount();
+  return $count;
+}
+/**
+ * count nodes of certain type
+ * @param type $type
+ * @return type
+ */
+function prayvinestat_count_nodes($type) {
+  $query = db_select('node','u');
+  $query->fields('u', array('nid'))
+        ->condition('type', $type);
+  $count = $query->execute()->rowCount();
+  return $count;
+}
+
+/**
+ * count nodes of certain type
+ * @param type $type
+ * @return type
+ */
+function prayvinestat_count_profile($field_name) {
+  $full_name = 'field_data_field_'.$field_name;
+  $query = db_select($full_name,'f');
+  $query->fields('f', array('entity_id'));
+  $count = $query->execute()->rowCount();
+  return $count;
+}
+/**
+ * count nodes of certain type
+ * @param type $type
+ * @return type
+ */
+function prayvinestat_count_comments() {
+  
+  $query = db_select('field_data_comment_body','c');
+  $query->fields('c', array('entity_id'));
+  $count = $query->execute()->rowCount();
+  return $count;
+}
+/**
+ * count profiles with photos
+ */
+function prayvinestat_count_photos() {
+  $query = db_select('file_managed','f');
+  $query->fields('f', array('uid'));
+  $count = $query->execute()->rowCount();
+  return $count;
+}
+/**
+ * count blank profiles
+ */
+function prayvinestat_count_blank() {
+  //profile fields
+  $users = prayvinestat_count_users();
+  $number_of_full = 0;
+  $data = prayvinestat_count_profile('current_church');
+  if ($data > $number_of_full){
+    $number_of_full = $data;
+  } 
+  $data = prayvinestat_count_profile('previous_church');
+  if ($data > $number_of_full){
+    $number_of_full = $data;
+  }
+  $data = prayvinestat_count_profile('favorite_bible_verses');
+  if ($data > $number_of_full){
+    $number_of_full = $data;
+  }
+  $data = prayvinestat_count_profile('favorite_hymns_and_worship');
+  if ($data > $number_of_full){
+    $number_of_full = $data;
+  }
+  $data = prayvinestat_count_profile('books_i_like');
+  if ($data > $number_of_full){
+    $number_of_full = $data;
+  }
+  $data = prayvinestat_count_photos();
+  if ($data > $number_of_full){
+    $number_of_full = $data;
+  }
+  return $users-$number_of_full;
+}
+/**
+ * count daily active users
+ */
+function prayvinestat_daily_active() {
+  $last_midnight = getdate();
+  $last_midnight['hours'] = 0;
+  $last_midnight['minutes'] = 0;
+  $timestamp = mktime($last_midnight['hours'],$last_midnight['minutes'],$last_midnight['seconds'],
+          $last_midnight['mon'],$last_midnight['mday'],$last_midnight['year']);
+  $query = db_select('prayvinestat_user_actions','p');
+  $query->fields('p',array('uid'));
+  $query->condition('timestamp', $timestamp, '>');
+  $query->condition('timestamp', time(), '<');
+  $query->distinct();
+  $count = $query->execute()->rowCount();
+  
+  return $count;
+}
+/**
+ * count daily active users
+ */
+function prayvinestat_monthly_active() {
+  $last_midnight = getdate();
+  $last_midnight['hours'] = 0;
+  $last_midnight['minutes'] = 0;
+  $timestamp = mktime($last_midnight['hours'],$last_midnight['minutes'],$last_midnight['seconds'],
+          $last_midnight['mon']-1,$last_midnight['mday'],$last_midnight['year']);
+  $query = db_select('prayvinestat_user_actions','p');
+  $query->fields('p',array('uid'));
+  $query->condition('timestamp', $timestamp, '>');
+  $query->condition('timestamp', time(), '<');
+  $query->distinct();
+  $count = $query->execute()->rowCount();
+
+  return $count;
+}
+
+/**
+ * record user action to database
+ * @param type $action_name - name of user action
+ */
+function prayvinestat_user_action($action_name) {
+  $time = time();
+  global $user;
+  if ($user->uid>0) {
+    db_insert('prayvinestat_user_actions')->fields(array(
+      'action' => $action_name,
+      'timestamp' => $time,
+      'uid' => $user->uid,
+    ))->execute();
+  }
+}
+/**
+ * collect invitation done buy users
+ * @param type $action_name - action name that user perform 
+ * @param type $inviteid
+ */
+function prayvinestat_invitations($action_name,$inviteid,$token=NULL,$begin=NULL) {
+  $invitations = array();
+ 
+  if (!(stripos($_GET['q'],'node') !== FALSE || stripos($_GET['q'],'say_amen') !== FALSE)) {//empty cache has token in session 
+    return;
+  }
+  
+  if (empty($_GET['token']) && $begin != NULL) {//there is no token when user start to interact exit
+    return;
+  }
+  
+  if (!empty($_GET['token'])) {
+    $invite_token = $_GET['token'];
+    prayvinestat_stat_event('inivite-emails-clicked');
+  }
+  
+  if ($begin != NULL) {
+    $token = $invite_token;
+  }
+  
+  if ($token == NULL){
+    $result = $result = db_query('SELECT *
+    FROM {prayvine_invites} p WHERE p.inviteId = :iid', array(':iid' => $inviteid));;
+    foreach ($result as $record) {
+      $invitations = $record;
+    }
+    
+  } else {//using for say amen event
+    
+    $result = db_query('SELECT *
+    FROM {prayvine_invites} p WHERE p.invite_code = :iid', array(':iid' => $token));
+    foreach ($result as $record) {
+      $invitations = $record;
+    }
+    $inviteid = $invitations->inviteId; 
+  }
+ 
+  $time_clicked = 0;
+  $time_action = 0;
+  if ($begin != NULL){//user comes with token without action
+    $time_clicked = time();
+  } else {
+    $time_action = time();
+  }
+ 
+  $invitations->sent = strtotime($invitations->sent);
+  
+
+  //check if already one is database
+  $query = db_select('prayvinestat_invitations','p');
+  $query->condition('p.invite_id', $inviteid);
+  $query->fields('p',array('uid'));
+  $is_exist = $query->execute()->rowCount();
+  if ($is_exist > 0) {
+    db_update('prayvinestat_invitations')
+            ->condition('invite_id', $inviteid)
+            ->fields(array(
+                'nid' => $invitations->nid,
+                'uid' => $invitations->inviter_uid,
+                'mail' => $invitations->mail,
+                'timestamp_send' => $invitations->sent,
+                'timestamp_action' => $time_action,
+                'register_user' => $invitations->claimed_uid,
+                'invite_id' => $inviteid,
+                'action' => $action_name,
+            ))->execute();
+  } else {
+    db_insert('prayvinestat_invitations')
+            ->fields(array(
+                'nid' => $invitations->nid,
+                'uid' => $invitations->inviter_uid,
+                'mail' => $invitations->mail,
+                'timestamp_send' => $invitations->sent,
+                'timestamp_clicked' => $time_clicked,
+                'timestamp_action' => $time_action,
+                'register_user' => $invitations->claimed_uid,
+                'invite_id' => $inviteid,
+                'action' => $action_name,
+            ))->execute();
+  }
+
+}
+/**
+ * Implements hook_cron();
+ */
+function prayvinestat_cron() {
+  prayvinestat_stat_event('general');
+}

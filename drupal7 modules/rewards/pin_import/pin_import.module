@@ -1,0 +1,53 @@
+<?php
+/**
+*@file 
+* provides functionality for the propco rewards redemption program
+*
+* allows admin users to import pins , adds a pin login form for customers.
+*/
+
+/**
+* Implementation of hook_menu()
+*
+*/
+
+function propco_pin_import_menu(){
+
+	//pin import form
+	$items['node/%node/import-pins'] = array(
+		'title' => 'Import Pins',
+		'page callback' => 'propco_pin_import_pin_import_page',
+		'page arguments' => array(1),		
+		'access callback' => '_pin_import_access',
+    	'access arguments' => array(1, 'administer rewards pins'),
+		'type' => MENU_LOCAL_TASK,
+		'file' => 'propco_pin_import_pin_import.inc',
+  	);
+
+	return $items;
+}
+
+
+function propco_pin_import_permission() {
+  return array(
+    'import rewards pins' => array(
+      'title' => t('Import reward Pin data'),
+    ),
+  );
+
+}
+
+
+
+function _pin_import_access($node , $permission){
+  
+	//validate that this tab should be shown to this user
+	$node_type = variable_get('propco_rewards_program_type', array(0 => 'program'));
+
+	if($node->type == $node_type[0] && user_access($permission))
+	{
+		return TRUE;
+	}
+
+	return FALSE;
+}

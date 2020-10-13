@@ -1,0 +1,54 @@
+body.path-frontpage .paragraph--type--webforms {
+  background: $black url(../images/want-to-stay-informed-bg.png) center center;
+  background-size: cover;
+  padding: 70px 0;
+
+  .want-to-stay-informed {
+    width: 540px;
+    margin: auto;
+    text-align: center;
+    color: $white;
+
+    h2 {
+      font-family: $font-family-base;
+      font-size: 40px;
+      font-weight: 300;
+      letter-spacing: 0;
+      line-height: 56px;
+    }
+    h3 {
+      font-family: $font-family-hind;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 3.5px;
+      line-height: 26px;
+      margin-bottom: 40px;
+    }
+    .field--name-field-webform .field__label {
+      display: none;
+    }
+    form.webform-submission-want-to-stay-informed--form {
+      text-align: left;
+
+      label {
+        color: $white;
+      }
+    }
+    .form-item-email {
+      width: 65%;
+    }
+    .webform-button--submit {
+      @extend .cta-orange;
+      width: 34%;
+      height: 40px;
+      font-weight: 600;
+      letter-spacing: 1.86px;
+      line-height: 21px;
+      text-align: center;
+      top: -55px;
+      right: 0;
+      text-transform: uppercase;
+      border: 0;
+    }
+  }
+}

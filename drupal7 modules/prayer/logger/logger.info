@@ -1,0 +1,7 @@
+;$Id$
+
+name = Prayvine Logger
+description = Module for logging data and messages
+package = Prayvine
+core = 7.x
+files[] = prayvine_logger.module

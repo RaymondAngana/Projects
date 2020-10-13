@@ -1,0 +1,34 @@
+/*
+Theme Name: Bootstrap 4 Sass
+Description: Bootstrap 4 with Sass
+*/
+
+// Imports Google fonts.
+@import url('https://fonts.googleapis.com/css?family=Montserrat:300,400,600,700|Hind:300,400,500|Lato:300,400,500');
+
+// Imports Bootstrap 4.
+@import 'node_modules/bootstrap/scss/bootstrap';
+
+// Imports variables first then general styles.
+@import 'variables';
+@import 'typography';
+@import 'partials/mixins';
+@import 'partials/general';
+
+// Imports components.
+// List in alphabetical order where possible.
+@import 'components/navbar';
+@import 'components/page';
+@import 'components/promet-insights';
+
+// Imports must-have partials.
+// List in alphabetical order where possible.
+@import 'partials/button';
+@import 'partials/footer';
+@import 'partials/header';
+@import 'partials/navigation';
+
+// Individual styling for blocks.
+// List in alphabetical order where possible.
+@import 'partials/homepage-clients';
+@import 'partials/want-to-stay-informed';

@@ -1,0 +1,7 @@
+name = Prayvine Invitation
+description = Module for Prayvine Invitation Customizations
+package = Prayvine
+core = 7.x
+dependencies[] = prayvine
+
+scripts[] = prayvine_invitation.js

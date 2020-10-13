@@ -1,0 +1,113 @@
+/* VARIABLES */
+
+// colors
+$primary-shade: #A8CF45;
+$primary-light: lighten($primary-shade, 37%);
+$primary-dark: darken($primary-shade, 12%);
+$accent-shade: #0079C0;
+$accent-light: lighten($accent-shade, 37%);
+$accent-dark: darken($accent-shade, 12%);
+// Reassign color vars to semantic color scheme
+$red: #dc3545;
+$yellow: #ffc107;
+$green: #28a745;
+$cyan: #17a2b8;
+$gray-100: #f8f9fa !default;
+$gray-800: #343a40 !default;
+$theme-colors: ( primary: $accent-shade, secondary: $primary-shade, success: $green, info: $cyan, warning: $yellow, danger: $red, light: $gray-100, dark: $gray-800);
+$brand-primary: $accent-shade;
+//$brand-success: $green;
+//$brand-info: $teal;
+//$brand-warning: $orange;
+//$brand-danger: $red;
+$brand-inverse: $primary-shade;
+
+// Body
+//
+// Settings for the `<body>` element.
+//$body-bg: $white;
+//$body-color: $gray-dark;
+$inverse-bg: $primary-shade;
+//$inverse-color: $gray-lighter;
+// Links
+//
+// Style anchor elements.
+$link-color: $accent-shade;
+$link-decoration: none;
+$link-hover-color: $accent-dark;
+$link-hover-decoration: underline;
+// Comments
+$comment-spacer-x: 1.25em;
+$comment-spacer-y: 1.25em;
+// Responsive font sizes
+$enable-responsive-font-sizes: true;
+
+
+// ***************** //
+// Promet Source V3  //
+// ***************** //
+// Bootstrap SASS variable reference: https://github.com/twbs/bootstrap-sass/blob/master/assets/stylesheets/bootstrap/_variables.scss
+$white: #fff;
+$black: #000;
+$black-light: #0D0D0D;
+$black-lighter: #191919;
+$gray: #cdcecd;
+$gray-light: #a1a1a1;
+$gray-dark: #979797;
+$gray-darker: #747474;
+$silver: #c7c7c7;
+$cod-gray: #0d0d0d;
+$cod-gray-light: #0a0a0a;
+$grenadier: #df4300;
+$grenadier-dark: #d74100;
+$emperor: #515151;
+$orange-dark: #fb8d32;
+
+// Fonts
+// Font, line-height, and color for body text, headings, and more.
+$font-family-base:           'Montserrat', sans-serif;
+$font-family-hind:           'Hind', sans-serif;
+$font-family-lato:           'Lato', sans-serif;
+$font-family-font-awesome-free:   'Font Awesome 5 Free';
+$font-family-font-awesome-brands:   'Font Awesome 5 Brands';
+$font-family-google-material:   'Material Icons';
+
+// Font sizes.
+$font-size-google-material-default: 22px;
+
+// Breakpoints
+// Extra small screen / phone.
+$screen-xs:                  576px;
+$screen-xs-min:              $screen-xs;
+$screen-phone:               $screen-xs-min;
+
+// Small screen / tablet.
+$screen-sm:                  768px;
+$screen-sm-min:              $screen-sm;
+$screen-tablet:              $screen-sm-min;
+
+// Medium screen / desktop.
+$screen-md:                  992px;
+$screen-md-min:              $screen-md;
+$screen-desktop:             $screen-md-min;
+
+// Large screen / wide desktop.
+$screen-lg:                  1200px;
+$screen-lg-min:              $screen-lg;
+$screen-lg-desktop:          $screen-lg-min;
+
+// XL screen / large desktop.
+$screen-xl:                  1640px;
+$screen-xl-min:              $screen-xl;
+$screen-xl-desktop:          $screen-xl-min;
+
+// So media queries don't overlap when required, provide a maximum.
+$screen-xs-max:              ($screen-sm-min - 1);
+$screen-sm-max:              ($screen-md-min - 1);
+$screen-md-max:              ($screen-lg-min - 1);
+
+$phone:               "screen and (min-width: #{$screen-xs-min})";
+$tablet:              "screen and (min-width: #{$screen-sm-min})";
+$normal:              "screen and (min-width: #{$screen-md-min})";
+$wide:                "screen and (min-width: #{$screen-lg-min})";
+$xl:                  "screen and (min-width: #{$screen-xl-min})";

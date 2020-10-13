@@ -1,0 +1,5 @@
+name = Propco OTS
+description = Module provides functionality for the OTS Integration
+package = "Propco Rewards"
+core = 7.x
+configure = admin/config/ots/settings

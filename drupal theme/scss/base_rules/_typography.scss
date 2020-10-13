@@ -1,0 +1,74 @@
+$rem-baseline: $font-size-base;
+$rem-fallback: true;
+
+.intro-header {
+  color: $silver;
+  font-family: $font-hind-regular;
+  @include rem(font-size, 16px);
+  letter-spacing: 4px;
+  line-height: 26px;
+}
+
+.main-header {
+  color: $white;
+  font-family: $font-monstserrat-bold;
+  @include rem(font-size, 60px);
+  letter-spacing: 1.88px;
+  line-height: 90px;
+}
+
+.title {
+  color: $cod-gray;
+}
+.title--first-level {
+  font-family: $font-monstserrat-light;
+  @include rem(font-size, 40px);
+  line-height: 56px;
+}
+.title--second-level,
+.title--third-level,
+.title--fourth-level {
+  color: $cod-gray;
+  font-family: $font-monstserrat-bold;
+}
+.title--second-level {
+  @include rem(font-size, 28px);
+  line-height: 33px;
+}
+.title--third-level {
+  @include rem(font-size, 22px);
+  line-height: 30px;
+}
+.title--fourth-level {
+  @include rem(font-size, 18px);
+  line-height: 26px;
+}
+
+.quote-style {
+  color: $cod-gray-light;
+  font-family: $font-monstserrat-light;
+  @include rem(font-size, 30px);
+  line-height: 42px;
+}
+
+.content-text {
+  font-family: $font-hind-regular;
+}
+.content-text--body,
+.content-text--description {
+  color: $emperor;
+}
+.content-text--body {
+  @include rem(font-size, 18px);
+  line-height: 37px;
+}
+.content-text-body--dark-bg {
+  color: $white;
+}
+.content-text--description {
+  @include rem(font-size, 16px);
+  line-height: 25px;
+}
+.content-text--description--dark-bg {
+  color: $white;
+}

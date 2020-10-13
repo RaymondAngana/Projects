@@ -1,0 +1,91 @@
+<?php
+/**
+ * Implements hook_install()
+ */
+function propco_pin_status_install() {
+  // Set initial schema version so the update will run.
+  drupal_set_installed_schema_version('propco_pin_status', '7000');
+}
+
+/**
+ * Implements hook_update_N().
+ *
+ * Updates pin status.
+ */
+function propco_pin_status_update_7001() {
+  
+  $file = fopen(drupal_get_path('module', 'propco_pin_status') . '/csv/redemptions.csv', 'r');
+  $count = 0;
+  $content[] = array("PIN Code", "NID", "Old Status", "Updated Status", "Remarks");
+  while ($fields = fgetcsv($file, 4096)) {
+    $pin = $fields[2];
+    // query to get nodes based on pin code
+    $query = new EntityFieldQuery();
+    $entities = $query->entityCondition('entity_type', 'node')
+      ->entityCondition('bundle', 'pin')
+      ->propertyCondition('title', $pin)
+      ->propertyOrderBy('nid', 'ASC')
+      ->execute();
+
+    if (!empty($entities['node'])) {
+      // get number of nodes per pin
+      $count_matched = count($entities['node']);
+      // check if pin exists
+      // notify/log user if not
+      if ($count_matched > 0) {
+        $remarks = '';
+        // notify user if there are multiple nodes
+        if ($count_matched > 1) {
+          drupal_set_message(t('PIN Code @pin has multiple nodes', array('@pin' => $pin)));
+          $remarks .= 'Multiple nodes.';
+        }
+        $ctr = 0;
+        $multiples = array();
+        // get nid values
+        $nodes = node_load_multiple(array_keys($entities['node'])); 
+        foreach ($nodes as $node) { 
+          $nid = $node->nid;
+          $wrapper = entity_metadata_wrapper('node', $node);
+          $status = $wrapper->field_pin_status->value();
+          // update first node
+          if ($ctr == 0) {
+            switch ($status) {
+              case 'open':
+                $new_status = 'redeemed';
+                $wrapper->field_pin_status->set($new_status);
+                $wrapper->save();
+                drupal_set_message(t('PIN Code @pin (NID @nid) is set to :redeemed status', array('@pin' => $pin, '@nid' => $nid, ':redeemed' => $new_status)));
+                break;
+              default:
+                drupal_set_message(t('PIN @pin (NID @nid) is already set to :status status', array('@pin' => $pin, '@nid' => $nid, ':status' => $status)));
+                $new_status = $status;
+                break;
+            }
+            // set updated nid & status values for report
+            $updated_nid = $nid;
+            $updated_status = $status;
+          // get other NIDs for report
+          } else {
+            $multiples[] = $nid;
+          }
+          $ctr++;
+        }
+        if (!empty($multiples)) {
+          $remarks .= '(' . implode(',', $multiples) . ')';
+        }
+        $content[] = array($pin, $updated_nid, $updated_status, $new_status, $remarks);
+      } else {
+        drupal_set_message(t('PIN Code @pin (NID @nid) does not exist', array('@pin' => $pin, '@nid' => $nid)));
+        $content[] = array($pin, $nid, "", "", "Node does not exist.");
+      }
+    }
+    $count++;
+  }
+  fclose($file);
+  // create/write content to file
+  $f = fopen(drupal_get_path('module', 'propco_pin_status') . '/csv/pin_code_status.csv', 'w+');
+  foreach ($content as $row) {
+    fputcsv($f, $row);
+  }
+  fclose($f);
+}

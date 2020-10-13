@@ -1,0 +1,247 @@
+.left-navbar {
+  .navbar-brand {
+    display: block;
+    margin-right: 0;
+    padding: 21px 24px;
+    &:focus,
+    &:hover {
+     outline: none;
+     .site-name {
+       border: 1px dotted $white;
+       color: $orange-dark;
+     }
+    }
+
+    .logo {
+      height: 46px;
+      width: 24px;
+    }
+
+    .site-name {
+      color: $white;
+      left: -38px;
+      position: absolute;
+      top: 126px;
+      transform: rotate(90deg);
+    }
+  }
+
+  .buttons {
+    /* margin-top: 315px; */
+    margin-top: 215px;
+    .button-bar {
+      &[aria-expanded="true"] {
+        &:focus,
+        &:hover {
+          outline: 3px solid $white;
+        }
+        .fa-bars {
+          &:before {
+            content: "\f00d";
+          }
+          
+        }
+      }
+      &[aria-expanded="false"] {
+        &:focus,
+        &:hover {
+          outline: none;
+          .fa-bars {
+            &:before {
+              content: "\f037";
+            }
+          }
+        }
+      }
+    }
+    .contact-buttons {
+    /* margin-top: 206px; */
+      margin-top: 106px;
+    }
+  }
+
+  .navbar-toggler {
+    margin: 20px;
+    padding: 0;
+    .navbar-toggler-icon {
+      color: $white;
+      font-size: 31px;
+      height: 100%;
+      width: 31px;
+    }
+  }
+
+  .contact-button {
+    padding: 15px;
+    button {
+      background-color: transparent;
+      border-color: $gray-dark;
+      border-radius: 50% !important;
+      height: 44px;
+      margin: 0;
+      padding: 0;
+      width: 44px;
+      .fas,
+      .far {
+        color: $gray-dark;
+        font-size: 15px;
+      }
+      &[aria-expanded="true"] {
+        display: none !important;
+      }
+      &:focus,
+      &:hover {
+        background-color: $gray-dark;
+        outline: none;
+        .fas,
+        .far {
+          color: $black;
+        }
+      }
+    }
+  }
+}
+
+.navbar {
+  .fa-phone {
+    transform: rotate(90deg);
+  }
+}
+
+#CollapsingNavbar {
+  background-color: $black-lighter;
+  height: 100%;
+  left: 73px;
+  position: absolute;
+  transition: all .3s;
+  width: 100%;
+  z-index: 2;
+
+    &:not(.show) {
+      width: 0;
+      .region-navigation,
+      .nav-contacts {
+        display: none;
+      }
+    }
+
+  .region-navigation {
+    background-color: $black-light;
+    display: block;
+    height: 100%;
+    margin: 0;
+    padding-left: 30px;
+    padding-right: 30px;
+    @media #{$tablet} {
+      padding-left: 50px;
+      padding-right: 31.5px;
+    }
+  }
+
+  .navigation {
+    position: relative;
+    margin-top: 152px;
+
+    ul.navbar-nav {
+      display: block;
+      padding-right: 10px;
+
+      @media #{$tablet} {
+        padding-right: 70px;
+      }
+
+      .nav-item {
+        padding: 5px 0;
+
+        &.show {
+          position: static;
+          > a {
+            color: $orange-dark;
+          }
+        }
+
+        a {
+          color: $white;
+          font-size: 28px;
+          &:focus,
+          &:hover {
+            outline: none;
+            color: $orange-dark;
+            text-decoration: none;
+          }
+        }
+
+      }
+
+      .dropdown-menu {
+        background-color: transparent;
+        position: static;
+
+        @media #{$phone} {
+          background-color: $black-lighter;
+          position: absolute;
+        }
+
+        &.show {
+          height: 100%;
+          left: 282px;
+          padding-left: 30px;
+          top: 0;
+          @media #{$tablet} {
+            left: 296px;
+            padding-left: 59px;
+          }
+        }
+
+        .dropdown-item {
+          padding: 10px;
+          &:focus,
+          &:hover {
+            background-color: transparent;
+          }
+        }
+
+        a {
+          font-size: 25px;
+          &:focus,
+          &:hover {
+            border-bottom: 3px solid $orange-dark;
+            color: $white;
+          }
+        }
+
+      }
+
+    }
+
+  }
+
+}
+
+#block-navcontactblock {
+  margin-top: 118px;
+
+  .contact-link {
+    &:first-child {
+      margin-bottom: 30px;
+    }
+    span {
+      background-color: transparent;
+      border: 1px solid $gray-dark;
+      border-radius: 50%;
+      color: $gray-dark;
+      font-size: 15px;
+      padding: 13px;
+    }
+  }
+  a {
+    color: $gray;
+    margin: 10px;
+    padding: 5px;
+    &:focus,
+    &:hover {
+      outline: 3px solid $white;
+      text-decoration: none;
+    }
+  }
+}

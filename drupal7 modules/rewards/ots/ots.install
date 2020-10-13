@@ -1,0 +1,22 @@
+<?php
+/**
+ *
+ */
+
+
+/**
+ * Implements hook_install().
+ */
+function propco_ots_install() {
+  variable_set('ots_entry_access_code', 'PCO');
+  variable_set('ots_operator_id', '70007');
+}
+
+
+/**
+ * Implemets hook_uninstall().
+ */
+function propco_ots_uninstall() {
+  variable_del('ots_entry_access_code');
+  variable_del('ots_operator_id');
+}

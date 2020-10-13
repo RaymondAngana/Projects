@@ -1,0 +1,46 @@
+<?php
+
+/**
+ * implementation hook install
+ */
+function prayvine_logger_schema(){
+  $schema['prayvine_logs'] = array(
+    'description' => 'Prayvine Log Data',
+    'fields' => array(
+      'user_id' => array(
+        'description' => 'User ID',
+        'type' => 'int',
+        'unsigned' => 1,
+      ),
+      'content_id' => array(
+        'description' => 'Content ID',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,        
+      ),
+      'timestamp' => array(
+        'description' => 'Timestamp of event',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,        
+      ),
+      'type' => array(
+        'description' => 'Type of event',
+        'type' => 'varchar',
+        'length' => 100,
+      ),
+      'message' => array(
+        'description' => 'Message',
+        'type' => 'text',
+        'length' => 2048,
+      ),
+    ),
+    'indexes' => array(
+      'user_id' => array('user_id'),
+      'content_id' => array('content_id'),    
+    ),
+  );
+  
+  return $schema;
+}
+

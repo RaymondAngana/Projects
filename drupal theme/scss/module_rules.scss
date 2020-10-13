@@ -1,0 +1,10 @@
+// @file
+// The Module Rules.
+//
+// Should only include the partial SASS that contains specific module rule.
+//
+// Actual implementation of the SASS module rule should resides in a partial SASS file,
+// inside module_rules/ directory and import it here. e.g. @import "module_rules/button".
+
+
+@import "module_rules/buttons";

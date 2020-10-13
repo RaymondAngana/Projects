@@ -1,0 +1,1103 @@
+<?php
+/**
+ * @file
+ * Prayvine onboard tutorial module.
+ */
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/**
+ *  Implements of hook_menu()
+ */
+function prayvine_tutorial_menu() {
+  $items = array();
+
+  $items['prayvine_tutorial/page'] = array(
+    'page callback' => 'prayvine_tutorial_page',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['prayvine_tutorial/save_image'] = array(
+    'page callback' => 'prayvine_tutorial_save_image',
+    'access callback' => 'user_is_logged_in',
+    'type' => MENU_CALLBACK,
+  );
+  //ajax call back for getting state fo tuorial
+  $items['prayvine_tutorial/state'] = array(
+    'page callback' => 'prayvine_tutorial_state',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  //tutorial screen 1
+  $items['prayvine_tutorial_1/%ctools_js'] = array(
+    'page callback' => 'prayvine_tutorial_callback_1',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  //tutorial screen 2
+  $items['prayvine_tutorial_2/%ctools_js'] = array(
+    'page callback' => 'prayvine_tutorial_callback_2',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  //tutorial screen 3
+  $items['prayvine_tutorial_3/%ctools_js'] = array(
+    'page callback' => 'prayvine_tutorial_callback_3',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  //tutorial screen 4
+  $items['prayvine_tutorial_4/%ctools_js'] = array(
+    'page callback' => 'prayvine_tutorial_callback_4',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  //tutorial screen 5
+  $items['prayvine_tutorial_5/%ctools_js'] = array(
+    'page callback' => 'prayvine_tutorial_callback_5',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  //tutorial screen 6
+  $items['prayvine_tutorial_6/%ctools_js'] = array(
+    'page callback' => 'prayvine_tutorial_callback_6',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  //tutorial screen 7
+  $items['prayvine_tutorial_7/%ctools_js'] = array(
+    'page callback' => 'prayvine_tutorial_callback_7',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * ajax call for getting state fo tutorial
+ */
+function prayvine_tutorial_state() {
+  global $user;
+  $tutorial_state = variable_get('tutorial_state',array());
+  if (empty($tutorial_state[$user->uid])) {
+    $tutorial_state[$user->uid] = true;
+  }
+  drupal_json_output($tutorial_state[$user->uid]);
+}
+/**
+* Helper function to make a link.
+*/
+function _prayvine_tutorial_make_link($link_text = '',$page_number,$topic) {
+  // Set a default value if no text in supplied.
+  if (empty($link_text)) {
+    $link_text = 'Magical Modal';
+  }
+  //add custom style with ctools-modal-prayvine-tutorial-style
+  return l($link_text, 'prayvine_tutorial_'.$page_number.'/nojs',
+          array('attributes' => array('id' => 'prayvine-tutorial-link-'.$page_number,'class' => 'ctools-use-modal ctools-modal-prayvine-tutorial-style'),
+              'query' => array('topic_id'=>$topic->nid),
+              ));
+}
+
+
+/**
+* An example page.
+*/
+function prayvine_tutorial_page($topic) {
+  // Load the modal library and add the modal javascript.
+  ctools_include('modal');
+  ctools_include('ajax');
+  ctools_modal_add_js();
+
+  global $user;
+  if ($topic->uid == $user->uid) {
+    drupal_add_js(array('prayvine_topic_owner' => true), 'setting');
+  } else {
+    drupal_add_js(array('prayvine_topic_owner' => false), 'setting');
+  }
+
+  $tutorial_state = variable_get('tutorial_state',array());
+  if (in_array($topic->nid, $tutorial_state[$user->uid]['already_pass'])){
+    drupal_add_js(array('prayvine_topic_tutorial_pass' => true), 'setting');
+  } else {
+    drupal_add_js(array('prayvine_topic_tutorial_pass' => false), 'setting');
+  }
+
+  $prayvine_style = array(
+        'prayvine-tutorial-style' => array(
+          'modalSize' => array(
+            'type' => 'scale',
+            'width' => 0.6,
+            'addWidth' => 10,
+            'addHeight' => 10,
+            'contentRight' => 0,
+            'contentBottom' => 0,
+          ),
+          'modalOptions' => array(
+            'opacity' => .6,
+            'background-color' => '#000000',
+          ),
+          'animation' => 'fadeIn',
+          'modalTheme' => 'prayvine_tutorial_modal',
+
+        ),
+      );
+
+  drupal_add_js($prayvine_style, 'setting');
+  ctools_add_js('prayvine_tutorial', 'prayvine_tutorial');
+  ctools_add_css('prayvine_tutorial', 'prayvine_tutorial');
+
+  $opts = array('absolute' => TRUE);
+  $json_url = url('prayvine_tutorial/state', $opts);
+  drupal_add_js(array('prayvine_tutorial_state' => array('json_url' => $json_url)), 'setting');
+
+  $path = drupal_get_path('module', 'prayvine_tutorial');
+  drupal_add_js($path.'/prayvine_tutorial_general.js');
+
+  drupal_add_css($path.'/prayvine_tutorial.css');
+  $output = '';
+  $output.= _prayvine_tutorial_make_link('Tutorial page 1',1,$topic);
+  $output.= _prayvine_tutorial_make_link('Tutorial page 2',2,$topic);
+  $output.= _prayvine_tutorial_make_link('Tutorial page 3',3,$topic);
+  $output.= _prayvine_tutorial_make_link('Tutorial page 4',4,$topic);
+  $output.= _prayvine_tutorial_make_link('Tutorial page 5',5,$topic);
+  $output.= _prayvine_tutorial_make_link('Tutorial page 6',6,$topic);
+  $output.= _prayvine_tutorial_make_link('Tutorial page 7',7,$topic);
+  return $output;
+}
+
+/**
+* Ajax menu callback.
+*/
+function prayvine_tutorial_callback_1($ajax) {
+  if ($ajax) {
+    ctools_include('ajax');
+    ctools_include('modal');
+
+    $form_state = array(
+      'ajax' => TRUE,
+      'title' => t('Prayvine Tutorial Page 1 Form topic'),
+    );
+
+    // Use ctools to generate ajax instructions for the browser to create
+    // a form in a modal popup.
+    $output = ctools_modal_form_wrapper('prayvine_tutorial_1_form', $form_state);
+
+    // If the form has been submitted, there may be additional instructions
+    // such as dismissing the modal popup.
+    //if (!empty($form_state['ajax_commands'])) {
+    //  $output = $form_state['ajax_commands'];
+    //}
+
+    // Return the ajax instructions to the browser via ajax_render().
+    print ajax_render($output);
+    drupal_exit();
+  }
+  else {
+    return drupal_get_form('prayvine_tutorial_1_form');
+  }
+}
+
+/**
+* Drupal form to be put in a modal.
+*/
+function prayvine_tutorial_1_form($form, $form_state) {
+  $form = array();
+  $topic_id = $_GET['topic_id'];
+  $topic = node_load($topic_id);
+
+  $list = '<ol class="prayvine-tutorial-page1">';
+  $list .= '<li class="prayvine-tutorial-done">'.t('Create Prayvine account').'</li>';
+  $list .= '<li class="prayvine-tutorial-2">'.t('Pray for @missionary',array('@missionary'=>$topic->field_prayer_recipient['und'][0]['value'])).'</li>';
+  $list .= '<li class="prayvine-tutorial-3">'.t('Choose profile photo').'</li>';
+  $list .= '<li class="prayvine-tutorial-4">'.t('Set prayer alerts').'</li>';
+  $list .= '</ol>';
+
+  $form['list'] = array(
+    '#markup' => $list,
+    '#prefix' => t('<h1>Follow this tutorial to brighten @missionary\'s day.</h1><h2><strong>Fact:</strong> missionaries almost never hear from their friends.</h2>',array('@missionary'=>$topic->field_prayer_recipient['und'][0]['value'])),
+  );
+
+  $form['submit'] = array(
+    '#prefix' => '<div id="prayvine-tutorial-form-1">',
+    '#suffix' => '</div>',
+    '#type' => 'submit',
+    '#value' => t('Next: Pray for @missionary',array('@missionary'=>$topic->field_prayer_recipient['und'][0]['value'])),
+  );
+
+  return $form;
+}
+
+/**
+* Drupal form submit handler.
+*/
+function prayvine_tutorial_1_form_submit(&$form, &$form_state) {
+  // Generate the new link using the submitted text value.
+
+  // Tell the browser to close the modal.
+  $form_state['ajax_commands'][] = ctools_modal_command_dismiss();
+
+  // Tell the browser to replace the old link with the new one.
+  global $user;
+  $tutorial_state = variable_get('tutorial_state',array());
+  $tutorial_state[$user->uid]['first_step'] = 1;
+  variable_set('tutorial_state',$tutorial_state);
+}
+
+/**
+* pray silently page where
+* Ajax menu callback.
+*/
+function prayvine_tutorial_callback_2($ajax) {
+  if ($ajax) {
+  ctools_include('ajax');
+  ctools_include('modal');
+
+  $form_state = array(
+    'ajax' => TRUE,
+    'title' => t('Prayvine Tutorial Page 2 Form'),
+  );
+
+  // Use ctools to generate ajax instructions for the browser to create
+  // a form in a modal popup.
+  $output = ctools_modal_form_wrapper('prayvine_tutorial_2_form', $form_state);
+
+  // If the form has been submitted, there may be additional instructions
+  // such as dismissing the modal popup.
+  //if (!empty($form_state['ajax_commands'])) {
+  //  $output = $form_state['ajax_commands'];
+  //}
+
+  // Return the ajax instructions to the browser via ajax_render().
+  print ajax_render($output);
+    drupal_exit();
+  }
+  else {
+    return drupal_get_form('prayvine_tutorial_2_form');
+  }
+}
+
+/**
+* Drupal form to be put in a modal.
+*/
+function prayvine_tutorial_2_form($form, $form_state) {
+  $form = array();
+  $topic_id = $_GET['topic_id'];
+  $topic = node_load($topic_id);
+  //get cached prayers
+  $cache_id = 'requests_'.$topic_id;
+  $request_cache = cache_get($cache_id);
+  $request_last = array_shift($request_cache->data);
+  $cache_id = 'comments_'.$topic_id;
+  $comments_cache = cache_get($cache_id);
+  $updates_last = array_pop($comments_cache->data);
+  if ($request_last->created > $updates_last->created ) {//take request
+
+    $request_id = $request_last->nid;
+    $author_name = prayvine_get_name($request_last->uid);
+    $author_first_name = prayvine_get_first_name($request_last->uid);
+    $author = user_load($request_lastt->uid);
+    $render_array = node_view($request_last, 'full');
+    $render_array['links']['#access'] = FALSE;
+    $render_array['#node']->status = 1;
+    $render_array['body']['#object']->name = $author_name;
+    $title = $render_array['#node']->title;
+    $render_array['#node']->title = '';
+    $render_array['body']['#attributes'] = array('class'=>array('nesto'));
+    $render_array['field_want_reminder']['#access'] = 0;
+    $render_array['field_email_reminder_prayer']['#access'] = 0;
+    $render_array['field_email_reminder_frequency_p']['#access'] = 0;
+    $unit_html = drupal_render($render_array);
+    if (empty($author->picture)) {//no image
+      $unit_html = str_replace('node-'.$request_id, 'node-'.$request_id.' user-image-default', $unit_html);
+    }
+    $type = 'prayer request';
+    $unit_id = $request_last->nid;
+    $comment = 0;
+  } else {//take update
+    $unit_id = $updates_last->cid;
+    $class = 'silent-comment';
+    $request = $updates_last;
+    $author = user_load($updates_last->uid);
+    if (!empty($author->picture)) {
+      $unit_html = '<div class="silent-comment-content"><p class="submitted">';
+      $unit_html .= '<span class="user-picture"><a title="View user profile." href="/user/'.$request->uid.'">'.prayvine_get_picture($request->uid).'</a></span>';
+    } else {
+      $unit_html = '<div class="silent-comment-content user-image-default"><p class="submitted">';
+    }
+    $unit_html .= '<span>'.t('Sent on ').  format_date($request->created,'long').'</span></p>';
+    $unit_html .= $request->comment_body['und'][0]['safe_value'].'</div>';
+    $type = 'update';
+    $author_name = prayvine_get_name($updates_last->uid);
+    $author_first_name = prayvine_get_first_name($request_last->uid);
+    $comment = 1;
+  }
+  $form['progress_bar'] = array(
+    '#markup' => t('Progress: ').' <progress value="25" max="100"><div class="progress-bar">
+        <span style="width: 100%;">Progress: 25%</span>
+    </div></progress>',
+  );
+  $form['title'] = array(
+    '#markup' => '<h2>'.t('Please take a moment to pray for @missionary.',array('@missionary'=>$topic->field_prayer_recipient['und'][0]['value'])) . '</h2>',
+  );
+  $form['pray_silently'] = array(
+    '#markup' => $unit_html,
+  );
+  //$form['footer'] = array(
+  //  '#markup' => t('Did you pray now? If so, please encourage @author by clicking this button:',array('@author' => $author_name)),
+  //);
+
+  global $user;
+  $form['request_id'] = array(
+   '#type' => 'hidden',
+   '#value' => $unit_id,
+  );
+  $form['user_id'] = array(
+   '#type' => 'hidden',
+   '#value' => $user->uid,
+  );
+  $form['comment'] = array(
+    '#type'=>'hidden',
+    '#value' => $comment,
+  );
+  $form['request_notify'] = array(
+   '#type' => 'submit',
+   '#value' => t('I prayed for @missionary',array('@missionary'=>$topic->field_prayer_recipient['und'][0]['value'])),
+   '#submit' => array('prayvine_tutorial_2_form_submit'),
+  );
+  $form['skip_next_step'] = array(
+    '#type' => 'submit',
+    '#value' => t('Skip this step'),
+    '#name' => 'skip_next_step',
+  );
+  return $form;
+}
+
+/**
+* Drupal form submit handler.
+*/
+function prayvine_tutorial_2_form_submit(&$form, &$form_state) {
+  // Generate the new link using the submitted text value.
+  $request_id = $form_state['input']['request_id'];
+  $comment = $form_state['input']['comment'];
+  $user_id = $form_state['input']['user_id'];
+  unset($tutorial_state[$user->uid]['second_step']['prayed_comment']);
+  unset($tutorial_state[$user->uid]['second_step']['prayed_request']);
+  if ($form_state['triggering_element']['#name'] == 'skip_next_step') {
+    global $user;
+    $tutorial_state = variable_get('tutorial_state',array());
+    $tutorial_state[$user->uid]['second_step']['prayed'] = 0;
+    variable_set('tutorial_state',$tutorial_state);
+    return;
+  }
+
+  if (empty($comment)) {
+    $request = node_load($request_id);
+    $topic_id = $request->field_topic_id['und'][0]['value'];
+    $topic = node_load($topic_id);
+    $author = user_load($request->uid);
+    $prayer = user_load($user_id);
+    if (empty($topic->field_ministry['und'][0]['value'])){
+      $ministry = 0;
+    } else {
+      $ministry = $topic->field_ministry['und'][0]['value'];
+    }
+    $footer = prayvine_get_email_footer($prayer->mail, $prayer, $topic->title);
+    rules_invoke_event('prayvine_pray_verbaly_notify',$request,$author,$topic,$prayer,$footer,$ministry);
+    global $user;
+    $tutorial_state = variable_get('tutorial_state',array());
+
+    $tutorial_state[$user->uid]['second_step']['prayed_request'] = $request_id;
+    variable_set('tutorial_state',$tutorial_state);
+
+  } else {
+    $comment = comment_load($request_id);
+    $topic_id = $comment->nid;
+    $topic = node_load($topic_id);
+    $author = user_load($comment->uid);
+    $prayer = user_load($user_id);
+    if (empty($topic->field_ministry['und'][0]['value'])){
+      $ministry = 0;
+    } else {
+      $ministry = $topic->field_ministry['und'][0]['value'];
+    }
+    $footer = prayvine_get_email_footer($prayer->mail, $prayer, $topic->title);
+    rules_invoke_event('prayvine_pray_verbaly_notify_comment',$comment,$author,$topic,$prayer,$footer,$ministry);
+    global $user;
+    $tutorial_state = variable_get('tutorial_state',array());
+
+    $tutorial_state[$user->uid]['second_step']['prayed_comment'] = $request_id;
+    variable_set('tutorial_state',$tutorial_state);
+  }
+  global $user;
+
+  if (module_exists('prayvine_logger')) {
+
+    if ($user_id > 0) {
+      prayvine_logger_log($user_id,$request_id,'pray_silently');
+    } else {
+      if (!empty($strToken)) {
+        prayvine_logger_log($strToken,$request_id,'pray_silently');
+      } else {
+        prayvine_logger_log(0,$request_id,'pray_silently');
+      }
+    }
+  }
+
+  // Tell the browser to close the modal.
+  $form_state['ajax_commands'][] = ctools_modal_command_dismiss();
+
+  // Tell the browser to replace the old link with the new one.
+  $form_state['ajax_commands'][] = ajax_command_replace('#magical-modal-link', $link);
+}
+
+/**
+* Ajax menu callback.
+*/
+function prayvine_tutorial_callback_3($ajax) {
+  if ($ajax) {
+  ctools_include('ajax');
+  ctools_include('modal');
+
+  $form_state = array(
+    'ajax' => TRUE,
+    'title' => t('Prayvine Tutorial Page 3 Form'),
+  );
+
+  // Use ctools to generate ajax instructions for the browser to create
+  // a form in a modal popup.
+  $output = ctools_modal_form_wrapper('prayvine_tutorial_3_form', $form_state);
+
+  // If the form has been submitted, there may be additional instructions
+  // such as dismissing the modal popup.
+  //if (!empty($form_state['ajax_commands'])) {
+  //  $output = $form_state['ajax_commands'];
+  //}
+
+  // Return the ajax instructions to the browser via ajax_render().
+  print ajax_render($output);
+    drupal_exit();
+  }
+  else {
+    return drupal_get_form('prayvine_tutorial_3_form');
+  }
+}
+
+/**
+* Drupal form to be put in a modal.
+*/
+function prayvine_tutorial_3_form($form, $form_state) {
+  global $user;
+  $tutorial_state = variable_get('tutorial_state',array());
+  if (!empty($tutorial_state[$user->uid]['second_step']['prayed_comment'])) {
+    $prayed_silently = true;
+    $unit = comment_load($tutorial_state[$user->uid]['second_step']['prayed_comment']);
+    $author = prayvine_get_name($unit->uid);
+  }
+  if (!empty($tutorial_state[$user->uid]['second_step']['prayed_request'])) {
+    $prayed_silently = true;
+    $unit = node_load($tutorial_state[$user->uid]['second_step']['prayed_request']);
+    $author = prayvine_get_name($unit->uid);
+  }
+  $form = array();
+  $topic_id = $_GET['topic_id'];
+  $topic = node_load($topic_id);
+
+  $list = '<ol class="prayvine-tutorial-page1">';
+  $list .= '<li class="prayvine-tutorial-done">'.t('Create Prayvine account').'</li>';
+  $list .= '<li class="prayvine-tutorial-done">'.t('Pray for @missionary',array('@missionary'=>$topic->field_prayer_recipient['und'][0]['value'])).'</li>';
+  $list .= '<li class="prayvine-tutorial-3">'.t('Choose profile photo').' <span>' .t("Your picture will bring a smile to @missionary's face."
+          ,array('@missionary'=>$topic->field_prayer_recipient['und'][0]['value'])). '</span></li>';
+  $list .= '<li class="prayvine-tutorial-4">'.t('Set prayer alerts').'</li>';
+  $list .= '</ol>';
+
+  $form['progress_bar'] = array(
+    '#markup' => t('Progress: ').' <progress value="50" max="100"><div class="progress-bar">
+        <span style="width: 100%;">Progress: 50%</span>
+    </div></progress>',
+  );
+  if ($prayed_silently) {
+    $message = '<p>'.t('Thanks! We\'ve notified @author that you prayed.',array('@author' => $author)).'</p>';
+  } else {
+    $message = '<p>'.t('Just to steps left.').'</p>';
+  }
+  $form['message'] = array(
+    '#markup' => '<h2>'.t('It may seem small, but you just made a big difference to @missionary\'s ministry.',array('@missionary'=>$topic->field_prayer_recipient['und'][0]['value'])).'</h2>',
+  );
+  $form['list'] = array(
+    '#markup' => $list,
+  );
+
+  $form['submit'] = array(
+  '#type' => 'submit',
+  '#value' => t('Next: Profile photo'),
+  );
+
+  return $form;
+}
+
+/**
+* Drupal form submit handler.
+*/
+function prayvine_tutorial_3_form_submit(&$form, &$form_state) {
+  // Generate the new link using the submitted text value.
+  global $user;
+  $tutorial_state = variable_get('tutorial_state',array());
+  $tutorial_state[$user->uid]['third_step'] = 1;
+  variable_set('tutorial_state',$tutorial_state);
+
+  // Tell the browser to close the modal.
+  $form_state['ajax_commands'][] = ctools_modal_command_dismiss();
+
+
+}
+
+
+/**
+* Ajax menu callback.
+*/
+function prayvine_tutorial_callback_4($ajax) {
+  if ($ajax) {
+    ctools_include('ajax');
+    ctools_include('modal');
+
+    $form_state = array(
+      'ajax' => TRUE,
+      'title' => t('Prayvine Tutorial Page 4 Form'),
+    );
+
+    // Use ctools to generate ajax instructions for the browser to create
+    // a form in a modal popup.
+    $output = ctools_modal_form_wrapper('prayvine_tutorial_4_form', $form_state);
+
+    // If the form has been submitted, there may be additional instructions
+    // such as dismissing the modal popup.
+    //if (!empty($form_state['ajax_commands'])) {
+    //  $output = $form_state['ajax_commands'];
+    //}
+
+    // Return the ajax instructions to the browser via ajax_render().
+    print ajax_render($output);
+    drupal_exit();
+  }
+  else {
+    return drupal_get_form('prayvine_tutorial_4_form');
+  }
+}
+
+/**
+* Drupal form to be put in a modal.
+*/
+function prayvine_tutorial_4_form($form, $form_state) {
+  $topic_id = $_GET['topic_id'];
+  $topic = node_load($topic_id);
+  $form = array();
+  $form['progress_bar'] = array(
+      '#markup' => t('Progress: ').' <progress value="50" max="100"><div class="progress-bar">
+        <span style="width: 100%;">Progress: 50%</span>
+    </div></progress>',
+    );
+
+  $form['header'] = array(
+    '#markup' => '<h2>'.t('Seeing your face means the world to @missionary.',array('@missionary'=>$topic->field_prayer_recipient['und'][0]['value'])).'</h2>',
+  );
+  $path = drupal_get_path('module','prayvine_tutorial');
+  $link = $path.'/images/facebook.png';
+
+  $output = '<fb:login-button scope="public_profile,email" onlogin="checkLoginState_4();" id="facebook-login-button">
+  </fb:login-button>';
+  $output = '<a id="fb-login" href="#" onclick="fb_login();">'.t('Use Facebook photo').'</a>';
+  $path = drupal_get_path('module', 'prayvine_tutorial');
+  drupal_add_js($path.'/facebook_login.js');
+  $form['facebook_login'] = array(
+    '#markup' => $output,
+  );
+  $form['facebook'] = array(
+    '#type' => 'submit',
+    '#prefix' => '<div class="facebook-button">',
+    '#value' => t('Take a photo'),
+    '#suffix' => '</div>',
+    '#name' => 'facebook',
+  );
+  $link = $path.'/images/photo.png';
+  $form['take_photo'] = array(
+    '#type' => 'submit',
+    '#prefix' => '<div class="take-photo-button">',
+    '#value' => t('Take a photo'),
+    '#suffix' => '</div>',
+    '#name' => 'take_photo',
+  );
+  $link = $path.'/images/folder.png';
+  $form['select_photo'] = array(
+    '#type' => 'submit',
+    '#prefix' => '<div class="select-photo-button"> ',
+    '#value' => t('Select photo'),
+    '#suffix' => '</div>',
+    '#name' => 'select_photo',
+  );
+  $form['skip_next'] = array(
+    '#type' => 'submit',
+    '#value' => t('Skip this step'),
+    '#name' => 'skip_step'
+  );
+
+  return $form;
+}
+
+/**
+* Drupal form submit handler.
+*/
+function prayvine_tutorial_4_form_submit(&$form, &$form_state) {
+  // Generate the new link using the submitted text value.
+  $tutorial_state = variable_get('tutorial_state',array());
+  // Tell the browser to close the modal.
+  $form_state['ajax_commands'][] = ctools_modal_command_dismiss();
+  global $user;
+  $tutorial_state = variable_get('tutorial_state',array());
+  if ($form_state['triggering_element']['#name'] == 'facebook') {
+    $tutorial_state[$user->uid]['forth_step'] = 'facebook';
+  }
+  if ($form_state['triggering_element']['#name'] == 'take_photo') {
+    $tutorial_state[$user->uid]['forth_step'] = 'take_photo';
+  }
+  if ($form_state['triggering_element']['#name'] == 'select_photo') {
+    $tutorial_state[$user->uid]['forth_step'] = 'select_photo';
+  }
+  if ($form_state['triggering_element']['#name'] == 'skip_step') {
+    $tutorial_state[$user->uid]['forth_step'] = 'skip_step';
+    $tutorial_state[$user->uid]['fifth_step'] = 'skip_step';
+  }
+  variable_set('tutorial_state',$tutorial_state);
+}
+
+/**
+* Ajax menu callback.
+*/
+function prayvine_tutorial_callback_5($ajax) {
+  if ($ajax) {
+  ctools_include('ajax');
+  ctools_include('modal');
+
+  $form_state = array(
+    'ajax' => TRUE,
+    'title' => t('Prayvine Tutorial Page 5 Form'),
+  );
+
+  // Use ctools to generate ajax instructions for the browser to create
+  // a form in a modal popup.
+  $output = ctools_modal_form_wrapper('prayvine_tutorial_5_form', $form_state);
+
+  // If the form has been submitted, there may be additional instructions
+  // such as dismissing the modal popup.
+  //if (!empty($form_state['ajax_commands'])) {
+  //  $output = $form_state['ajax_commands'];
+  //}
+
+  // Return the ajax instructions to the browser via ajax_render().
+  print ajax_render($output);
+    drupal_exit();
+  }
+  else {
+    return drupal_get_form('prayvine_tutorial_5_form');
+  }
+}
+
+/**
+* Drupal form to be put in a modal.
+*/
+function prayvine_tutorial_5_form($form, $form_state) {
+  $form = array();
+  global $user;
+
+  $tutorial_state = variable_get('tutorial_state',array());
+  $topic_id = $_GET['topic_id'];
+  $topic = node_load($topic_id);
+  $form['progress_bar'] = array(
+    '#markup' => t('Progress: ').' <progress id="prayvine-tutorial-progress-5" value="75" max="100"><div class="progress-bar">
+        <span style="width: 100%;">Progress: 75%</span>
+    </div></progress>',
+  );
+  $form['title'] = array(
+    '#markup' => '<h2>'.t('Nice. @missionary will be thrilled to see you.',array('@missionary'=>$topic->field_prayer_recipient['und'][0]['value'])).'</h2>',
+  );
+  if ($tutorial_state[$user->uid]['forth_step'] == 'facebook') {
+    $output = '<fb:login-button scope="public_profile,email" onlogin="checkLoginState();" id="facebook-login-button">
+  </fb:login-button>';
+    $output .= '<div id="fb-picture"></div>';
+    $path = drupal_get_path('module', 'prayvine_notification');
+    drupal_add_js($path.'/facebook.js');
+    $form['facebook'] = array(
+      '#markup' => $output,
+
+    );
+  }
+  if ($tutorial_state[$user->uid]['forth_step'] == 'take_photo') {
+    $output = '<video id="video" width="300" height="200" autoplay></video>
+              <button id="snap">Snap Photo</button>
+              <canvas id="canvas" width="300" height="200"></canvas>';
+    $path = drupal_get_path('module', 'prayvine_tutorial');
+    //drupal_add_js($path.'/js/takephoto.js');
+    $form['take_photo'] = array(
+      '#markup' => $output,
+    );
+  }
+  if ($tutorial_state[$user->uid]['forth_step'] == 'select_photo') {
+    // Attach User Picture upload
+   $node = new StdClass();
+   //creating a bare node
+   $node->type = 'prayer';
+   $node->uid = 1;
+   //giving it type
+   $node->status = 1;
+
+   $node = node_submit($node);
+   $entity = $node;
+   $formtmp = array();
+   field_attach_form('node', $entity, $formtmp, $form_state, NULL, array(
+      'field_name' => 'field_add_photo'
+    ));
+
+
+    $form['photo'] = $formtmp;
+    $form['photo']['#prefix'] = '<div id="tutorial-page-photo">';
+    $form['photo']['#suffix'] = '</div>';
+
+  }
+
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Use this photo'),
+    '#name' => 'use_this_photo',
+  );
+  $form['submit_1'] = array(
+    '#type' => 'submit',
+    '#value' => t('Back: Pick another photo'),
+    '#name' => 'another_photo',
+  );
+  $form['#attributes'] = array('id'=>array('prayvine-tutorial-5-form'));
+  return $form;
+}
+
+/**
+* submit photo for user profile. Photo taken by camera is save with ajax.
+* Photo selected by file saved with this handler
+*/
+function prayvine_tutorial_5_form_submit(&$form, &$form_state) {
+  // Tell the browser to close the modal.
+  global $user;
+  $tutorial_state = variable_get('tutorial_state',array());
+  $form_state['ajax_commands'][] = ctools_modal_command_dismiss();
+
+  if (!empty($form_state['triggering_element']['#name'])) {
+    $button_clicked  = $form_state['triggering_element']['#name'];
+  } else {
+    $button_clicked = 'none';
+  }
+  if ($button_clicked == 'use_this_photo') {
+    $uid = $user->uid;
+    $account = user_load($uid);
+
+    //use when photo is taken by camera
+      //done with ajax
+    //use when photo is taken by facebook
+      //done with ajax
+    //use when submit photo when uploaded
+    if (!empty($form_state['values']['field_add_photo']['und'][0]['fid'])){
+      $file_id = $form_state['values']['field_add_photo']['und'][0]['fid'];
+
+
+      $file = file_load($file_id);
+      $drupalfile = file_move($file, 'public://pictures');
+
+      $edit['picture'] = $drupalfile;
+      user_save($account, $edit);
+
+    }
+    $tutorial_state[$user->uid]['fifth_step'] = $user->picture;
+  }
+  if ($button_clicked == 'another_photo') {
+    //delete unused photo
+    if (!empty($form_state['values']['field_add_photo']['und'][0]['fid'])){
+      $file_id = $form_state['values']['field_add_photo']['und'][0]['fid'];
+      file_delete($file_id);
+    }
+     unset($tutorial_state[$user->uid]['fifth_step']);
+     unset($tutorial_state[$user->uid]['forth_step']);
+  }
+  //save newly selected photo or if it is not selected variable is empty
+  variable_set('tutorial_state',$tutorial_state);
+}
+
+/**
+* Ajax menu callback.
+*/
+function prayvine_tutorial_callback_6($ajax) {
+  if ($ajax) {
+  ctools_include('ajax');
+  ctools_include('modal');
+
+  $form_state = array(
+    'ajax' => TRUE,
+    'title' => t('Prayvine Tutorial Page 6 Form'),
+  );
+
+  // Use ctools to generate ajax instructions for the browser to create
+  // a form in a modal popup.
+  $output = ctools_modal_form_wrapper('prayvine_tutorial_6_form', $form_state);
+
+  // If the form has been submitted, there may be additional instructions
+  // such as dismissing the modal popup.
+  //if (!empty($form_state['ajax_commands'])) {
+  //  $output = $form_state['ajax_commands'];
+  //}
+
+  // Return the ajax instructions to the browser via ajax_render().
+  print ajax_render($output);
+    drupal_exit();
+  }
+  else {
+    return drupal_get_form('prayvine_tutorial_6_form');
+  }
+}
+
+/**
+* Drupal form to be put in a modal.
+*/
+function prayvine_tutorial_6_form($form, $form_state) {
+  $topic_id = $_GET['topic_id'];
+  $topic = node_load($topic_id);
+  global $user;
+  $tutorial_state = variable_get('tutorial_state',array());
+  if (in_array($topic_id, $tutorial_state[$user->uid]['already_pass'])){
+    drupal_add_js(array('prayvine_topic_tutorial_pass' => true), 'setting');
+  } else {
+    drupal_add_js(array('prayvine_topic_tutorial_pass' => false), 'setting');
+  }
+  $list = '<ol class="prayvine-tutorial-page6">';
+  $list .= '<li class="prayvine-tutorial-done">'.t('Write a Prayer').'</li>';
+  $list .= '<li class="prayvine-tutorial-done">'.t('Pray for @missionary',array('@missionary'=>$topic->field_prayer_recipient['und'][0]['value'])).'</li>';
+  $list .= '<li class="prayvine-tutorial-done">'.t('Choose profile photo').'</li>';
+  $list .= '<li class="prayvine-tutorial-4">'.t('Select prayer alerts').'</li>';
+  $list .= '</ol>';
+  $form = array();
+
+  $form['progress_bar'] = array(
+    '#markup' => t('Progress: ').' <progress id="prayvine-tutorial-progress-5" value="95" max="100"><div class="progress-bar">
+        <span style="width: 100%;">Progress: 95%</span>
+    </div></progress>
+    <h2>'.t('Get inspired. See written prayers for @missionary.</h2>',array('@missionary'=>$topic->field_prayer_recipient['und'][0]['value'])),
+  );
+
+  $form['list'] = array(
+    '#markup' => $list,
+  );
+  $form['prayer_alerts'] = array(
+    '#type' => 'radios',
+    '#title' => t('Do you want to be inspired by other people who write prayers for @missionary?',array('@missionary'=>$topic->field_prayer_recipient['und'][0]['value'])),
+    '#description' => t('You can change this setting anytime.'),
+    '#options' => array(
+       0 => t('Yes. Please send an email notification when someone writes a new prayer for @missionary',array('@missionary'=>$topic->field_prayer_recipient['und'][0]['value'])),
+       1 => t('No, thanks.',array('@topic'=>$topic->title))
+    ),
+    '#default_value' => 0,
+
+  );
+  $form['topic_id'] = array(
+    '#type'=>'#hidden',
+    '#value'=>$topic->nid,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Next'),
+  );
+
+  return $form;
+}
+
+/**
+* Drupal form submit handler.
+*/
+function prayvine_tutorial_6_form_submit(&$form, &$form_state) {
+  // Generate the new link using the submitted text value.
+  global $user;
+  $form_state['ajax_commands'][] = ctools_modal_command_dismiss();
+  $topic_id = $form_state['complete form']['topic_id']['#value'];
+  $topic = node_load($topic_id);
+  $value_selected = $form_state['values']['prayer_alerts'];
+
+  $topic_settings_un = $topic->field_settings['und'][0]['value'];
+  $topic_seetings = unserialize($topic_settings_un);
+  $topic_seetings['notification'][$user->uid]['posting'] = $value_selected;
+  $topic->field_settings['und'][0]['value'] = serialize($topic_seetings);
+  node_save($topic);
+  global $user;
+  $tutorial_state = variable_get('tutorial_state',array());
+  $tutorial_state[$user->uid]['sixth_step'] = 1;
+  unset ( $tutorial_state [$user->uid] ['seventh_step'] );
+  $tutorial_state[$user->uid]['already_pass'][$topic_id] = $topic_id;
+  if (in_array($topic_id, $tutorial_state[$user->uid]['already_pass'])){
+    drupal_add_js(array('prayvine_topic_tutorial_pass' => true), 'setting');
+  } else {
+    drupal_add_js(array('prayvine_topic_tutorial_pass' => false), 'setting');
+  }
+  variable_set('tutorial_state',$tutorial_state);
+}
+
+/**
+* Ajax menu callback.
+*/
+function prayvine_tutorial_callback_7($ajax) {
+  if ($ajax) {
+  ctools_include('ajax');
+  ctools_include('modal');
+
+  $form_state = array(
+    'ajax' => TRUE,
+    'title' => t('Prayvine Tutorial Page 7 Form'),
+  );
+
+  // Use ctools to generate ajax instructions for the browser to create
+  // a form in a modal popup.
+  $output = ctools_modal_form_wrapper('prayvine_tutorial_7_form', $form_state);
+
+  // If the form has been submitted, there may be additional instructions
+  // such as dismissing the modal popup.
+  //if (!empty($form_state['ajax_commands'])) {
+  //  $output = $form_state['ajax_commands'];
+  //}
+
+  // Return the ajax instructions to the browser via ajax_render().
+  print ajax_render($output);
+    drupal_exit();
+  }
+  else {
+    return drupal_get_form('prayvine_tutorial_7_form');
+  }
+}
+
+/**
+* Drupal form to be put in a modal.
+*/
+function prayvine_tutorial_7_form($form, $form_state) {
+  $topic_id = $_GET['topic_id'];
+  $topic = node_load($topic_id);
+
+  global $user;
+  $tutorial_state = variable_get('tutorial_state',array());
+  $tutorial_state[$user->uid]['seventh_step'] = 1;
+  $tutorial_state[$user->uid]['already_pass'][$topic_id] = $topic_id;
+  variable_set('tutorial_state', $tutorial_state);
+
+  $list = '<ol class="prayvine-tutorial-page7">';
+  $list .= '<li class="prayvine-tutorial-writeprayer">'.t('Write a prayer').' <span>'.t('Written prayers are precious gifts that @missionary can read over and over.',array('@missionary'=>$topic->field_prayer_recipient['und'][0]['value'])).'</span></li>';
+  $list .= '<li class="prayvine-tutorial-sayamen">'.t('Say Amen').' <span>'.t('Click the Amen button to agree with others in prayer. ').'</span></li>';
+
+  /** TODO in future sprints
+  $list .= '<li class="prayvine-tutorial-createcomm">'.t('Create a Personal Prayer Community').'</li>'.t("Start your own private prayer communities on Prayvine. It's free.");
+  $list .= '<li class="prayvine-tutorial-ministry">'.t('Use Prayvine for Missions and Ministry').'</li>'.t('Prayvine offers special features for missionaries and ministries').
+          '<a href="#">'.t('Learn more and request early access').'</a>';
+  */
+
+  $list .= '</ol>';
+  $form = array();
+   $form['progress_bar'] = array(
+    '#markup' => t('Progress: ').' <progress id="prayvine-tutorial-progress-5" value="100" max="100"><div class="progress-bar">
+        <span style="width: 100%;">Progress: 100%</span>
+    </div></progress>
+    <h1>'.t('Thanks for taking the time to pray for @missionary!</h1>
+    <h2>More ways to encourage @missionary through Prayvine.</h2>',array('@missionary'=>$topic->field_prayer_recipient['und'][0]['value'])),
+  );
+
+  $form['list'] = array(
+    '#markup' => $list,
+  );
+  $form['topic_id'] = array(
+    '#type'=>'#hidden',
+    '#value'=>$topic->nid,
+  );
+  $form['close'] = array(
+    '#markup' => '<span class="tutorial-close">' . t('Close tutorial') . '</span>',
+  );
+
+  return $form;
+}
+
+/**
+ * Save image for prayvine profiel photo.
+ */
+function prayvine_tutorial_save_image() {
+  global $user;
+  $data = $_POST['imgData'];
+  $root_path = realpath(drupal_get_path('module', 'node') . '/../../');
+  $file_path_img = $root_path . "/sites/default/files/pictures/profile_picture_" . $user->uid;
+
+  // Save image from source through browser is not allowed because of security.
+  if (!empty($_POST['imgLink'])) {
+    // Save link with facebook.
+    $url = $_POST['imgLink'];
+    $url_explode = explode('?', $url);
+    $url_clean = $url_explode[0];
+    $url_components = explode('/', $url_clean);
+    $img_name = array_pop($url_components);
+
+    $file_path = $file_path_img . $img_name;
+
+    if (!_prayvine_tutorial_check_if_php($img_name)) {
+      file_put_contents($file_path, file_get_contents($url));
+    }
+    else {
+      watchdog('prayvine_tutorial', "The :file_path is not an image.", array(':file_path' => $file_path), WATCHDOG_ALERT, 'link');
+    }
+  }
+  else {
+    // Save with camera.
+    $file_path = $root_path . "/sites/default/files/pictures/profile_picture_" . $user->uid . '.png';
+
+    $uri = substr($data, strpos($data, ",") + 1);
+
+    file_put_contents($file_path, base64_decode($uri));
+  }
+
+  $uid = $user->uid;
+  $account = user_load($uid);
+
+  $file = (object) array(
+      'uid' => 1,
+      'uri' => $file_path,
+      'filemime' => file_get_mimetype($filepath),
+      'status' => 1,
+      'display' =>1,
+      'folder' => 'pictures'
+    );
+
+  $drupalfile = file_copy($file, 'public://pictures');
+
+  $edit['picture'] = $drupalfile;
+  user_save($account, $edit);
+
+  echo $file_path;
+}
+
+/**
+ * Private checking if user is saving a php file.
+ */
+function _prayvine_tutorial_check_if_php($img_name) {
+  $ext = strtolower(array_pop(explode(".", $img_name)));
+  $php = FALSE;
+  if (in_array($ext, ['php', 'inc', 'module', 'lib'])) {
+    $php = TRUE;
+  }
+  return $php;
+}

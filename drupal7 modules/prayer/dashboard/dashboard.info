@@ -1,0 +1,6 @@
+name = Prayvine Dashboard
+description = Module for Prayvine Dashboard
+package = Prayvine
+core = 7.x
+dependencies[] = date
+dependencies[] = date_popup

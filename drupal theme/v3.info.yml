@@ -1,0 +1,24 @@
+name: Promet Source Version 3
+type: theme
+description: 'Implementation of SASS starter kit for a Bootstrap Barrio SubTheme on Promet Source Version 3.'
+# version: VERSION
+# core: 8.x
+base theme: bootstrap_barrio
+
+libraries:
+  - promet_v3/global-styling
+libraries-override:
+  bootstrap_barrio/global-styling: false
+regions:
+  navigation: 'Navigation'
+  header: 'Header'
+  breadcrumb: 'Breadcrumb'
+  content: 'Content'
+  pre_footer: 'Pre-Footer'
+  footer: 'Footer'
+
+# Information added by Drupal.org packaging script on 2019-02-25
+version: '8.x-1.9'
+core: '8.x'
+project: 'promet'
+datestamp: 1551065297

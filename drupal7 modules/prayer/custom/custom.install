@@ -1,0 +1,199 @@
+<?php
+
+/**
+ * @file
+ * Install file for Custom Prayvine module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function prayvine_custom_install() {
+  drupal_set_installed_schema_version('prayvine_custom', '7000');
+}
+
+/**
+ * Remove all blocked users.
+ */
+function prayvine_custom_update_7001() {
+  $num_deleted = db_delete('users')
+    ->condition('status', 0, '=')
+    ->condition('uid', 0, '!=')
+    ->execute();
+
+  drupal_set_message(t("Deleted $num_deleted blocked users"));
+}
+
+/**
+ * Delete unused nodes (with php_code filters).
+ */
+function prayvine_custom_update_7002() {
+  // SignIn page and PHP Debug page.
+  $unused_nodes = array(241, 3772);
+
+  node_delete_multiple($unused_nodes);
+  drupal_set_message(t('%count nodes have been deleted.', array('%count' => count($nids))));
+}
+
+/**
+ * Remove PHP format.
+ */
+function prayvine_custom_update_7003() {
+  // Delete php code format.
+  db_delete('filter')
+    ->condition('format', 'php_code')
+    ->execute();
+
+  // Delete use of php widget in other formats.
+  db_delete('filter')
+    ->condition('module', 'php')
+    ->execute();
+
+  // Hide PHP format listing.
+  db_update('filter_format')
+    ->fields(array(
+      'status' => 0,
+    ))
+    ->condition('format', 'php_code')
+    ->execute();
+}
+
+/**
+ * Change absolute URL to relative in announcements_front block.
+ */
+function prayvine_custom_update_7004() {
+  $delta = 2;
+  $block = block_custom_block_get($delta);
+  $edit = array(
+    'body' => array(
+      'value' => str_replace('https://www.prayvine.org', '', $block['body']),
+      'format' => 'full_html',
+    ),
+    'info' => $block['info'],
+  );
+  block_custom_block_save($edit, $delta);
+}
+
+/**
+ * Sets all reminder days with post date prior to Feb 1, 2018 to zero.
+ */
+function prayvine_custom_update_7005() {
+  $sql = "SELECT nid FROM {node} WHERE type = 'prayer_request'
+          AND created < :pdate";
+  $rst = db_query($sql, array(':pdate' => strtotime('02/01/2018')));
+
+  foreach ($rst as $row) {
+    $prayer = node_load($row->nid);
+    $prayer->field_email_reminder_prayer[LANGUAGE_NONE][0]['value'] = 0;
+    node_save($prayer);
+  }
+
+  $arg = array('%count' => $rst->rowCount());
+  return t('%count prayer requests have been reset.', $arg);
+}
+
+/**
+ * Set all topic reminder days to 30 and frequency to 15.
+ */
+function prayvine_custom_update_7006() {
+  $rst = db_query("SELECT nid FROM {node} WHERE type = 'topic'");
+
+  foreach ($rst as $row) {
+    $topic = node_load($row->nid);
+    $topic->field_email_reminder[LANGUAGE_NONE][0]['value'] = 30;
+    $topic->field_email_reminder_frequency[LANGUAGE_NONE][0]['value'] = 15;
+    node_save($topic);
+  }
+
+  $arg = array('%count' => $rst->rowCount());
+  return t('%count topics have been updated.', $arg);
+}
+
+/**
+ * Dedupes email invites by changing the email address to dustbin@prayvine.org.
+ */
+function prayvine_custom_update_7007() {
+  $bin_arr = array();
+  $sql = "SELECT * FROM {prayvine_invites} WHERE mail != '' OR mail != 'dustbin@prayvine.org' ORDER BY sent DESC";
+  $rst = db_query($sql);
+
+  foreach ($rst as $row) {
+    if (!isset($bin_arr[$row->nid][$row->mail])) {
+      db_update('prayvine_invites')
+        ->fields(array(
+          'mail' => 'dustbin@prayvine.org',
+        ))
+        ->condition('mail', $row->mail, '=')
+        ->condition('nid', $row->nid, '=')
+        ->condition('inviteId', $row->inviteId, '!=')
+        ->execute();
+
+      $bin_arr[$row->nid][$row->mail] = TRUE;
+    }
+  }
+
+  return t('Successfully removes duplicate email invites.');
+}
+
+/**
+ * Runs the dedupe script again with the latest invites.
+ */
+function prayvine_custom_update_7008() {
+  $bin_arr = array();
+  $sql = "SELECT * FROM {prayvine_invites} WHERE mail != '' OR mail != 'dustbin@prayvine.org' ORDER BY sent DESC";
+  $rst = db_query($sql);
+
+  foreach ($rst as $row) {
+    if (!isset($bin_arr[$row->nid][$row->mail])) {
+      db_update('prayvine_invites')
+        ->fields(array(
+          'mail' => 'dustbin@prayvine.org',
+        ))
+        ->condition('mail', $row->mail, '=')
+        ->condition('nid', $row->nid, '=')
+        ->condition('inviteId', $row->inviteId, '!=')
+        ->execute();
+
+      $bin_arr[$row->nid][$row->mail] = TRUE;
+    }
+  }
+
+  return t('Successfully removes duplicate email invites.');
+}
+
+/**
+ * Add the prayer topic's latest post value.
+ */
+function prayvine_custom_update_7009() {
+  $rst = db_query("SELECT nid FROM {node} WHERE type = 'topic'");
+
+  foreach ($rst as $row) {
+    $topic = node_load($row->nid);
+
+    // Check the latest topic activity.
+    $latest_post = _prayvine_get_last_post_date($topic->nid);
+    if ($latest_post == 0) {
+      $latest_post = $topic->created;
+    }
+    elseif ($topic->created > $latest_post) {
+      $latest_post = $topic->created;
+    }
+    $latest_post = date('Y-m-d H:i:s', $latest_post);
+
+    $topic->field_topic_latest_update[LANGUAGE_NONE][0]['value'] = $latest_post;
+    node_save($topic);
+  }
+
+  return t('Successfully added the topic latest post date.');
+}
+
+/**
+ * Enable Smiley module.
+ */
+function prayvine_custom_update_7010() {
+  module_enable(array('smiley'));
+  cache_clear_all();
+
+  return t('Successfully enabled Smiley module.');
+}
+

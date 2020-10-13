@@ -1,0 +1,4 @@
+name = Prayvine Custom
+description = Custom code for Prayvine, etc
+package = Prayvine Custom
+core = 7.x

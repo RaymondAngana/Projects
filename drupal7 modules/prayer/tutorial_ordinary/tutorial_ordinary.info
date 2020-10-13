@@ -1,0 +1,10 @@
+;$Id$
+
+
+
+name = Prayvine onboard tutorial ordinary
+description = Prayvine onboard tutorial module - used to introduce prayvine to new users.
+core = 7.x
+package = Prayvine
+dependencies[] = ctools
+dependencies[] = views

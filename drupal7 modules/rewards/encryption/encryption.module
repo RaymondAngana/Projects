@@ -1,0 +1,534 @@
+<?php
+/**
+ * @file
+ * Provides functionality for the propco encryption.
+ *
+ */
+/**
+ * Implementation of hook_menu().
+ */
+function propco_encryption_menu() {
+  $items['entityreference/autocomplete/tags/field_redemption_pin/node/redemption/%'] = array(
+      'title' => 'Custom autocomplete node reference',
+      'page callback' => '_propco_encryption_node_autocomplete',
+      'page arguments' => array(2),
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+  * Implements hook_node_presave().
+  */
+function propco_encryption_node_presave($node) {
+  if ($node->type == 'redemption' && $node->op == 'Save') {
+    $encrypted_fn = _propco_encryption_pin_encrypt_decrypt($node->field_first_name['und'][0]['value'], 'encrypt');
+    $encrypted_ln = _propco_encryption_pin_encrypt_decrypt($node->field_last_name['und'][0]['value'], 'encrypt');
+    $encrypted_address1 = _propco_encryption_pin_encrypt_decrypt($node->field_address['und'][0]['thoroughfare'], 'encrypt');
+    $encrypted_address2 = _propco_encryption_pin_encrypt_decrypt($node->field_address['und'][0]['premise'], 'encrypt');
+    $encrypted_address3 = _propco_encryption_pin_encrypt_decrypt($node->field_address['und'][0]['locality'], 'encrypt');
+    $encrypted_address4 = _propco_encryption_pin_encrypt_decrypt($node->field_address['und'][0]['administrative_area'], 'encrypt');
+    $encrypted_address5 = _propco_encryption_pin_encrypt_decrypt($node->field_address['und'][0]['postal_code'], 'encrypt');
+    $encrypted_phone = _propco_encryption_pin_encrypt_decrypt($node->field_phone['und'][0]['value'], 'encrypt');
+    $encrypted_email = _propco_encryption_pin_encrypt_decrypt($node->field_email['und'][0]['email'], 'encrypt');
+    $node->field_first_name['und'][0]['value'] = $encrypted_fn;
+    $node->field_last_name['und'][0]['value'] = $encrypted_ln;
+    $node->field_address['und'][0]['thoroughfare'] = $encrypted_address1;
+    $node->field_address['und'][0]['premise'] = $encrypted_address2;
+    $node->field_address['und'][0]['locality'] = $encrypted_address3;
+    $node->field_address['und'][0]['administrative_area'] = $encrypted_address4;
+    $node->field_address['und'][0]['postal_code'] = $encrypted_address5;
+    $node->field_email['und'][0]['email'] = $encrypted_email;
+  } elseif ($node->type == 'pin' && $node->op == 'Save' && $node->is_new == 1) {
+    $title = $node->title;
+    $path_alias = _propco_encryption_load_path($node->nid, $title);
+    if ($path_alias['save'] == 1) {
+      $path = array('pid' => $path_alias['pid'], 'source' => "node/$node->nid", 'alias' => "content/$title");
+      path_save($path);
+    }
+  } elseif ($node->type == 'pin' && $node->op == 'Save' && $node->is_new <> 1) {
+    $title = $node->title;
+    $encrypted_pin = _propco_encryption_pin_encrypt_decrypt($title, 'encrypt');
+    $node->title = $encrypted_pin;
+    $path_alias = _propco_encryption_load_path($node->nid, $title);
+    if ($path_alias['save'] == 1) {
+      $path = array('pid' => $path_alias['pid'], 'source' => "node/$node->nid", 'alias' => "content/$title");
+      path_save($path);
+    }
+  }
+}
+
+/**
+  * Implements hook_views_pre_render().
+  */
+function propco_encryption_views_pre_render(&$view) {
+  if ($view->name == 'redemption_management') {
+    foreach($view->result as $row) {
+      $text = $row->field_field_redemption_pin[0]['rendered']['#label'];
+      $text = _propco_encryption_pin_encrypt_decrypt($text, 'decrypt');
+      $row->field_field_redemption_pin[0]['rendered']['#label'] = $text;
+
+      $raw_data = _propco_encryption_load_raw_data_from_table($row->nid, 'redemption', 'field_data_field_first_name', 'field_first_name_value');
+      $text = _propco_encryption_pin_encrypt_decrypt($raw_data, 'decrypt');
+      $row->field_field_first_name[0]['rendered']['#markup'] = $text;
+
+      $raw_data = _propco_encryption_load_raw_data_from_table($row->nid, 'redemption', 'field_data_field_last_name', 'field_last_name_value');
+      $text = _propco_encryption_pin_encrypt_decrypt($raw_data, 'decrypt');
+      $row->field_field_last_name[0]['rendered']['#markup'] = $text;
+
+      $raw_data = _propco_encryption_load_raw_data_from_table($row->nid, 'redemption', 'field_data_field_email', 'field_email_email');
+      $text_converted = _propco_encryption_pin_encrypt_decrypt($raw_data, 'decrypt');
+      $row->field_field_email[0]['rendered']['#markup'] = '<a href="mailto:' . $text_converted . '">' . $text_converted . '</a>';
+
+      $text = $row->field_data_field_address_field_address_thoroughfare;
+      $text = _propco_encryption_pin_encrypt_decrypt($text, 'decrypt');
+      $row->field_data_field_address_field_address_thoroughfare = $text;
+
+      $text = $row->field_data_field_address_field_address_premise;
+      $text = _propco_encryption_pin_encrypt_decrypt($text, 'decrypt');
+      $row->field_data_field_address_field_address_premise = $text;
+
+      $text = $row->field_data_field_address_field_address_locality;
+      $text = _propco_encryption_pin_encrypt_decrypt($text, 'decrypt');
+      $row->field_data_field_address_field_address_locality = $text;
+
+      $text = $row->field_data_field_address_field_address_administrative_area;
+      $text = _propco_encryption_pin_encrypt_decrypt($text, 'decrypt');
+      $row->field_data_field_address_field_address_administrative_area = $text;
+
+      $text = $row->field_data_field_address_field_address_postal_code;
+      $text = _propco_encryption_pin_encrypt_decrypt($text, 'decrypt');
+      $row->field_data_field_address_field_address_postal_code = $text;
+    }
+  } elseif ($view->name == 'redemption_report') {
+    foreach ($view->result as $index => $row) {
+      if ($row->_field_data['nid']['entity']->type == 'redemption') {
+        $redemption_pin = $row->field_field_redemption_pin[0]['rendered']['#markup'];
+        $decrypted_text = _propco_encryption_pin_encrypt_decrypt($redemption_pin, 'decrypt');
+        $row->field_field_redemption_pin[0]['rendered']['#markup'] = $decrypted_text;
+
+        $f_name = $row->field_field_first_name[0]['rendered']['#markup'];
+        $decrypted_text = _propco_encryption_pin_encrypt_decrypt($f_name, 'decrypt');
+        $row->field_field_first_name[0]['rendered']['#markup'] = $decrypted_text;
+
+        $l_name = $row->field_field_last_name[0]['rendered']['#markup'];
+        $decrypted_text = _propco_encryption_pin_encrypt_decrypt($l_name, 'decrypt');
+        $row->field_field_last_name[0]['rendered']['#markup'] = $decrypted_text;
+
+        $email = $row->field_field_email[0]['raw']['email'];
+        $decrypted_text = _propco_encryption_pin_encrypt_decrypt($email, 'decrypt');
+        $old_markup = $row->field_field_email[0]['rendered']['#markup'];
+        $row->field_field_email[0]['rendered']['#markup'] = str_replace($email, $decrypted_text, $old_markup);
+
+        $addr1 = $row->field_data_field_address_field_address_thoroughfare;
+        $decrypted_text = _propco_encryption_pin_encrypt_decrypt($addr1, 'decrypt');
+        $row->field_data_field_address_field_address_thoroughfare = $decrypted_text;
+
+        $addr2 = $row->field_data_field_address_field_address_premise;
+        $decrypted_text = _propco_encryption_pin_encrypt_decrypt($addr2, 'decrypt');
+        $row->field_data_field_address_field_address_premise = $decrypted_text;
+
+        $city = $row->field_data_field_address_field_address_locality;
+        $decrypted_text = _propco_encryption_pin_encrypt_decrypt($city, 'decrypt');
+        $row->field_data_field_address_field_address_locality = $decrypted_text;
+
+        $state = $row->field_data_field_address_field_address_administrative_area;
+        $decrypted_text = _propco_encryption_pin_encrypt_decrypt($state, 'decrypt');
+        $row->field_data_field_address_field_address_administrative_area = $decrypted_text;
+
+        $postal_code = $row->field_data_field_address_field_address_postal_code;
+        $decrypted_text = _propco_encryption_pin_encrypt_decrypt($postal_code, 'decrypt');
+        $row->field_data_field_address_field_address_postal_code = $decrypted_text;
+      }
+    }
+  }
+  elseif ($view->name == 'pins' || $view->name == 'pin_management') {
+    if (isset($_SESSION['messages']['status'][1])) {
+      unset($_SESSION['messages']['status'][1]);
+    }
+    foreach ($view->result as $index => $row) {
+      if ($row->_field_data['nid']['entity']->type == 'pin') {
+        $title = $row->node_title;
+        $decrypted_text = _propco_encryption_pin_encrypt_decrypt($title, 'decrypt');
+        $view->result[$index]->node_title = $decrypted_text;
+
+        $redemption = $row->field_field_redemption[0]['rendered']['#label'];
+        if (isset($redemption)) {
+          $view->result[$index]->field_field_redemption[0]['rendered']['#label'] = 'Redemption (' . $decrypted_text . ')';
+        }
+      }
+    }
+  }
+}
+
+/**
+  * Implements hook_form_alter().
+  */
+function propco_encryption_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'redemption_node_form' ) {
+    $redemption_pin = $form["field_redemption_pin"]['und']['#default_value'];
+    $redemption_pin_explode = explode(" ", $redemption_pin);
+    if (count($redemption_pin_explode) > 1) {
+      $text_decrypted_redemption = _propco_encryption_pin_encrypt_decrypt($redemption_pin_explode[0], 'decrypt');
+      $form["field_redemption_pin"]['und']["#default_value"] = $text_decrypted_redemption . " " . $redemption_pin_explode[1];
+    }
+
+    $text = $form["field_first_name"]['und'][0]["value"]["#default_value"];
+    $text_fn = _propco_encryption_pin_encrypt_decrypt($text, 'decrypt');
+    $form["field_first_name"]['und'][0]["value"]["#default_value"] = $text_fn;
+
+    $text = $form["field_last_name"]['und'][0]["value"]["#default_value"];
+    $text_ln = _propco_encryption_pin_encrypt_decrypt($text, 'decrypt');
+    $form["field_last_name"]['und'][0]["value"]["#default_value"] = $text_ln;
+
+    $text = $form["field_email"]['und'][0]["email"]["#default_value"];
+    $text_email = _propco_encryption_pin_encrypt_decrypt($text, 'decrypt');
+    $form["field_email"]['und'][0]["email"]["#default_value"] = $text_email;
+
+    $text = $form["field_address"]['und'][0]["#address"]["thoroughfare"];
+    $text_address1 = _propco_encryption_pin_encrypt_decrypt($text, 'decrypt');
+    $form["field_address"]['und'][0]["#address"]["thoroughfare"] = $text_address1;
+
+    $text = $form["field_address"]['und'][0]["#address"]["premise"];
+    $text_address2 = _propco_encryption_pin_encrypt_decrypt($text, 'decrypt');
+    $form["field_address"]['und'][0]["#address"]["premise"] = $text_address2;
+
+    $text = $form["field_address"]['und'][0]["#address"]["locality"];
+    $text_address3 = _propco_encryption_pin_encrypt_decrypt($text, 'decrypt');
+    $form["field_address"]['und'][0]["#address"]["locality"] = $text_address3;
+
+    $text = $form["field_address"]['und'][0]["#address"]["administrative_area"];
+    $text_address4 = _propco_encryption_pin_encrypt_decrypt($text, 'decrypt');
+    $form["field_address"]['und'][0]["#address"]["administrative_area"] = $text_address4;
+
+    $text = $form["field_address"]['und'][0]["#address"]["postal_code"];
+    $text_address5 = _propco_encryption_pin_encrypt_decrypt($text, 'decrypt');
+    $form["field_address"]['und'][0]["#address"]["postal_code"] = $text_address5;
+
+    $redemption_pin = $form['field_redemption_pin']['und']['#default_value'];
+    $pin_only = explode(' (', $redemption_pin);
+    $new_title = rtrim($pin_only[0], ' (');
+    $form['title']['#default_value'] = 'Redemption (' . $new_title . ')';
+    drupal_set_title(t('Edit Redemption (') . $new_title . ')');
+
+  }
+  elseif ($form_id == "pin_node_form") {
+    // Edit Pin page.
+    if ($form["nid"]["#value"]) {
+      $nid = $form["nid"]["#value"];
+      $node = _propco_encryption_load_raw_data($nid, 'pin');
+      $decrypted_pin = _propco_encryption_pin_encrypt_decrypt($node['title'], 'decrypt');
+      $node_alias = drupal_get_path_alias('node/' . $nid);
+      $form["path"]["alias"]["#default_value"] = $node_alias;
+      $form["#node"]->title = $decrypted_pin;
+      $form["title"]["#default_value"] = $decrypted_pin;
+      $form['field_redemption']['und']['0']['target_id']['#default_value'] = "Redemption ($decrypted_pin) ($nid)";
+      drupal_set_title(t('Edit Pin ') . $decrypted_pin);
+    }
+
+    // Clone Pin Page.
+    if (strpos($form['title']['#default_value'], 'Clone of') !== FALSE) {
+      $nid = $form['clone_from_original_nid']['#value'];
+      $get_pin = explode('Clone of ', $form['title']['#default_value']);
+      $decrypted_pin = _propco_encryption_pin_encrypt_decrypt($get_pin[1], 'decrypt');
+      $new_title = "Clone of ($decrypted_pin)";
+      $form['title']['#default_value'] = $new_title;
+      $form['field_redemption']['und']['0']['target_id']['#default_value'] = "Redemption ($decrypted_pin) ($nid)";
+      drupal_set_title(t($new_title));
+    }
+  }
+}
+
+/**
+  * Implements hook_node_view().
+  */
+function propco_encryption_node_view($node, $view_mode, $langcode) {
+  if ($node->type == 'redemption') {
+    $text_fn = $node->field_first_name['und'][0]['value'];
+    $decrypted_text = _propco_encryption_pin_encrypt_decrypt($text_fn, 'decrypt');
+    $node->content['field_first_name'][0]['#markup'] = $decrypted_text;
+
+    $text_ln = $node->field_last_name['und'][0]['value'];
+    $decrypted_text = _propco_encryption_pin_encrypt_decrypt($text_ln, 'decrypt');
+    $node->content['field_last_name'][0]['#markup'] = $decrypted_text;
+
+    $text_email = $node->field_email['und'][0]['email'];
+    $decrypted_text = _propco_encryption_pin_encrypt_decrypt($text_email, 'decrypt');
+    $node->content['field_email'][0]['#markup'] = $decrypted_text;
+
+    $text_address1 = $node->field_address['und'][0]['thoroughfare'];
+    $decrypted_text = _propco_encryption_pin_encrypt_decrypt($text_address1, 'decrypt');
+    $node->field_address['und'][0]['thoroughfare'] = $decrypted_text;
+
+    $text_address2 = $node->field_address['und'][0]['premise'];
+    $decrypted_text = _propco_encryption_pin_encrypt_decrypt($text_address2, 'decrypt');
+    $node->field_address['und'][0]['premise'] = $decrypted_text;
+
+    $text_address3 = $node->field_address['und'][0]['locality'];
+    $decrypted_text = _propco_encryption_pin_encrypt_decrypt($text_address3, 'decrypt');
+    $node->field_address['und'][0]['locality'] = $decrypted_text;
+
+    $text_address4 = $node->field_address['und'][0]['administrative_area'];
+    $decrypted_text = _propco_encryption_pin_encrypt_decrypt($text_address4, 'decrypt');
+    $node->field_address['und'][0]['administrative_area'] = $decrypted_text;
+
+    $text_address5 = $node->field_address['und'][0]['postal_code'];
+    $decrypted_text = _propco_encryption_pin_encrypt_decrypt($text_address5, 'decrypt');
+    $node->field_address['und'][0]['postal_code'] = $decrypted_text;
+
+    $get_pin = explode('Redemption (', rtrim($node->title, ')'));
+    $decrypted_pin = _propco_encryption_pin_encrypt_decrypt($get_pin[1], 'decrypt');
+    $new_title = "Redemption ($decrypted_pin)";
+    $node->title = $new_title;
+    drupal_set_title($new_title);
+
+  } elseif ($node->type == 'pin') {
+    if (isset($_SESSION['messages']['status'][1])) {
+      unset($_SESSION['messages']['status'][1]);
+    }
+    $decrypted_text = _propco_encryption_pin_encrypt_decrypt($node->title, 'decrypt');
+    $node->title = $decrypted_text;
+    drupal_set_title($decrypted_text);
+  }
+}
+
+/**
+  * Implements hook_form_node_admin_content_alter().
+  */
+function propco_encryption_form_node_admin_content_alter(&$form, &$form_state, $form_id) {
+  foreach ($form['admin']['nodes']['#options'] as $index => $row) {
+    $row_entity = $row['title']['data']['#options']['entity'];
+    if (in_array($row_entity->type, array('pin', 'redemption'))) {
+      if (isset($_SESSION['messages']['status'][1])) {
+        unset($_SESSION['messages']['status'][1]);
+      }
+      $title = $row['title']['data']['#title'];
+
+      if ($row_entity->type == 'redemption') {
+        $get_pin = explode('Redemption (', rtrim($title, ')'));
+        $title = $get_pin[1];
+        $redemption = true;
+      }
+
+      $title_decrypted = _propco_encryption_pin_encrypt_decrypt($title, 'decrypt');
+      $new_title = (!$redemption) ?  $title_decrypted : "Redemption($title_decrypted)";
+      $form['admin']['nodes']['#options'][$index]['title']['data']['#title'] = $new_title;
+    }
+  }
+}
+
+/**
+ * Implements hook_views_query_alter().
+ */
+function propco_encryption_views_query_alter(&$view, &$query) {
+  if ($view->name == 'pins') {
+    $where_clause = $view->query->where[1]['conditions'];
+
+    foreach ($where_clause as $key => $value) {
+      if ($value['field'] == 'node.title') {
+        $old_value = str_replace('%', '', $view->query->where[1]['conditions'][$key]['value']);
+        $new_value = _propco_encryption_pin_encrypt_decrypt($old_value, 'encrypt');
+
+        $view->query->where[1]['conditions'][$key]['value'] = '%' . $new_value . '%';
+      }
+    }
+  }
+}
+
+/**
+  * Implements hook_form_node_delete_confirm_alter().
+  */
+function propco_encryption_form_node_delete_confirm_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'node_delete_confirm') {
+    if ($form['#node']->type == 'pin') {
+      $title = $form['#node']->title;
+      $decrypted_text = _propco_encryption_pin_encrypt_decrypt($title, 'decrypt');
+      drupal_set_title('Are you sure you want to delete ' . $decrypted_text . '?');
+    }
+  }
+}
+
+/**
+  * Implements hook_node_update().
+  */
+function propco_encryption_node_update($node) {
+  if ($node->type == 'pin' && $node->op == 'Save' && $node->is_new <> 1) {
+    $title = _propco_encryption_pin_encrypt_decrypt($node->title, 'decrypt');
+    $path_alias = _propco_encryption_load_path($node->nid, $title);
+    if ($path_alias['save'] == 1) {
+      $path = array('pid' => $path_alias['pid'], 'source' => "node/$node->nid", 'alias' => "content/$title");
+      path_save($path);
+    }
+    drupal_set_message('Pin ' . $title . ' has been updated.');
+  }
+}
+
+/**
+  * Implements hook_node_insert().
+  */
+function propco_encryption_node_insert($node) {
+  if ($node->type == 'pin' && $node->op == 'Save') {
+    $title == $node->title;
+    $path_alias = _propco_encryption_load_path($node->nid, $title);
+    if ($path_alias['save'] == 1) {
+      if (!empty($title)) {
+        $path = array('pid' => $path_alias['pid'], 'source' => "node/$node->nid", 'alias' => "content/$title");
+        path_save($path);
+      }
+    }
+  }
+}
+
+/**
+  * Implements hook_node_update().
+  */
+function propco_encryption_node_delete($node) {
+  if ($node->type == 'pin') {
+    $title = _propco_encryption_pin_encrypt_decrypt($node->title, 'decrypt');
+    drupal_set_message('Pin ' . $title . ' has been deleted.');
+  }
+}
+
+/**
+ * Implements hook_mail_alter().
+ */
+function propco_encryption_mail_alter(&$message) {
+  if (strpos($message['key'], 'rules_process_customer_redemption')) {
+    $message['to'] = _propco_encryption_pin_encrypt_decrypt($message['to'], 'decrypt');
+  }
+}
+
+/**
+ * Custom autocomplete decrypt redemption pin function.
+ */
+function _propco_encryption_node_autocomplete($node_type, $string = "") {
+  $key = _propco_encryption_get_key();
+  $selected_redemption_pin = array();
+
+  $query = db_select('node', 'n');
+  $query->fields('n', array('nid', 'type'));
+  $query->addExpression("AES_DECRYPT(UNHEX(n.title), '" . $key . "')", "title");
+  $query->condition('n.type', 'pin', "=");
+  $query->where("AES_DECRYPT(UNHEX(n.title), '" . $key . "') LIKE '%" . $string . "%'");
+  $result = $query->execute()->fetchAll();
+
+  foreach($result as $row) {
+    $new_index = $row->title . ' (' . $row->nid . ')';
+    $selected_redemption_pin[$new_index] = '<div class="reference-autocomplete">' . $row->title . '</div>';
+  }
+
+  drupal_json_output($selected_redemption_pin);
+}
+
+/**
+  * Calculate AES Key.
+  */
+function _mysql_aes_key($key) {
+  $new_key = str_repeat(chr(0), 16);
+  for($i=0,$len=strlen($key);$i<$len;$i++)
+  {
+    $new_key[$i%16] = $new_key[$i%16] ^ $key[$i];
+  }
+  return $new_key;
+}
+
+/**
+  * Encrypt and Decrypt PINS function.
+  */
+function _propco_encryption_pin_encrypt_decrypt($text, $op) {
+  $propco_rewards_encrypted_variable_key = _propco_encryption_get_key();
+  $key = _mysql_aes_key($propco_rewards_encrypted_variable_key);
+
+  if (empty($text)) {
+    return '';
+  }
+
+  if ($op == 'decrypt') {
+    $result = db_query("SELECT
+                          AES_DECRYPT(
+                            UNHEX(:en_text), :key
+                          )
+                          AS title",
+                            array(
+                              ':en_text' => $text,
+                              ':key' => $key
+                            )
+                      );
+    $text = '';
+    foreach ($result as $row) {
+      $text = $row->title;
+    }
+
+  } elseif ($op == 'encrypt') {
+    $result = db_query("SELECT
+                          HEX(
+                            AES_ENCRYPT(:en_text, :key)
+                          )
+                          AS title",
+                            array(
+                              ':en_text' => $text,
+                              ':key' => $key
+                            )
+                      );
+    $text = '';
+    foreach ($result as $row) {
+      $text = $row->title;
+    }
+  }
+
+  return $text;
+}
+
+/**
+ * Load the pid url_alias.
+ */
+function _propco_encryption_load_path($nid, $title) {
+  $alias = array();
+  $results = db_select('url_alias', 'n')
+    ->condition('source', 'node/' . $nid, '=')
+    ->fields('n',array('pid', 'alias'))
+    ->execute()
+    ->fetchAssoc();
+  $alias['save'] = 1;
+  if ($results['alias'] == 'content/' . $title) {
+    $alias['save'] = 0;
+  }
+  $alias['pid'] = $results['pid'];
+
+  return $alias;
+}
+
+/**
+ * Load the raw data of node.
+ */
+function _propco_encryption_load_raw_data($nid, $type) {
+  $result = db_select('node', 'n')
+      ->fields('n')
+      ->condition('nid', $nid,'=')
+      ->condition('type', $type,'=')
+      ->execute()
+      ->fetchAssoc();
+
+  return $result;
+}
+
+/**
+ * Load the raw data from table.
+ */
+function _propco_encryption_load_raw_data_from_table($nid, $type, $table, $field) {
+  $result = db_select($table, 'n')
+      ->fields('n')
+      ->condition('entity_id', $nid,'=')
+      ->condition('bundle', $type,'=')
+      ->execute()
+      ->fetchAssoc();
+
+  return $result[$field];
+}
+
+function _propco_encryption_get_key() {
+  $default_key = 'u1xnyr5zFzGj92gt';
+  return variable_get('propco_rewards_encrypted_variable_key', $default_key);
+}

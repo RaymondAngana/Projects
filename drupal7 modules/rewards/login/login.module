@@ -1,0 +1,185 @@
+<?php
+/**
+ * @file
+ * Provides functionality for the propco rewards pin auth.
+ */
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ *
+ * This lets ctools know to scan our module for a content_type plugin file
+ * Detailed docks in ctools/ctools.api.php.
+ */
+function propco_login_ctools_plugin_directory($owner, $plugin_type) {
+  // We'll be nice and limit scandir() calls.
+  if ($owner == 'ctools' && $plugin_type == 'content_types') {
+    return 'plugins/content_types';
+  }
+}
+
+/**
+ * Set user pin auth.
+ */
+function propco_login_set_pin_auth($pin_code, $pin_id, $program_id, $pin_status) {
+  $pin_auth = array(
+    'pin_code' => $pin_code,
+    'pin_id' => $pin_id,
+    'program_id' => $program_id,
+    'redeemed' => $pin_status,
+  );
+
+  // Clear any pre-existing auth.
+  session_cache_set('propco_rewards_user_pin_auth', NULL);
+  session_cache_set('propco_rewards_user_pin_auth', $pin_auth);
+}
+
+/**
+ * Invalidate user pin auth.
+ */
+function propco_login_invalidate_pin_auth() {
+  session_cache_set('propco_rewards_user_pin_auth', NULL);
+}
+
+/**
+ * Defines pin login form for customers.
+ */
+function propco_login_pin_login_form($form, $form_state) {
+  $form = array();
+  $pin = $_GET['pin'];
+  $pin = isset($pin) ? $pin : '';
+
+  $form['pincode'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Enter your pin to claim your award.'),
+    '#default_value' => $pin,
+    '#size' => 15,
+    '#required' => TRUE,
+    '#filters' => array('trim', 'strip_tags'),
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('CLAIM MY AWARD'),
+    '#attributes' => array(
+      'class' => array('button--full'),
+    ),
+  );
+
+  return $form;
+}
+
+/**
+ * Form pin login validation.
+ */
+function propco_login_pin_login_form_validate(&$form, &$form_state) {
+  $pin_code = ltrim($form_state['values']['pincode']);
+
+  $encrypted_pin = _propco_encryption_pin_encrypt_decrypt($pin_code, 'encrypt');
+  $pin = propco_login_pin_get($encrypted_pin);
+
+  if (!empty($pin)) {
+    $pin_wrapper = entity_metadata_wrapper('node', $pin);
+    $program_wrapper = $pin_wrapper->field_program->value();
+    $pin_redemption = $pin_wrapper->field_redemption->value();
+    if (!empty($pin_redemption)) {
+      // Pin has been redeemed, user will be redirected to review.
+      $pin_state = TRUE;
+      $program_state = TRUE;
+      $form_state['values']['pin_redeemed'] = TRUE;
+      $form['redemption_id'] = $pin_redemption->nid;
+    }
+    else {
+      $form_state['values']['pin_redeemed'] = FALSE;
+      $pin_status = $pin_wrapper->field_pin_status->value();
+
+      // Validate pin. Disregard pin date if status is expired or closed.
+      if ($pin_status == 'expired' || $pin_status == 'closed') {
+        form_set_error('pincode', propco_login_pin_message($pin_wrapper));
+      }
+
+      // Validate pin start, expiration and status.
+      if (!propco_rewards_validate_pin_dates($pin)) {
+        form_set_error('pincode', propco_login_pin_message($pin_wrapper));
+      }
+      // Validate program start, expiration and status.
+      if (!propco_rewards_validate_program_dates($pin_wrapper->field_program->value())) {
+        form_set_error('pincode', 'Your program is not yet open for redemption');
+      }
+    }
+    $form_state['values']['pin_id'] = $pin_wrapper->nid->value();
+    $form_state['values']['program_id'] = $program_wrapper->nid;
+  }
+  else {
+    form_set_error('rewardpin', t('%rewardpin is not a valid pin.', array('%rewardpin' => $pin_code)));
+  }
+}
+
+/**
+ * Form pin login submit handler.
+ */
+function propco_login_pin_login_form_submit(&$form, &$form_state) {
+  $pin_redeemed = $form_state['values']['pin_redeemed'];
+  $program_id = $form_state['values']['program_id'];
+
+  propco_login_set_pin_auth($form_state['values']['pincode'], $form_state['values']['pin_id'], $program_id, $pin_redeemed);
+  if ($pin_redeemed) {
+    drupal_goto('program/' . $program_id . '/review/' . $form['redemption_id']);
+  }
+  else {
+    drupal_goto('program/' . $program_id . '/selection');
+  }
+}
+
+/**
+ * Fetch node by pincode.
+ */
+function propco_login_pin_get($pinvalue) {
+  $query = new EntityFieldQuery();
+  $result = $query->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', 'pin')
+    ->propertyCondition('status', 1)
+    ->propertyCondition('title', $pinvalue)
+    ->execute();
+
+  if (!empty($result['node'])) {
+    $pin_nids = array_keys($result['node']);
+    $pin_items = entity_load('node', $pin_nids);
+    foreach ($pin_items as $pin) {
+      // Return the first pin.
+      return $pin;
+    }
+  }
+  else {
+    return NULL;
+  }
+
+}
+
+/**
+ * Returns the message per pin status.
+ */
+function propco_login_pin_message($pin) {
+  $pin_status = $pin->field_pin_status->value();
+  $pin_code = _propco_encryption_pin_encrypt_decrypt($pin->title->value(), 'decrypt');
+
+  $result = array();
+
+  switch ($pin_status) {
+    case 'pending':
+      $result = t('%rewardpin is not yet open for redemption.', array('%rewardpin' => $pin_code));
+      break;
+
+    case 'expired':
+      $result = t('%rewardpin has expired.', array('%rewardpin' => $pin_code));
+      break;
+
+    case 'closed':
+        $result = t('%rewardpin is not a valid pin.', array('%rewardpin' => $pin_code));
+      break;
+
+    default:
+      $result = t('%rewardpin is not a valid pin.', array('%rewardpin' => $pin_code));
+  }
+
+  return $result;
+}

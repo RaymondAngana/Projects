@@ -1,0 +1,13 @@
+<?php
+/**
+ * Implements hook_install()
+ */
+
+function propco_login_install(){
+	//setup captcha on the form
+	 module_load_include('inc', 'captcha');
+	 //set the captcha settings here since this isn't exportable
+	 captcha_set_form_id_setting('propco_login_pin_login_form' , 'image_captcha/Image');
+
+}
+

@@ -1,0 +1,28 @@
+<?php
+/**
+*@file 
+* functionality for propco pin status updates
+*
+*/
+/**
+ * Implements hook_menu()
+ */ 
+function propco_pin_status_menu() {
+  $items['admin/reports/pin_status'] = array(
+    'title'            => 'Pin Code Update Status',
+    'type'             => MENU_NORMAL_ITEM,
+    'description'      => 'Pin Code Status Update CSV Report.',
+    'page callback'   => 'propco_pin_status_csv_download',
+    'access arguments' => array('access administration pages'),
+  );
+  return $items;
+}
+
+/**
+ * Page callback function to download Pin Code Status update CSV report
+ */
+function propco_pin_status_csv_download() {
+  $file = drupal_get_path('module', 'propco_pin_status') . '/csv/pin_code_status.csv';
+
+  drupal_goto($file);
+}

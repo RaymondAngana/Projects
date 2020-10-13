@@ -1,0 +1,7 @@
+name = Propco Login
+description = module providing "pin" authentication for awards selection
+package = "Propco Rewards"
+core = 7.x
+dependencies[] = session_cache
+dependencies[] = entity
+dependencies[] = ctools

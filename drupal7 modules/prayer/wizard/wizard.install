@@ -1,0 +1,8 @@
+<?php
+
+/**
+ * implementation hook install
+ */
+function prayvine_wizard_schema() {
+	
+}

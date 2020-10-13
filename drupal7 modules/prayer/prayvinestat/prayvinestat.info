@@ -1,0 +1,6 @@
+name = PrayvineStat
+description = Record prayvine statistics informations
+core = 7.x
+package = Prayvine
+version =7.x-1.0
+

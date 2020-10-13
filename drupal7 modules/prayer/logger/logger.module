@@ -1,0 +1,446 @@
+<?php
+/**
+ * @file - this module is used to record logs each time when log is created
+ */
+
+
+/**
+ * implement hook_menu
+ * @return array
+ */
+function prayvine_logger_menu() {
+  $items['content_data/%/%/%'] = array
+      ('page callback' => 'prayvine_logger_data',
+      'page arguments' => array(1,2,3),
+      'access arguments' => array('access content'),
+      'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * get content data for tooltip
+ * @param type $content_id - this is content id
+ * @param type $topic_id - topic id
+ * @param tyep $node - is it node or comment true/false
+ */
+function prayvine_logger_data($content_id,$topic_id,$node) {
+  global $user;
+  $has_permission = false;
+  if ($node) {//prayer_request
+     //get all sub prayers, sub amens, sub silent prayers
+    $query = db_select('field_data_field_prayer_id','s')->fields('s',array('entity_id'))
+      ->condition('field_prayer_id_target_id',$content_id);
+    $node = node_load($content_id);
+    if ($user->uid == $node->uid) {
+      $has_permission = true;
+    }
+  } else {
+     //get all sub prayers, sub amens, sub silent prayers
+    $query = db_select('field_data_field_comment_id','s')->fields('s',array('entity_id'))
+      ->condition('field_comment_id_target_id',$content_id);
+    $comment = comment_load($content_id);
+    if ($user->uid == $comment->uid) {
+      $has_permission = true;
+    }
+  }
+  $topic = node_load($topic_id);
+  $result = $query->execute();
+  $amens[$content_id] = prayvine_logger_get_amens($content_id);
+  $prayer_silently[$content_id] = prayvine_logger_get_pray_silently($content_id);
+  while ($record = $result->fetchAssoc()) {//get prayers
+    //get prayers authors
+    $node_id = $record['entity_id'];
+    $query_node = db_select('node','n')->fields('n',array('uid'))
+      ->condition('nid',$node_id);
+    $user_id = $query_node->execute()->fetchField();
+    $prayers[$user_id] = $user_id;
+    //get amens
+    $amens[$node_id] = prayvine_logger_get_amens($node_id);
+    //get pray silently
+    $prayer_silently[$node_id] = prayvine_logger_get_pray_silently($node_id);
+  }
+  //check invite permission
+
+  if (!empty($topic->field_settings['und'][0])){
+    $settings_text = $topic->field_settings['und'][0]['value'];
+    $settings = unserialize($settings_text);
+    if (!empty($settings['invite_permission'][$user->uid]) || !empty($settings['ministry_communicator'][$user->uid])){
+      $has_permission = true;
+    }
+  }
+
+  if ($user->uid == $topic->uid) {
+      $has_permission = true;
+  }
+  if (!empty($topic->field_ministry['und'][0]['value'])) {//ministry
+    $prayers_text = t('Written prayers:').' ';
+    $count = 0;
+
+    foreach ($prayers as $author) {
+      if (!empty($author)) {
+        $count++;
+        if ($has_permission) {
+          $prayers_text .= prayvine_get_name($author).', ';
+        }
+
+      }
+    }
+    if ($count>0) {
+      $prayers_text = substr($prayers_text, 0,  strlen($prayers_text)-2).'. ';
+    }else {
+      $prayers_text = '';
+    }
+    $count = 0;
+    //get amens
+    $amens_text = t('Amens:').' ';
+    foreach ($amens as $nodes) {
+      foreach ($nodes as $amen) {
+        if (!empty($amen)) {
+          $count++;
+          $amens_text .= prayvine_get_name($amen).', ';
+        }
+      }
+    }
+    if ($count > 0) {
+      $amens_text = substr($amens_text, 0, strlen($amens_text)-2).'. ';
+    }else{
+      $amens_text = '';
+    }
+     $count = 0;
+    //get pray_silently
+    $prayer_silently_text = t('Silent prayers:').' ';
+    foreach ($prayer_silently as $nodes) {
+      foreach ($nodes as $silent) {
+        if (!empty($silent)) {
+           $count++;
+           if ($has_permission){
+             $prayer_silently_text .= prayvine_get_name($silent).', ';
+           }
+
+        }
+      }
+    }
+    if ($count > 0) {
+      $prayer_silently_text = substr($prayer_silently_text, 0, strlen($prayer_silently_text)-2).'. ';
+    } else {
+      $prayer_silently_text = '';
+    }
+
+  } else {//non ministry
+    $prayers_text = t('Written prayers:').' ';
+    $prayers_count = 0;
+    foreach ($prayers as $author) {
+      if (!empty($author)) {
+        $prayers_count++;
+        if ($has_permission) {
+          $prayers_text .= prayvine_get_name($author).', ';
+        }
+      }
+    }
+    if ($prayers_count == 0) {
+      $prayers_text = '';
+    } else {
+      $prayers_text = $prayers_text.$prayers_count;
+    }
+
+    //get amens
+    $amens_text = t('Amens:').' ';
+    $amens_count = 0;
+    foreach ($amens as $nodes) {
+      foreach ($nodes as $amen) {
+        if (!empty($amen)) {
+          $amens_count++;
+        }
+      }
+    }
+    if ($amens_count == 0) {
+
+      $amens_text = '';
+    } else {
+      $amens_text = $amens_text.$amens_count;
+    }
+
+    //get pray_silently
+    $prayer_silently_text = t('Silent prayers:').' ';
+    $prayer_silently_count = 0;
+    foreach ($prayer_silently as $nodes) {
+      foreach ($nodes as $silent) {
+        if (!empty($silent)) {
+           $prayer_silently_count++;
+           if ($has_permission) {
+            $prayer_silently_text .= prayvine_get_name($silent) . ', ';
+          }
+        }
+      }
+    }
+    if ($prayer_silently_count == 0) {
+
+      $prayer_silently_text = '';
+    } else {
+      $prayer_silently_text = $prayer_silently_text.$prayer_silently_count;
+    }
+
+  }
+  if ($node == 2) {
+
+    if (strlen($amens_text) > 2) {
+      $output = '<p class="data-prayers-amens-tooltip">'.$amens_text.'</p>';
+    } else {
+      $output = '';
+    }
+  } else {
+    if (strlen($prayer_silently_text.$amens_text.$prayers_text)>3) {
+      $output = '<p class="data-prayers-amens-tooltip">'.$prayers_text.' '.$amens_text.' '.$prayer_silently_text.'</p>';
+    } else {
+      $output = '';
+    }
+
+  }
+
+  drupal_json_output($output);
+}
+
+/**
+ * get users of pray silently for speicifi content type
+ * @param type $content_id
+ */
+function prayvine_logger_get_pray_silently ($content_id,$user_id = null) {
+  $pray_silently = array();
+  if ($user_id == null) {
+    $query = db_select('prayvine_logs','l')->fields('l',array('user_id'))
+          ->condition('content_id',$content_id)
+          ->condition('type','pray_silently');
+  } else {
+    $query = db_select('prayvine_logs','l')->fields('l',array('user_id'))
+          ->condition('content_id',$content_id)
+          ->condition('user_id',$user_id)
+          ->condition('type','pray_silently');
+  }
+  $result = $query->execute();
+  while ($record = $result->fetchAssoc()) {
+    $pray_silently[$record['user_id']] = $record['user_id'];
+  }
+
+  return $pray_silently;
+}
+
+
+/**
+ * get user amens of specific content
+ * @param type $content_id
+ */
+function prayvine_logger_get_amens($content_id,$user_id = null) {
+  $amen_user = array();
+  if ($user_id == null) {
+    $query = db_select('prayvine_prayer_amens','a')->fields('a',array('uid'))
+          ->condition('nid',$content_id);
+  } else {
+    $query = db_select('prayvine_prayer_amens','a')->fields('a',array('uid'))
+          ->condition('nid',$content_id)
+          ->condition('uid',$user_id);
+  }
+
+  $result = $query->execute();
+  while ($record = $result->fetchAssoc()) {
+    $amen_user[$record['uid']] = $record['uid'];
+  }
+
+  return $amen_user;
+}
+
+/**
+ * count when mail is open using img tag
+ * @param type $content_id content id
+ * @param type $user_id - user id it can be invite id for unregister users
+ * @param type $register - if user is register or not
+ * @param type $key - access key needed for
+ */
+function prayvine_logger_mail_open($content_id, $user_id,$type,$key) {
+  $key_generate = prayvine_logger_link($content_id, $user_id);
+  if ($key_generate === $key) {
+    //count emails
+    if (module_exists('prayvine_logger')) {
+      prayvine_logger_log($user_id,$content_id,'mail_count');
+
+    }
+  }
+
+}
+/**
+ *creat mail_alter hook
+ * @param type $message
+ */
+function prayvine_logger_mail_alter(&$message){
+
+  //updates emails
+  if (!empty($message['params']['context']['state']->variables['comment'])) {
+
+    if (!empty($message['params']['context']['state']->variables['subscriber'])) {//register users
+      global $base_url;
+      $subscriber = $message['params']['context']['state']->variables['subscriber'];
+      $s_object = $subscriber->value();
+      $user_id = $s_object->uid;
+      $content = $message['params']['context']['state']->variables['comment'];
+      $content_object = $content->value();
+      $content_id = $content_object->cid;
+      $key = prayvine_logger_link($content_id, $user_id);
+      $link = $base_url.'/prayvine_mail/'.$content_id.'/'.$user_id.'/1/'.$key;
+      $img = '<img src="'.$link.'" height="1" width="1" />';
+      $message['body'][0] = $message['body'][0].$img;
+    } else { //unregister users
+      $content = $message['params']['context']['state']->variables['comment'];
+      $content_object = $content->value();
+      $content_id = $content_object->cid;
+      $user_id = 0;
+      $key = prayvine_logger_link($content_id, $user_id);
+      $link = $base_url.'/prayvine_mail/'.$content_id.'/'.$user_id.'/1/'.$key;
+      $img = '<img src="'.$link.'" height="1" width="1" />';
+      $message['body'][0] = $message['body'][0].$img;
+    }
+  } else {//prayer and requests
+    if (!empty($message['params']['context']['state']->variables['subscriber'])) {//register users
+      global $base_url;
+      $subscriber = $message['params']['context']['state']->variables['subscriber'];
+      $s_object = $subscriber->value();
+      $user_id = $s_object->uid;
+      if (!empty($message['params']['context']['state']->variables['request'])) {//request
+        $content = $message['params']['context']['state']->variables['request'];//
+      } else { //prayer
+        $content = isset($message['params']['context']['state']->variables['prayer']) ? $message['params']['context']['state']->variables['prayer'] : NULL;//
+      }
+      if (!empty($content)) {
+        $content_object = $content->value();//check if value exist
+        $content_id = $content_object->nid;
+      } else {
+        $content_id = 0;
+      }
+      $key = prayvine_logger_link($content_id, $user_id);
+      $link = $base_url.'/prayvine_mail/'.$content_id.'/'.$user_id.'/1/'.$key;
+      $img = '<img src="'.$link.'" height="1" width="1" />';
+      $message['body'][0] = $message['body'][0].$img;
+    } else { //unregister users
+      global $base_url;
+      if (!empty($message['params']['context']['state']->variables['request'])) {//request
+        $content = $message['params']['context']['state']->variables['request'];//
+      } else { //prayer
+        $content = (isset($message['params']['context']) && isset($message['params']['context']['state']->variables['prayer'])) ? $message['params']['context']['state']->variables['prayer'] : NULL;//
+      }
+      if (!empty($content)) {
+        $content_object = $content->value();//check if value exist
+        $content_id = $content_object->nid;
+      } else {
+        $content_id = 0;
+      }
+
+      $user_id = 0;
+      $key = prayvine_logger_link($content_id, $user_id);
+      $link = $base_url.'/prayvine_mail/'.$content_id.'/'.$user_id.'/1/'.$key;
+      $img = '<img src="'.$link.'" height="1" width="1" />';
+      $message['body'][0] = $message['body'][0].$img;
+    }
+  }
+
+}
+
+function prayvine_logger_link($content_id, $user_id) {
+  $secret_key = "sdf$%0,df/=?)=";
+  $key_generate = md5($content_id.$user_id.$secret_key);
+  return $key_generate;
+}
+/**
+ * logg different type of events conected to specific content type (view, pray silently, click ...)
+ * @param type $user_id - user id of user that generate event (ip, token or uid)
+ * @param type $content_id - content id (node id, comment id)
+ * @param type $type - type of event (view, pray silently, click)
+ * @param type $message - message that is related to this event
+ */
+function prayvine_logger_log($user_id,$content_id,$type,$message=null) {
+  $path_local = variable_get('path_local', NULL);
+  $path_live = variable_get('path_live', NULL);
+  $path_dev = variable_get('path_dev', NULL);
+
+  global $conf;
+
+  $client = new GearmanClient();
+  $client->addServer();
+  $client->setTimeout(1000);
+  $data['user_id'] = $user_id;
+  $data['content_id'] = $content_id;
+  $data['type'] = $type;
+  $data['message'] = $message;
+  $data['timestamp'] = time();
+  $json_data = json_encode($data);
+
+  if (isset($conf['gearman_server']) && $conf['gearman_server'] == 'local') {
+    $client->addServer($conf['gearman_local_server']);
+    $result = $client->doBackground("local_log", $json_data);
+  }
+
+  if ($_SERVER['SERVER_NAME'] === $path_live) {
+    $result = $client->doBackground("prayvine_log", $json_data);
+  }
+
+  if ($_SERVER['SERVER_NAME'] === $path_dev && isset($conf['gearman_server']) &&
+    $conf['gearman_server'] == 'dev') {
+    $result = $client->doBackground("skele_log", $json_data);
+  }
+
+  if ($_SERVER['SERVER_NAME'] === $path_dev && isset($conf['gearman_server']) &&
+    $conf['gearman_server'] == 'staging') {
+    $result = $client->doBackground("skele_log_staging", $json_data);
+  }
+}
+
+/**
+ * save log to database
+ * @param type $data
+ */
+function prayvine_logger_save($data,$connection,$database) {
+  if (!mysql_ping($connection)) {
+    echo 'Connection lost reconnecting!';
+  }
+    //select a database to work with
+  $selected = mysql_select_db($database,$connection)
+    or die("Could not select database");
+
+  //execute the SQL query and return records
+  $sql = 'INSERT INTO drupal_prayvine_logs '.
+       '(user_id,content_id, timestamp, type, message) '.
+       'VALUES ( '.$data['user_id'].', '.$data['content_id'].', '.$data['timestamp'].', "'.$data['type'].'","'.$data['message'].'" )';
+
+  $result = mysql_query($sql,$connection);
+
+
+//close the connection
+}
+
+/**
+ * create connection to database
+ * @param type $host
+ * @param type $user
+ * @param type $pass
+ * @return type
+ */
+function prayvine_logger_connect($host,$user,$pass) {
+
+  $connection = mysql_connect($host, $user, $pass);
+  if (!$connection) {
+    echo 'Could not connect: ' . mysql_error();
+    return null;
+  }
+
+  return $connection;
+}
+
+/**
+ * close connection to database
+ * @param type $host
+ * @param type $user
+ * @param type $pass
+ * @return type
+ */
+function prayvine_logger_close($connection) {
+  mysql_close($connection);
+}

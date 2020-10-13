@@ -1,0 +1,54 @@
+<?php
+
+/**
+ * @file
+ * Contains prayvine related dashboard customizations.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function prayvine_dashboard_menu() {
+  $items['admin/reports/prayvine_dashboard'] = array(
+    'title' => 'Prayvine Dashboard',
+    'menu_name' => 'management',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_prayvine_dashboard_main_form'),
+    'access arguments' => array('access site reports'),
+    'file' => 'prayvine_dashboard.page.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  $items['admin/reports/prayvine_dashboard_csv'] = array(
+    'title' => 'Prayvine Dashboard CSV Export',
+    'menu_name' => 'management',
+    'page callback' => '_prayvine_dashboard_main_csv',
+    'access arguments' => array('access site reports'),
+    'file' => 'prayvine_dashboard.page.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Get ministry communicators.
+ */
+function prayvine_dashboard_get_ministry_communicators() {
+  $result = db_query(
+    "SELECT field_settings_value
+    FROM {field_data_field_settings}
+    WHERE bundle = 'topic'
+    and field_settings_value like '%ministry_communicator%'"
+  );
+
+  $mc = array();
+  foreach ($result as $_settings) {
+    $settings = unserialize($_settings->field_settings_value);
+    foreach ($settings['ministry_communicator'] as $uid) {
+      $mc[] = $uid;
+    }
+  }
+
+  return array_unique($mc);
+}

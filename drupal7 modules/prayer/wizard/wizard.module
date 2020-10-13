@@ -1,0 +1,334 @@
+<?php
+/**
+ * implement hook_menu
+ * @return array
+ */
+function prayvine_wizard_menu() {
+  $items['wizard/create/topic'] = array(
+  	'page callback' => 'prayvine_wizard_page',
+  	'access callback' => TRUE,
+  	'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * This function will render wizard for create new topic
+ * @param number $page
+ * @param string $form
+ * @param array $data
+ * @return string
+ */
+function prayvine_wizard_page($page = 1, $form = NULL, $data = array()) {
+	$path = drupal_get_path('module', 'prayvine_wizard');
+	$variables = array();
+	$variables['shortDesc'] = '';
+	$variables['prayerRequest'] = 0;
+	switch ($page) {
+		case 1:
+			$variables['form'] = (!$form) ? drupal_get_form('prayvine_wizard_form_1', $data) : $form;
+			$variables['title'] = 'Step 1 of 3 : Create a new prayer community with Prayvine';
+			break;
+		case 2:
+			$variables['prayerRequest'] = 1;
+			$variables['form'] = drupal_get_form('prayvine_wizard_form_2', $data);
+			$variables['title'] = 'Step 2 of 3 : Post a prayer request';
+			break;
+		 case 3:
+			$variables['form'] = drupal_get_form('prayvine_wizard_form_3', $data);
+			$variables['title'] = "Step 3 of 3 : Invite friends to pray with you<h4>Great! You're ready to invite friends to pray together.Simply enter their email addresses and click 'Send Invitation'.</h4>";
+			break;
+
+		default :
+			drupal_set_message('Invalid page acccess', 'error');
+			drupal_goto('');
+	}
+	$variables['data'] = $data;
+
+	return theme_render_template($path.'/theme/wizard.tpl.php', $variables);;
+}
+
+/**
+ * This function will return form 1 for wizard
+ * @param array $form
+ * @param array $form_state
+ * @param array $vars
+ * @return multitype:
+ */
+function prayvine_wizard_form_1($form, &$form_state, $vars) {
+
+	$module_path = drupal_get_path('module', 'prayvine_wizard');
+	drupal_add_js($module_path . '/js/wizard.js');
+
+	$form = array();
+	$form['#ajax'] = 1;
+	$form['#method'] = 'post';
+	$form['#prefix'] = "<div  class='content-row'><ol type='1'>";
+	$form['#suffix'] = "</ol></div>";
+
+	$form['markup']['#markup'] = '<h3><strong>'.t('Get started now: It takes less than 2 minutes!').'</strong></h3>';
+	$form['name'] = array('#type' => 'textfield',
+			'#prefix' => "<li>",
+			'#suffix' => '</li>',
+			'#title' => t('Name your prayer community'),
+			"#required" => true,
+			'#attributes' => array('placeholder' => t('Enter a name here')),
+	);
+
+	$form['desc'] = array('#type' => 'textarea',
+			'#prefix' => "<li>",
+			'#suffix' => '</li>',
+			'#title' => t('Write a short, 1-2 sentence description about your prayer community:'),
+			'#attributes' => array('placeholder' => t('Enter short description')),
+	);
+
+	$options = array(
+				0 => t('Prayer for small group, Bible study group or family group'),
+				1 => t('Prayer for missionary or ministry'),
+				2 => t('Other (Please type)')
+				);
+
+	$form['purpose'] = array(
+			'#type' => 'radios',
+			'#prefix' => "<li class='radio-options'>",
+			'#suffix' => '</li>',
+			'#title' => t('Which of the following best describes the purpose of this prayer community?'),
+			'#options' => $options,
+			'#default_value' => 0,
+	);
+
+	$form['purpose_other'] = array(
+			'#type' => 'textfield',
+			'#prefix' => "<li id='other_element' class='pv-hidden' style='list-style-type: none;'>",
+			'#suffix' => '</li>',
+			'#title' => t('Other'),
+			'#attributes' => array('placeholder' => t('Enter other purpose')),
+	);
+
+	$form['submit'] = array('#type' => 'submit',
+			'#value' => t('Create prayer community'),
+			'#type' => 'button',
+			'#attributes' => array('text-align' => 'right'),
+			'#ajax' => array(
+				'callback' => 'prayvine_wizard_save_topic',
+				'wrapper' => 'create-topic-wizard',
+				'method' => 'replace',
+				'effect' => 'fade',
+			),
+			'#submit' => array('prayvine_wizard_save_topic'),
+	);
+
+
+	return $form;
+}
+
+/**
+ * This function will save value for wizard
+ * @param array $form
+ * @param array $form_state
+ */
+function prayvine_wizard_save_topic($form, &$form_state) {
+
+	if ($form_state['values']['purpose'] == 2 && trim($form_state['values']['purpose_other']) == '') {
+		form_set_error('purpose_other', 'Other box is empty!');
+	}
+	if (form_get_errors()) {
+		$form_state['rebuild'] = TRUE;
+		return prayvine_wizard_page(1, $form);
+	} else {
+		global $user;
+		if (is_null($user) || !isset($user->uid) || ($user->uid <= 0)) {
+			$form_state['rebuild'] = TRUE;
+			drupal_set_message('Please login first', 'error');
+			return prayvine_wizard_page(1, $form);
+		}
+		$strTitle = $form_state['values']['name'];
+		$node = new stdClass();
+		$node->type = "topic";
+
+		node_object_prepare($node); // sets the uid
+		$node->title = $strTitle;
+		$node->field_description[LANGUAGE_NONE][0]['value'] = $form_state['values']['desc'];
+		$node->field_purpose[LANGUAGE_NONE][0]['value'] = $form_state['values']['purpose'];
+		if ($form_state['values']['purpose'] == 2) {
+			$node->field_purpose_other[LANGUAGE_NONE][0]['value'] = $form_state['values']['purpose_other'];
+		}
+		$node->language = LANGUAGE_NONE;
+		$node = node_submit($node);
+		if ($node != null) {
+			node_save($node);
+			$nid = db_insert('prayvine_subscriptions') // Table name no longer needs {}
+			->fields(array(
+					'nid' => $node->nid,
+					'uid' => $user->uid,
+			))
+			->execute();
+
+		}
+		return prayvine_wizard_page(2, null, array('nid' => $node->nid));
+	}
+
+}
+
+/**
+ * This function will return form 2 for wizard
+ * @param array $form
+ * @param array $form_state
+ * @param array $vars
+ * @return multitype:
+ */
+function prayvine_wizard_form_2($form, &$form_state, $vars) {
+
+	$module_path = drupal_get_path('module', 'prayvine_wizard');
+	drupal_add_js($module_path . '/js/wizard.js');
+
+	$nid = $vars['nid'];
+	$form = array();
+	$form['#ajax'] = 1;
+	$form['#method'] = 'post';
+
+	$form['prayer'] = array('#type' => 'textarea',
+			"#required" => true,
+			'#title' => t('Your request will be shared with this prayer community only.'),
+			'#attributes' => array('placeholder' => t('Enter your prayer request here and click "Post Prayer Request" below to continue.')),
+	);
+	$form['submit'] = array('#type' => 'submit',
+			'#prefix' => '<div style="float:left">',
+			'#suffix' => '</div>',
+			'#value' => t('Post prayer request'),
+			'#type' => 'button',
+			'#attributes' => array('text-align' => 'right'),
+			'#ajax' => array(
+					'callback' => 'prayvine_wizard_save_prayer',
+					'wrapper' => 'create-topic-wizard',
+					'method' => 'replace',
+					'effect' => 'fade',
+			),
+			'#submit' => array('prayvine_wizard_save_prayer'),
+	);
+
+	$form['skip_step'] = array('#type' => 'submit',
+			'#prefix' => '<div style="float:left">',
+			'#suffix' => '</div>',
+			'#value' => t('Skip this step'),
+			'#type' => 'button',
+			'#attributes' => array('text-align' => 'right'),
+			'#ajax' => array(
+					'callback' => 'prayvine_skip_step_2',
+					'wrapper' => 'create-topic-wizard',
+					'method' => 'replace',
+					'effect' => 'fade',
+			),
+			'#submit' => array('prayvine_skip_step_2'),
+	);
+
+	$form['mark_as'] = array(
+			'#type' => 'checkbox',
+			'#title' => t('Mark as urgent'),
+			'#display_title' => 'after'
+	);
+	$form['nid'] = array('#type' => 'hidden', '#value' => $nid);
+	return $form;
+}
+
+/**
+ * This function will save prayer
+ * @param array $form
+ * @param array $form_state
+ * @return string
+ */
+function prayvine_wizard_save_prayer($form, &$form_state) {
+
+	if (form_get_errors()) {
+		if($form_state['values']['skip_step'] == 1){
+			return prayvine_wizard_page(3, null, array('nid' => $form_state['values']['nid']));
+		}
+		$form_state['rebuild'] = TRUE;
+		return prayvine_wizard_page(2, $form);
+	} else {
+		if($form_state['values']['skip_step'] == 1){
+			return prayvine_wizard_page(3, null, array('nid' => $form_state['values']['nid']));
+		}
+		global $user;
+		if (is_null($user) || !isset($user->uid) || ($user->uid <= 0)) {
+			$form_state['rebuild'] = TRUE;
+			drupal_set_message('Please login first', 'error');
+			return prayvine_wizard_page(2, $form);
+		}
+		$strTitle = $form_state['values']['name'];
+
+		$node = new stdClass();
+		$node->type = "prayer_request";
+
+		node_object_prepare($node); // sets the uid
+		$node->title = 'Dear God,';
+		$node->body[LANGUAGE_NONE][0]['value'] = $form_state['values']['prayer'] ;
+		$node->body[LANGUAGE_NONE][0]['format'] = 'filtered_html';
+
+		$node->field_topic_id[LANGUAGE_NONE][0]['value'] = $form_state['values']['nid'];
+		if (isset($form_state['values']['mark_as'])) {
+			$node->field_mark_as_urgent[LANGUAGE_NONE][0]['value'] = 1;
+		}
+		$node->language = LANGUAGE_NONE;
+		$node = node_submit($node);
+		if ($node != null) {
+			node_save($node);
+		}
+
+		if (module_exists('prayvinestat')) {
+			prayvinestat_stat_event('create-prayer_request');
+		}
+		//clear cache of topic request
+		$cache_id = 'requests_' . prayvine_get_topic_id($node->nid);
+		cache_clear_all($cache_id, 'cache', FALSE);
+
+		if (!empty($_SESSION['prayvine_tokens'][0])) {//set action that user use for get to site
+			$_SESSION['action'] = 'add-prayer_request';
+			$_SESSION['topic_id'] = prayvine_get_topic_id($node->nid);
+		}
+
+		if (isset($user->mail)) {
+			if (!prayvine_gear_request_notify($node)) {
+				prayvine_notify_request_insert($node, $user);
+			}
+		}
+
+		return prayvine_wizard_page(3, null, array('nid' => $form_state['values']['nid']));
+	}
+}
+
+/**
+ * This function will skip step 2
+ * @param array $form
+ * @param array $form_state
+ * @return string
+ */
+function prayvine_skip_step_2($form, &$form_state){
+	unset($_SESSION['messages']['error']);
+	return prayvine_wizard_page(3, null, array('nid' => $form_state['values']['nid']));
+}
+
+/**
+ * This function will return form 3 for wizard.
+ */
+function prayvine_wizard_form_3($form, &$form_state, $vars) {
+  $nid = $vars['nid'];
+  $topic = node_load($nid);
+  $form = prayvine_invitation_main_form($form, $form_state, $topic);
+
+  $form['skip_step'] = array(
+    '#type' => 'submit',
+    '#value' => t('Skip this step'),
+    '#type' => 'button',
+    '#attributes' => array(
+      'text-align' => 'right'
+    ),
+  );
+
+  // This form will be called via ajax, hence the form action is '/system/ajax'.
+  // But Batch API will not work with with ajax.
+  // Manually setting the action to custom callback.
+  $form['#action'] = '/prayvine/batch-invite/' . $nid;
+  return $form;
+}

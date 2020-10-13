@@ -1,0 +1,13 @@
+<?php
+/**
+ * Implements hook_install()
+ */
+
+function propco_pin_import_install(){
+	//make sure we have our private pin-uploads folder for pin
+	
+	$directory = "private://pin-imports";
+
+	file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+	
+}

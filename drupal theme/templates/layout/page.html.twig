@@ -1,0 +1,146 @@
+{#
+/**
+ * @file
+ * Bootstrap Barrio's theme implementation to display a single page.
+ *
+ * The doctype, html, head and body tags are not in this template. Instead they
+ * can be found in the html.html.twig template normally located in the
+ * core/modules/system directory.
+ *
+ * Available variables:
+ *
+ * General utility variables:
+ * - base_path: The base URL path of the Drupal installation. Will usually be
+ *   "/" unless you have installed Drupal in a sub-directory.
+ * - is_front: A flag indicating if the current page is the front page.
+ * - logged_in: A flag indicating if the user is registered and signed in.
+ * - is_admin: A flag indicating if the user has permission to access
+ *   administration pages.
+ *
+ * Site identity:
+ * - front_page: The URL of the front page. Use this instead of base_path when
+ *   linking to the front page. This includes the language domain or prefix.
+ * - logo: The url of the logo image, as defined in theme settings.
+ * - site_name: The name of the site. This is empty when displaying the site
+ *   name has been disabled in the theme settings.
+ * - site_slogan: The slogan of the site. This is empty when displaying the site
+ *   slogan has been disabled in theme settings.
+
+ * Page content (in order of occurrence in the default page.html.twig):
+ * - node: Fully loaded node, if there is an automatically-loaded node
+ *   associated with the page and the node ID is the second argument in the
+ *   page's path (e.g. node/12345 and node/12345/revisions, but not
+ *   comment/reply/12345).
+ *
+ * Regions:
+ * - page.navigation: Custom theme navigation region, items for navigation,
+ * - page.header: Custom theme header region, items for header.
+ * - page.breadcrumb: Custom theme breadcrumb region, items for breadcrumb.
+ * - page.content: Custom theme content region, items for content.
+ * - page.pre_footer: Custom theme pre_footer region, items for pre_footer.
+ * - page.footer: Custom theme footer region, items for footer.
+ *
+ * Theme variables:
+ * - navbar_top_attributes: Items for the header region.
+ * - navbar_attributes: Items for the header region.
+ * - content_attributes: Items for the header region.
+ * - sidebar_first_attributes: Items for the highlighted region.
+ * - sidebar_second_attributes: Items for the primary menu region.
+ * - sidebar_collapse: If the sidebar_first will collapse.
+ *
+ * @see template_preprocess_page()
+ * @see bootstrap_barrio_preprocess_page()
+ * @see html.html.twig
+ */
+#}
+<div id="page-wrapper">
+
+    <!-- Main navigation -->
+    <nav{{ navbar_attributes }}>
+      {% if container_navbar %}
+      <div class="container">
+      {% endif %}
+        {{ page.header }}
+        {% if page.navigation %}
+          <div class="collapse navbar-collapse" id="CollapsingNavbar">
+            {{ page.navigation }}
+          </div>
+        {% endif %}
+        {% if sidebar_collapse %}
+          <button class="navbar-toggler navbar-toggler-left" type="button" data-toggle="collapse" data-target="#CollapsingLeft" aria-controls="CollapsingLeft" aria-expanded="false" aria-label="Toggle navigation"></button>
+        {% endif %}
+      {% if container_navbar %}
+      </div>
+      {% endif %}
+    </nav>
+
+  <div id="page">
+    <!-- Header -->
+    <header id="header" class="header" role="banner" aria-label="{{ 'Site header'|t}}">
+      <a href="#webform-submission-ready-to-get-started-form" class="cta-orange">{{ 'CONTACT US'|t }}</a>
+      {% block head %}
+        {% if page.header %}
+          <nav{{ navbar_top_attributes }}>
+          {% if container_navbar %}
+          <div class="container">
+          {% endif %}
+          {% if container_navbar %}
+          </div>
+          {% endif %}
+          </nav>
+        {% endif %}
+      {% endblock %}
+    </header>
+
+    <!-- Content -->
+    <div id="main-wrapper" class="layout-main-wrapper clearfix">
+      {% block content %}
+        <div id="main"">
+          {{ page.breadcrumb }}
+          <div class="row row-offcanvas row-offcanvas-left clearfix">
+              <main{{ content_attributes }}>
+                <section class="section">
+                  <a id="main-content" tabindex="-1"></a>
+                  {{ page.content }}
+                </section>
+              </main>
+          </div>
+        </div>
+      {% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      {% if is_front and main_site %}
+        <div class="accessibility-block text-center">
+          <div class="accessibility-block--container container">
+            <h2>{{ accessibility_title }}</h2>
+            <p>{{ accessibility_body.value|raw }}</p>
+          </div>
+        </div>
+      {% endif %}
+      <div class="container-fluid pre-footer-container">
+        <div class="row">
+          <div class="col-12 col-xl-10 mx-auto">
+            <div class="pre-footer">
+              {% if page.pre_footer %}
+                {{ page.pre_footer }}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="container-fluid footer-container">
+        <div class="row">
+          <div class="col-12 col-xl-10 mx-auto">
+            <div class="footer">
+              {% if page.footer %}
+                {{ page.footer }}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+</div>

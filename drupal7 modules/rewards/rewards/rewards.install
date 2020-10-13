@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and schema hooks for Propco Rewards module.
+ */
+
+/**
+ * Update encrypt settings based on prod settings.
+ */
+function propco_rewards_update_7001() {
+  db_update('encrypt_config')
+    ->fields(
+      array(
+        'label' => t('Default'),
+        'description' => t('The default configuration.'),
+        'method' => 'mcrypt_rij_256',
+        'method_settings' => '',
+        'provider' => 'file',
+        'provider_settings' => serialize(
+          array(
+            'path' => '../encryption_key',
+            'method' => 'file_contents',
+          )
+        ),
+        'enabled' => 1,
+        'created' => '1435037707',
+        'changed' => '1435037707',
+      )
+    )
+    ->condition('name', 'default')
+    ->execute();
+}

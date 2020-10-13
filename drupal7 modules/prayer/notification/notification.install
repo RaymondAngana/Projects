@@ -1,0 +1,64 @@
+<?php
+
+/**
+ * implementation hook install
+ */
+function prayvine_notification_update_9005() {
+
+  $schema['prayvine_topic_reminder_settings'] = array(
+    'description' => 'Prayvines Notification Goal Reminder from non ministry',
+    'fields' => array(
+      'prid' => array(
+        'description' => 'Reminder ID',
+        'type' => 'serial',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+      'nid' => array(
+        'description' => 'node ID',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'user ID',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+     'want_reminder'=> array(
+        'description' => 'Want a reminder',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),
+     'email_reminder'=> array(
+        'description' => 'email reminder',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),	
+     'email_reminder_frequency'=> array(
+        'description' => 'email reminder',
+        'type' => 'int',
+        'unsigned' => 1,
+        'not null' => TRUE,
+      ),	
+      'created' => array(
+        'description' => 'created time',
+        'type' => 'timestamp',
+        'mysql_type' => 'TIMESTAMP',
+        'not null' => TRUE,
+      ),
+    ),
+    'indexes' => array(
+      'topicReminderSettingIndex' => array('prid'),
+      'nidTopicReminderSettingIndex' => array('nid'),
+      'uidTopicReminderSettingIndex' => array('uid'),
+    ),
+    'primary key' => array('prid'),
+  );
+
+  db_create_table('prayvine_topic_reminder_settings', $schema['prayvine_topic_reminder_settings']);
+  
+}

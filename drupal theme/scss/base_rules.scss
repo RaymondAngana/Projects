@@ -1,0 +1,9 @@
+// @file
+// The Base Rules.
+//
+// Should only include the partial SASS that contains specific base rule.
+//
+// Actual implementation of the SASS base rule should resides in a partial SASS file,
+// inside base_rules/ directory and import it here. e.g. @import "base_rules/webstyle-guide.scss".
+
+@import "base_rules/typography";

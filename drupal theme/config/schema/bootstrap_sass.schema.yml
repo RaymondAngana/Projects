@@ -1,0 +1,5 @@
+# Schema for the configuration files of the Bootstrap SASS Subtheme.
+
+promet_v3.settings:
+  type: theme_settings
+  label: 'Promet Source V3 settings'

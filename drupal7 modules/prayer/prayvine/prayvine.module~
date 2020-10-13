@@ -1,0 +1,928 @@
+<?php
+
+/*
+ * create SQL tables: see tables.sql in modules file
+ */
+
+function prayvine_menu() {
+    $items['invite'] = array
+        ('page callback' => 'drupal_get_form',
+         'page arguments' => array('prayvine_invite'),
+         'access arguments' => array('access content'),
+         'type' => MENU_CALLBACK,
+         );
+    $items['update/%'] = array
+        ('page callback' => 'drupal_get_form',
+         'page arguments' => array('prayvine_post_comment', 1),
+         'access arguments' => array('access content'),
+         'type' => MENU_CALLBACK,
+         );
+    $items['delete_update/%'] = array
+        ('title' => 'Delete update',
+         'page callback' => 'drupal_get_form',
+         'page arguments' => array('prayvine_confirm_update_delete', 1),
+         'access arguments' => array('access content'),
+         'type' => MENU_CALLBACK,
+         );
+    $items['signin_register/%'] = array
+        ('page callback' => 'drupal_get_form',
+         'page arguments' => array('prayvine_signin_register', 1),
+         'access arguments' => array('access content'),
+         'type' => MENU_CALLBACK,
+         );
+    $items['add'] = array
+        ('page callback' => 'prayvine_add_subscription',
+         'access arguments' => array('access content'),
+         'type' => MENU_CALLBACK,
+         );
+    $items['remove'] = array
+        ('page callback' => 'prayvine_remove_subscription',
+         'access arguments' => array('access content'),
+         'type' => MENU_CALLBACK,
+         );
+    $items['say_amen/%/%/%'] = array
+        ('page callback' => 'prayvine_say_amen',
+         'access arguments' => array('access content'),
+         'page arguments' => array( 1, 2, 3),
+         'type' => MENU_CALLBACK,
+         );
+    $items['set_sharing'] = array
+        ('page callback' => 'prayvine_set_sharing',
+         'access arguments' => array('access content'),
+         'type' => MENU_CALLBACK,
+         );
+    return $items;
+}
+
+function prayvine_menu_alter(&$items) {
+    $items['user/register'] = array
+        ('access arguments' => array('administer users'),
+         );
+    //$items['user']['page callback'] = 'pray_vine_forward';
+}
+
+function pray_vine_forward() {
+  global $user;
+  if ($user->uid <= 0) drupal_goto("");
+  else drupal_goto("user/");
+}
+
+function prayvine_create_topic_form() {
+    $form = array();
+    $form['set']
+        = array('#type' => 'fieldset',
+                '#title' => 'Pray To God',
+                '#prefix' => "<div class='content-row'>",
+                '#suffix' => "</div>",
+                '#collapsible' => FALSE,
+                '#collapsed' => FALSE,
+                '#attributes' => array('style' => 'padding: 10px'),
+                );
+    $form['set']['intro']
+        = array('#type' => 'item',
+                '#title' => '<h4>Something on your heart? God is listening! Start by entering a topic:</h4>',
+                );
+    $form['set']['topic']
+        = array('#type' => 'textfield',
+                '#title' => '<em>I want to pray about...</em>',
+                );
+    $form['set']['submit']
+        = array('#prefix' => '<div style="text-align: right; width: 500px">',
+                '#suffix' => '</div>',
+                '#type' => 'submit',
+                '#value' => 'Next',
+                '#attributes' => array('text-align' => 'right'),
+                );
+    return $form;
+}
+
+function prayvine_create_topic_form_submit($form, &$form_state) {
+    // create topic node
+    // goto node/add/prayer?topic=X
+    // in form_alter, set X in form
+    // in node_save, store X
+    global $user;
+    if (is_null($user) || !isset($user->uid) || ($user->uid <= 0)) {
+        drupal_set_message("Please log in");
+        drupal_goto("");
+    }
+    $strTitle = $form_state['values']['topic'];
+    if (empty($strTitle)) {
+        drupal_set_message("Please specify a topic title");
+        drupal_goto("");
+    }
+    $node = new stdClass();
+    $node->type = "topic";
+    node_object_prepare($node); // sets the uid
+    $node->title = $strTitle;
+    $node->language = LANGUAGE_NONE;
+    $node = node_submit($node);
+    if ($node != null) {
+        node_save($node);
+        drupal_goto("node/add/prayer",
+                    array("query" => array("topic" => $node->nid,
+                                           "destination" => "node/" . $node->nid)));
+    } else {
+        drupal_set_message("Encountered error when creating topic page");
+        drupal_goto("");
+    }
+    //drupal_set_message("<pre>" . print_r($form_state, true) . "</pre>");
+}
+
+function prayvine_confirm_update_delete($form, $args) {
+    $cid = 0;
+    //drupal_set_message("<pre>" . print_r($args, true) . "</pre>");
+    if (isset($args['build_info']['args'][0]))
+        $cid = $args['build_info']['args'][0];
+    if ($cid <= 0) {
+        drupal_set_message("Invalid comment id", 'error');
+        drupal_goto("");
+    }
+    //drupal_set_message("<pre>" . print_r($comment, true) . "</pre>");
+    $form = array();
+    $form['cid'] = array('#type' => 'value', '#value' => $cid);
+    $comment = db_query("select b.comment_body_value, c.nid from {field_data_comment_body} b, {comment} c where b.entity_type = 'comment' and b.entity_id = c.cid and b.entity_id = :cid", array(':cid' => $cid))->fetchObject();
+    if ($comment == NULL) {
+        drupal_set_message("Could not find comment", 'error');
+        drupal_goto("");
+    }
+    return confirm_form($form,
+                        t('Are you sure you want to delete the comment %title?', array('%title' => $comment->comment_body_value)),
+                        'node/' . $comment->nid,
+                        t('Any replies to this comment will be lost. This action cannot be undone.'),
+                        t('Delete'),
+                        t('Cancel'),
+                        'prayvine_confirm_update_delete');
+}
+
+function prayvine_confirm_update_delete_submit($form, &$form_state) {
+    // Delete the comment and its replies.
+    $iCid = $form_state['values']['cid'];
+    //drupal_set_message("cid = " . $iCid);
+    global $user;
+    if ($user->uid == 0) {
+        drupal_set_message("Please log in to delete the comment", 'error');
+        drupal_goto("");
+    } else {
+        $uid = db_query("select uid from {comment} where cid = :cid", array(':cid' => $iCid))->fetchField();
+        if ($user->uid != $uid) {
+            drupal_set_message("You are not authorized to delete that comment", 'error');
+            drupal_goto("");
+        }
+    }
+    comment_delete($iCid);
+    drupal_set_message(t('The comment and all its replies have been deleted.'));
+    watchdog('content', 'Deleted comment @cid and its replies.', array('@cid' => $iCid));
+    // Clear the cache so an anonymous user sees that his comment was deleted.
+    cache_clear_all();
+
+    //$form_state['redirect'] = "node/$comment->nid";
+}
+
+function prayvine_signin_register($form, $args) {
+    $iNid = 0;
+    //drupal_set_message("<pre>" . print_r($args, true) . "</pre>");
+    if (isset($args['build_info']['args'][0]))
+        $iNid = $args['build_info']['args'][0];
+    drupal_goto("lr", array("query" => array("destination" => "node/" . $iNid)));
+    /*$strTitle = prayvine_get_title($iNid);
+    $form = array();
+    $form['forms']['#prefix'] = "<div><h2>Please create an account or sign-in to finish adding your prayer about " . $strTitle . " to the page</h2><div class='content-row'>";
+    $form['forms']['#suffix'] = "</div></div>";
+    $form['forms']['register_form'] = drupal_get_form("user_register_form");
+    $form['forms']['register_form']['#prefix'] = "<div class='left-content' style='width: 40%'><h4>Create an account and add prayer about " . $strTitle . "</h4>";
+    $form['forms']['register_form']['#suffix'] = "</div><div style='display: table-cell; border-right: thick solid #888888;'></div>";
+    $form['forms']['login'] = drupal_get_form("user_login");
+    $form['forms']['login']['#prefix'] = "<div class='right-content' style='width: 60%'><h4>Sign-in and add prayer about " . $strTitle . " </h4>";
+    $form['forms']['login']['#suffix'] = "<a href='/user/password'>Request new password</a></div>";
+    //drupal_set_message("form = <pre>" . print_r($form, true) . "</pre>");
+    return $form;*/
+}
+
+function prayvine_prayer_node_form_after_build(&$form, &$form_state) {
+  //$form[LANGUAGE_NONE][0]['format']['help']['#access'] = FALSE;
+}
+
+function prayvine_form_alter(&$form, &$form_state, $form_id) {
+    //drupal_set_message("hello: "  . $form_id);
+    //drupal_set_message("form = <pre>" . print_r($form, true) . "</pre>");
+    //drupal_set_message("form_state = <pre>" . print_r($form_state, true) . "</pre>");
+    switch ($form_id) {
+    case "prayer_node_form":
+        //drupal_set_message("form = <pre>" . print_r($form, true) . "</pre>");
+        //drupal_set_message("isarray " . is_array($form['field_topic_id']['und'][0]['value']));
+        //drupal_set_message("is_numeric " . is_numeric($form['field_topic_id']['und'][0]['value']));
+        //drupal_set_message("isset " . isset($form['field_topic_id']['und'][0]['value']));
+        if (!isset($form['field_topic_id']['und'][0]['value']['#default_value'])
+            || empty($form['field_topic_id']['und'][0]['value']['#default_value'])
+                   //|| !is_numeric($form['field_topic_id']['und'][0]['value'])) {
+                   ) {
+            global $user;
+            if (isset($_GET['topic'])) $iTopicId = $_GET['topic'];
+            else $iTopicId = "";
+            if (empty($iTopicId) || !is_numeric($iTopicId) || ($iTopicId <= 0)
+                //|| (prayvine_get_authorid($iTopicId) != 1)
+                ) {
+                drupal_set_message("Please use the user interface to add a prayer");
+                drupal_goto("");
+            }
+            /*$form['closing_label']
+                = array('#markup' => 'I want to pray about... '
+                        . prayvine_get_title($iTopicId),
+                        '#weight' => -4,
+                        );*/
+            drupal_set_title("Create Prayer: " . prayvine_get_title($iTopicId));
+            $form['actions']['submit']['#value'] = "Pray";
+            $form['field_topic_id']['und'][0]['value']['#default_value'] = 1;
+            $form['field_topic_id']['und'][0]['value']['#default_value'] = $iTopicId;
+            $form['title']['#default_value'] = "Dear heavenly Father,";
+        } else {
+            //drupal_set_message("got " . $form['field_topic_id']['und'][0]['value']['#default_value']);
+            //$iTopicId = prayvine_get_topic_id($form['field_topic_id']['und'][0]['value']);
+        }
+        $form['field_topic_id']['#access'] = FALSE;
+	//$form['#after_build'][] = 'prayvine_prayer_node_form_after_build';
+        //$form['actions']['submit']['#submit'][] = "prayvine_prayer_node_redirect";
+        //$form_state['redirect'] = array('node/' . $iTopicId);
+        //drupal_set_message("form = <pre>" . print_r($form['topic_id'], true) . "</pre>");
+        //hide($form['field_subscribers']);
+
+        //$form_state['field']['field_prayer_text']['und']['instance']['label'] = "Dear Heavenly Father,";
+        //$form['body']['#title'] = "Dear Heavenly Father,";
+        //drupal_set_message("got : " . $form['field_prayer_text']['und'][0]['#title']);
+        //unset($form['field_prayer_text']['und'][0]['#title']);// = "Dear Heavenly Father,";
+        break;
+    }
+}
+
+function prayvine_prayer_node_redirect($form, $form_state) {
+    //unset($form_state['rebuild']);
+    //$iTopicId = $form_state['values']['field_topic_id']['und'][0]['value'];
+    //$form_state['redirect'] = 'node/' . $iTopicId;
+    //drupal_set_message("setting redirect to " . $iTopicId);
+}
+
+function prayvine_notify_prayer_insert($node) {
+    $iTopicId = $node->field_topic_id['und'][0]['value'];
+    $strUrl = prayvine_get_prayer_page_url($iTopicId);
+    $alSubscriberIds = prayvine_get_subscriber_ids($iTopicId, true);
+    $alSubscribers = user_load_multiple($alSubscriberIds);
+    $strAuthorFirstName = prayvine_get_name($node->uid, 1);
+    $strAuthorName = prayvine_get_name($node->uid);
+    $strTopic = prayvine_get_title($iTopicId);
+    $strTopicAuthorId = prayvine_get_authorid($iTopicId);
+    $strTopicAuthorName = prayvine_get_name($strTopicAuthorId);
+    _prayvine_do_add_subscription($iTopicId, $node->uid);
+    foreach ($alSubscribers as $subscriber) {
+        if ($subscriber->uid == $node->uid) {
+            /*prayvine_send_email("Prayvine", "bounce@prayvine.org", $user->mail, NULL,
+                          NULL, "Prayer created",
+                          "Access your prayer at " . $strUrl);*/
+        } else {
+            prayvine_send_email("Prayvine", "notifications-prayer@prayvine.org",
+                                $subscriber->mail, NULL, NULL,
+                                $strAuthorName
+                                . " shared a new prayer with you",
+                                $strAuthorName . " wrote a new prayer about "
+                                . $strTopic . ".\n\nFollow this link to see "
+                                . $strAuthorName . "'s prayer: " . $strUrl
+                                . prayvine_get_email_footer($subscriber->mail,
+                                                            $subscriber,
+                                                            $strTopic));
+        }
+    }
+}
+
+function prayvine_node_insert($node) {
+    if ($node->type == 'prayer') {
+        global $user;
+        //drupal_set_message("user->mail = " . isset($user->mail) . "; get = " . $_GET['token']);
+        if (isset($user->mail)) {
+            prayvine_notify_prayer_insert($node);
+        } else if (isset($_GET['token']) && !empty($_GET['token'])) {
+            $iId = db_query("select inviteid from prayvine_invites where invite_code = :invite_code", array(':invite_code' => $_GET['token']))->fetchField();
+            //drupal_set_message("id = " . $iId . " after getting " . $_GET['token']);
+            if (!is_null($iId) && ($iId > 0)) db_query("insert into prayvine_anonymous_posts (inviteId, nid) values (:inviteId, :nid)", array(':inviteId' => $iId, ':nid' => $node->nid));
+            //unset($_SESSION['messages']['status']);
+        }
+    }
+}
+
+function prayvine_notify_comment_insert($comment) {
+    //drupal_set_message("<pre>" . print_r($comment, true) . "</pre>");
+    $alSubscriberIds = prayvine_get_subscriber_ids($comment->nid, true);
+    $alSubscribers = user_load_multiple($alSubscriberIds);
+    $strUrl = prayvine_get_prayer_page_url($comment->nid);
+    $strAuthorFirstName = prayvine_get_name($comment->uid, 1);
+    $strAuthorName = prayvine_get_name($comment->uid);
+    $strTopic = prayvine_get_title($comment->nid);
+    $strTopicAuthorId = prayvine_get_authorid($comment->nid);
+    $strTopicAuthorName = prayvine_get_name($strTopicAuthorId);
+    _prayvine_do_add_subscription($comment->nid, $comment->uid);
+    foreach ($alSubscribers as $subscriber) {
+        if ($subscriber->uid == $comment->uid) {
+            /*prayvine_send_email("Prayvine", "bounce@prayvine.org", $comment->mail,
+                          NULL, NULL, "You posted an update!",
+                          "See " . $strUrl);*/
+        } else {
+            prayvine_send_email("Prayvine","notifications-comment@prayvine.org",
+                                $subscriber->mail, NULL, NULL,
+                                $strAuthorName . " commented on " . $strTopic,
+                                $strAuthorName . " commented on "
+                                . $strTopicAuthorName . "'s prayer topic "
+                                . $strTopic
+                                . ". " . $strAuthorFirstName . " wrote: "
+                                . $comment->comment_body['und'][0]['value']
+                                . "\n\nFollow this link to reply to this comment or to write a new prayer about " . $strTopic . ": " . $strUrl
+                                . prayvine_get_email_footer($subscriber->mail,
+                                                            $subscriber,
+                                                            $strTopic));
+        }
+    }
+}
+
+function prayvine_comment_insert($comment) {
+    //drupal_set_message("comment = <pre>" . print_r($comment, true) . "</pre>");
+    if ($comment->node_type == 'comment_node_topic') {
+        if ($comment->uid > 0) {
+            prayvine_notify_comment_insert($comment);
+        } else if (isset($_GET['token']) && !empty($_GET['token'])) {
+            $iId = db_query("select inviteId from prayvine_invites where invite_code = :token", array(':token' => $_GET['token']))->fetchField();
+            if (!is_null($iId) && ($iId > 0)) db_query("insert into prayvine_anonymous_posts (inviteId, cid) values (:inviteId, :cid)", array(':inviteId' => $iId, ':cid' => $comment->cid));
+        }
+    }
+}
+
+function prayvine_get_authorid($iNid) {
+    return db_query("select uid from {node} where nid = :nid", array(':nid' => $iNid))->fetchField();
+}
+
+function prayvine_get_title($iNid) {
+    return db_query("select title from {node} where nid = :nid", array(':nid' => $iNid))->fetchField();
+}
+
+function prayvine_get_topic_id($iNid) {
+    return db_query("select field_topic_id_value from {node} n, {field_data_field_topic_id} f where n.vid = f.revision_id and f.entity_type = 'node' and f.bundle = 'prayer' and n.nid = :nid", array(':nid' => $iNid))->fetchField();
+}
+
+function prayvine_get_subscriber_ids($iNid, $bKeepOnlyWantUpdates = false) {
+    $strQuery = "select uid from prayvine_subscriptions where nid = :nid and uid > 0";
+    if ($bKeepOnlyWantUpdates) $strQuery = "select s.uid from prayvine_subscriptions s, {field_data_field_receive_topic_updates} u where s.nid = :nid and u.entity_type='user' and u.entity_id = s.uid and u.field_receive_topic_updates_value > 0 and s.uid > 0";
+    $subscribersResultSet = db_query($strQuery, array(':nid' => $iNid));
+
+    $alSubscriberIds = array();
+    while (($row = $subscribersResultSet->fetchObject()) != NULL) {
+        $alSubscriberIds[] = $row->uid;
+    }
+    $iAuthorId = prayvine_get_authorid($iNid);
+    if (!in_array($iAuthorId, $alSubscriberIds))
+        $alSubscriberIds[] = prayvine_get_authorid($iNid);
+    return $alSubscriberIds;
+}
+
+function prayvine_get_mail_from_token($strToken) {
+    $strMail = db_query("select mail from prayvine_invites where invite_code = :invite_code", array(':invite_code' => $strToken))->fetchField();
+    if (empty($strMail)) return "";
+    else return $strMail;
+}
+
+function prayvine_invite($form, $args) {
+    $nid = 0;
+    if (isset($args['build_info']['args'][0]))
+        $nid = $args['build_info']['args'][0];
+    $strError = "";
+    global $user;
+    if ($user->uid < 1) {
+        $strError = "Please log in first";
+    } else if (empty($nid) || !is_numeric($nid) || ($nid < 1)) {
+        $strError = "Invalid prayer";
+    } else {
+        $iAuthorId = prayvine_get_authorid($nid);
+        if ($iAuthorId != $user->uid) {
+            if (!prayvine_has_permission($user->uid, $nid, ""))
+                $strError = "Please log out and log back in";   
+        }
+    }
+    if (!empty($strError)) {
+        drupal_set_message($strError, 'error');
+        drupal_goto("");
+    }
+    $form['emails'] = array
+        ('#title' => 'E-mail addresses to invite (one on each line)',
+         '#type' => 'textarea'
+         );
+    $form['nid'] = array
+        ('#type' => 'hidden',
+         '#value' => $nid
+         );
+    $form['submit'] = array
+        ('#type' => 'submit',
+         '#value' => 'Invite',
+         '#submit' => array('prayvine_send_invites'),
+         );
+    return $form;
+}
+
+function prayvine_post_comment($form, $args) {
+    $nid = 0;
+    if (isset($args['build_info']['args'][0]))
+        $nid = $args['build_info']['args'][0];
+    if ($nid <= 0) {
+        drupal_set_message("Please try again", 'error');
+        drupal_goto("");
+    }
+    $strToken = "";
+    global $user;
+    if ($user->uid <= 0) {
+        if (isset($_GET['token'])) $strToken = $_GET['token'];
+        if (empty($strToken)) {
+            drupal_set_message("Please try again", 'error');
+            drupal_goto("");
+        }
+    }
+    $form['comment'] = array
+        ('#title' => 'Comment or update in regards to '
+         . prayvine_get_title($nid),
+         '#type' => 'textarea',
+         );
+    $form['nid'] = array
+        ('#type' => 'hidden',
+         '#value' => $nid,
+         );
+    $form['token'] = array
+        ('#type' => 'hidden',
+         '#value' => $strToken,
+         );
+    $form['submit'] = array
+        ('#type' => 'submit',
+         '#value' => 'Submit',
+         );
+    return $form;
+}
+
+function prayvine_post_comment_submit($form, $form_state) {
+    $alValues = $form_state['values'];
+    $iNid = $alValues['nid'];
+    if (!is_numeric($iNid) || ($iNid < 1)) {
+        drupal_set_message("Invalid prayer page", 'error');
+        drupal_goto("");
+    }
+    $strToken = $alValues['token'];
+    global $user;
+    $iAuthorId = prayvine_get_authorid($iNid);
+    /*if (($user->uid < 1) || ($user->uid != $iAuthorId)
+      && !prayvine_has_permission($user->uid, $iNid, "")) {
+      drupal_set_message("You lack permission to post an update for this prayer page", 'error');
+      drupal_goto("");
+      }*/
+    $strMail = "";
+    $strName = "";
+    if ($user->uid <= 0) {
+        if (empty($strToken)) {
+            drupal_set_message("Insufficient permissions", 'error');
+            drupal_goto("");
+        }
+        $strMail = prayvine_get_mail_from_token($strToken);
+        $strName = $strMail;
+    } else {
+        $strMail = $user->mail;
+        $strName = $user->name;
+    }
+    $comment = new stdClass();
+    $comment->nid = $iNid; // nid of a node you want to attach a comment to
+    $comment->cid = 0; // leave it as is
+    $comment->pid = 0; // parent comment id, 0 if none 
+    $comment->uid = $user->uid; // user's id, who left the comment
+    $comment->mail = $strMail; // user's email
+    $comment->name = $strName; // If user is authenticated you can omit this field, it will be auto-populated, if the user is anonymous and you want to name him somehow, input his name here
+    $comment->created = time(); // OPTIONAL. You can set any time you want here. Useful for backdated comments creation.
+    $comment->is_anonymous = 0; // leave it as is
+    $comment->homepage = ''; // you can add homepage URL here
+    $comment->status = COMMENT_PUBLISHED; // We auto-publish this comment
+    $comment->language = LANGUAGE_NONE; // The same as for a node
+    $comment->subject = ''; 
+    $comment->comment_body[$comment->language][0]['value'] = $alValues['comment'];
+    $comment->comment_body[$comment->language][0]['format'] = 'filtered_html';
+    comment_submit($comment); // saving a comment
+    comment_save($comment);
+    if ($user->uid <= 0)
+        drupal_goto("lr", array('query' => array('nid' => $iNid)));
+    else drupal_goto("node/" . $iNid);
+}
+
+function prayvine_get_add_prayer_url($iNid, $strToken) {
+    return "/node/add/prayer?topic=" . $iNid . "&destination=signin_register/"
+        . $iNid . "&token=" . $strToken;
+}
+
+function prayvine_get_edit_prayer_url($bPrayer, $iNid, $iTopicId, $strAction = 'edit') {
+    if ($bPrayer) return "/node/" . $iNid . "/" . $strAction
+                      . "?destination=node/" . $iTopicId;
+    if ($strAction == 'edit') return "/comment/" . $iNid . "/" . $strAction
+                                  . "?destination=node/" . $iTopicId;
+    else return "/delete_update/" . $iNid . "?destination=node/" . $iTopicId;
+}
+
+function prayvine_get_prayer_page_url($iNid) {
+    return "http://prayvine.org/node/" . $iNid;
+}
+
+function prayvine_get_link($user, $iNid, $strUrl) {
+    if ($user->uid > 0) return $strUrl;
+    else return "/lr?nid=" . $iNid . "&destination=" . $strUrl; 
+}
+
+function prayvine_get_name($uid, $iParts = 0) {
+    $names = db_query("select f.field_first_name_value, l.field_last_name_value from {field_data_field_first_name} f, {field_data_field_last_name} l where f.entity_type = 'user' and f.entity_id = :uid and l.entity_type = 'user' and l.entity_id = f.entity_id", array(':uid' => $uid))->fetchObject();
+    if ($names == NULL) return db_query("select name from {users} where uid = :uid", array(':uid' => $uid))->fetchField();
+    if ($iParts == 1) return $names->field_first_name_value;
+    return $names->field_first_name_value . " " . $names->field_last_name_value;
+}
+
+function prayvine_wants_updates($iUid) {
+    return (db_query("select count(*) from {field_data_field_receive_topic_updates} where entity_type='user' and entity_id = :uid and field_receive_topic_updates_value > 0;", array(":uid" => $iUid))->fetchField()) > 0;
+}
+
+function prayvine_get_picture($uid) {
+    $user = user_load($uid);
+    if ($user != NULL) return prayvine_get_picture_from_user_object($user);
+    else return "";
+}
+
+function prayvine_get_picture_from_user_object($user) {
+    if (isset($user->picture) && !is_null($user->picture))
+        return" <img height='40px' src='/sites/prayvine.org/files/pictures/" . $user->picture->filename . "' />";
+    return "";
+}
+
+function prayvine_get_prayers($iTopicId) {
+    $ids = array();
+    $rows = db_query("select distinct f.entity_id from {field_data_field_topic_id} f, {node} n where f.entity_type = 'node' and f.bundle = 'prayer' and f.entity_id = n.nid and n.uid > 0 and f.field_topic_id_value = :topic_id order by entity_id desc", array(':topic_id' => $iTopicId));
+    while (($row = $rows->fetchObject()) != NULL) {$ids[] = $row->entity_id;}
+    return node_load_multiple($ids);
+}
+
+function prayvine_get_comments($iTopicId) {
+    $ids = array();
+    $rows = db_query("select distinct cid from {comment} where uid > 0 and nid = :nid", array(':nid' => $iTopicId));
+    while (($row = $rows->fetchObject()) != NULL) {$ids[] = $row->cid;}
+    return comment_load_multiple($ids);
+}
+
+function prayvine_generate_random_string($iLen) {
+    $strPossible = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    $strResult = "";
+    for ($i = 0; $i < $iLen; $i++) {
+        $strResult .= substr($strPossible, rand(0, 35), 1);
+    }
+    return $strResult;
+}
+
+function prayvine_send_invites($form, $form_state) {
+    $alValues = $form_state['values'];
+    $iNid = $alValues['nid'];
+    if (!is_numeric($iNid) || ($iNid < 1)) {
+        drupal_set_message("Invalid prayer page", 'error');
+        drupal_goto("");
+    }
+    global $user;
+    $iAuthorId = prayvine_get_authorid($iNid);
+    if (($user->uid < 1) || ($user->uid != $iAuthorId)
+        && !prayvine_has_permission($user->uid, $iNid, "")) {
+        drupal_set_message("You lack permission to send invites for this prayer page", 'error');
+        drupal_goto("");
+    }
+    if ($user->uid != $iAuthorId) $author = user_load($iAuthorId);
+    $strEmails = $alValues['emails'];
+    $alEmails = explode("\n", $strEmails);
+    foreach ($alEmails as $strEmail) {
+        $strEmail = trim($strEmail);
+        if (empty($strEmail)) continue;
+        //db_query("BEGIN WORK;");
+        db_query("LOCK TABLE prayvine_invites WRITE");
+	//db_query("LOCK TABLE prayvine_invites IN SHARE ROW EXCLUSIVE MODE");
+        $strCode = prayvine_generate_random_string(6);
+        while (TRUE) {
+            $iNumRows = db_query("select count(nid) from prayvine_invites where invite_code = ':invite_code'", array(':invite_code' => $strCode))->fetchField();
+            if ($iNumRows == 0) break;
+            $strCode = prayvine_generate_random_string(6);
+        }
+        db_query("insert into prayvine_invites (mail, nid, status, inviter_uid, invite_code, sent) values (:mail, :nid, 1, :inviter_uid, :invite_code, now())", array(':mail' => $strEmail, ':nid' => $iNid, ':inviter_uid' => $user->uid, ':invite_code' => $strCode));
+        //db_query("COMMIT WORK;");
+        db_query("UNLOCK TABLES");
+        $strTopic = prayvine_get_title($iNid);
+        $strInviterName = prayvine_get_name($user->uid);
+        prayvine_send_email($strInviterName, $user->mail, $strEmail,
+                            NULL, NULL, "Prayer request: " . $strTopic,
+                            "I've written a prayer about " . $strTopic
+                            . " that I'd like to share with you. Please pray with me about " . $strTopic . " on Prayvine, a non-profit website that helps me pray with my trusted friends and family. Blessings, " . prayvine_get_name($user->uid, 1) . "\n\nFollow this link to see my prayer (or copy and paste into your browser): "
+                            . prayvine_get_prayer_page_url($iNid)
+                            . "?token=" . $strCode
+                            . "\n\n\n=========================\n"
+                            . $strInviterName . " (" . $user->mail . ") sent this invitation to " . $strEmail . " via Prayvine. For help with Prayvine, contact us at help@prayvine.org.\n\nPrayvine, 2700 Mission College Blvd #140-243, Santa Clara, CA 95054");
+        if (($user->uid != $iAuthorId) && prayvine_wants_updates($iAuthorId)) {
+            prayvine_send_email("Prayvine", "bounce@prayvine.org", $author->mail,
+                                NULL, NULL, "Your prayer page just got bigger",
+                                $user->mail . " just invited " . $strEmail
+                                . " to your prayer page");
+        }
+    }
+    drupal_goto("node/" . $alValues['nid']);
+}
+
+function prayvine_token_matches($nid, $strToken) {
+    $inviteResultSet = db_query("select claimed_uid from prayvine_invites where invite_code = :token and nid = :nid", array(':token' => $strToken, ':nid' => $nid));
+    while (($row = $inviteResultSet->fetchObject()) != NULL) {
+        //if (is_null($row->claimed_uid) || ($row->claimed_uid == $uid)) {
+        return true;
+        //break;
+        //}
+    }
+    return false;
+}
+
+function prayvine_has_permission($uid, $nid, $strToken) {
+    $bHasPermission = FALSE;
+    if ($uid > 0) {
+        $bHasPermission = (db_query("select count(nid) from prayvine_subscriptions where uid = :uid and nid = :nid", array(':uid' => $uid, ':nid' => $nid))->fetchField() > 0);
+        if (!$bHasPermission) {
+            $iAuthorId = db_query("select uid from {node} where nid = :nid", array(':nid' => $nid))->fetchField();
+            //drupal_set_message("iAuthorId = " . $iAuthorId . " for " . $nid);
+            if ($iAuthorId == $uid) $bHasPermission = TRUE;
+        }
+    }
+    if (!$bHasPermission && !empty($strToken)) {
+        $bHasPermission = prayvine_token_matches($nid, $strToken);
+    }
+    if (!$bHasPermission && isset($_SESSION['prayvine_tokens'])
+        && is_array($_SESSION['prayvine_tokens'])) {
+        foreach ($_SESSION['prayvine_tokens'] as $strToken) {
+            $bHasPermission = prayvine_token_matches($nid, $strToken);
+            if ($bHasPermission) break;
+        }
+    }
+
+    return $bHasPermission;
+}
+
+function _prayvine_do_add_subscription($nid, $uid) {
+    $iNumSubscriptions = db_query("select count(uid) from prayvine_subscriptions where nid = :nid and uid = :uid", array(':nid' => $nid, ':uid' => $uid))->fetchField();
+    if ($iNumSubscriptions > 0) return;
+    db_query("insert into prayvine_subscriptions (nid, uid) values (:nid, :uid)", array(':nid' => $nid, ':uid' => $uid));
+}
+
+function prayvine_add_subscription($nid, $strToken = "") {
+    global $user;
+    if ($user->uid <= 0) {
+        drupal_set_message("You must be logged in to subscribe");
+        drupal_goto("");
+    }
+    if ($nid < 0) {
+        drupal_set_message("Invalid page");
+        drupal_goto("");
+    }
+    $node = node_load($nid);
+    if (is_null($node)) {
+        drupal_set_message("Unable to load prayer page");
+        drupal_goto("");
+    }
+    /*if (empty($strToken)) {
+        drupal_set_message("Please specify an authorization token");
+        drupal_goto("");
+        }*/
+    if (!prayvine_has_permission($user->uid, $nid, $strToken)) {
+        drupal_set_message("I'm afraid that you don't have access to read that prayer page");
+        drupal_goto("");
+    }
+    _prayvine_do_add_subscription($nid, $user->uid);
+    unset($_SESSION['prayer_destination']);
+    db_query("update prayvine_invites set claimed_uid = :uid, first_access = now() where invite_code = :invite_code and nid = :nid and (claimed_uid is null)", array(':nid' => $nid, ':uid' => $user->uid, ':invite_code' => $strToken));
+    $author = user_load($node->uid);
+    if (isset($author) && prayvine_wants_updates($author->uid)) {
+        $strSubscriberName = prayvine_get_name($user->uid);
+        $strTopic = $node->title; //prayvine_get_title($nid);
+        prayvine_send_email("Prayvine", "notifications-add@prayvine.org",
+                            $author->mail, NULL, NULL,
+                            $strSubscriberName . " signed up to pray about "
+                            . $strTopic,
+                            $strSubscriberName . " (" . $user->mail
+                            . ") just joined you in praying about " . $strTopic
+                            . ".  Follow this link to invite others or to see a list of everyone praying about " . $strTopic . " on Prayvine: "
+                            . prayvine_get_prayer_page_url($node->nid)
+                            . prayvine_get_email_footer($author->mail, $author,
+                                                        $strTopic)
+                      );
+    }
+    drupal_goto("node/" . $nid);
+}
+
+function prayvine_remove_subscription($nid) {
+    global $user;
+    if ($user->uid < 0) {
+        drupal_set_message("You must be logged in to unsubscribe");
+        drupal_goto("");
+    }
+    if ($nid < 0) {
+        drupal_set_message("Invalid page");
+        drupal_goto("");
+    }
+    if (!prayvine_has_permission($user->uid, $nid, "")) {
+        drupal_set_message("I'm afraid that you don't have access to read that prayer page");
+        drupal_goto("");
+    }
+    db_query("delete from prayvine_subscriptions where nid = :nid and uid = :uid", array(':nid' => $nid, ':uid' => $user->uid));
+    drupal_goto("");
+}
+
+function prayvine_say_amen($iNid, $iStatus, $strToken) {
+    global $user;
+    if ($user->uid < 0) {
+        drupal_set_message("You must be logged in to call this function");
+        drupal_goto("");
+    }
+    if ($iNid <= 0) {
+        drupal_set_message("Invalid prayer ID");
+        drupal_goto("");
+    }
+    $iTopicId = prayvine_get_topic_id($iNid);
+    if ($iTopicId <= 0) {
+        drupal_set_message("That prayer is not associated with an appropriate prayer page");
+        drupal_goto("");
+    }
+    if (!prayvine_has_permission($user->uid, $iTopicId, $strToken)) {
+        drupal_set_message("--I'm afraid that you don't have access to access that prayer page " . $strToken);
+        drupal_goto("");
+    }
+    if ($iStatus == "0") $iStatus = "0";
+    else $iStatus = "1";
+    $iNumRows = db_query("select count(uid) from prayvine_prayer_amens where nid = :nid and uid = :uid", array(':nid' => $iNid, ':uid' => $user->uid))->fetchField();
+
+    if ($iNumRows == 0) {
+        db_query("insert into prayvine_prayer_amens (nid, uid, status, updated) values (:nid, :uid, :status, now())", array(':nid' => $iNid, ':uid' => $user->uid, ':status' => $iStatus));
+        $iAuthorId = db_query("select uid from {node} where nid = :nid", array(':nid' => $iNid))->fetchField();
+        if (($iAuthorId > 0) && ($iAuthorId != $user->uid)) {
+            $author = user_load($iAuthorId);
+            if (!is_null($author) && prayvine_wants_updates($author->uid)) {
+                $strTopic = prayvine_get_title($iTopicId);
+                prayvine_send_email("Prayvine", "notifications-amen@prayvine.org",
+                              $author->mail, NULL, NULL,
+                              prayvine_get_name($user->uid)
+                              . " said Amen to your prayer",
+                              prayvine_get_name($user->uid)
+                              . " read your prayer about " . $strTopic
+                              . " and said Amen. Follow this link to see all prayers about "
+                              . $strTopic
+                              . ": " . prayvine_get_prayer_page_url($iTopicId)
+                              . prayvine_get_email_footer($author->mail,
+                                                          $author, $strTopic));
+            }
+        }
+    } else {
+        db_query("update prayvine_prayer_amens set nid = :nid, uid = :uid, status = :status, updated = now()", array(':nid' => $iNid, ':uid' => $user->uid, ':status' => $iStatus));
+    }
+    drupal_goto("node/" . $iTopicId);
+}
+
+function prayvine_set_sharing($iNid, $iPermission) {
+    global $user;
+    if ($user->uid < 0) {
+        drupal_set_message("You must be logged in to call this function");
+        drupal_goto("");
+    }
+    if ($iNid < 0) {
+        drupal_set_message("Invalid prayer page");
+        drupal_goto("");
+    }
+    $node = node_load($iNid);
+    if (is_null($node)) {
+        drupal_set_message("Unable to load the prayer page");
+        drupal_goto("");
+    }
+    if (($iPermission != "0") && ($iPermission != "1")) {
+        drupal_set_message("Invalid permission specified");
+        drupal_goto("");
+    }
+    $iAuthorId = db_query("select uid from {node} where nid = :nid", array(':nid' => $iNid))->fetchField();
+    if ($user->uid != $iAuthorId) {
+        drupal_set_message("Only the creator of the prayer page is allowed to change its sharing settings");
+        drupal_goto("");
+    }
+    $node->field_shareable['und'][0]['value'] = $iPermission;
+    node_save($node);
+    //db_query("update field_data_field_shareable set field_shareable_value = :permission where bundle = 'prayer' and entity_id = :nid", array(':permission' => $iPermission, ':nid' => $iNid));
+    // clear cache
+    //drupal_flush_all_caches(); -- is slow
+    //node_load($iNid, $iNid, TRUE); -- doesn't seem to work
+    drupal_goto("node/" . $iNid);
+}
+
+function prayvine_user_login(&$edit, $account) {
+    if (isset($_SESSION['prayer_destination'])
+        && empty($_GET['destination'])
+        && (!isset($_POST['form_id'])
+            || $_POST['form_id'] != 'user_pass_reset')) {
+        $edit['redirect'] = $_SESSION['prayer_destination'];
+        //$_GET['destination'] = $_SESSION['prayer_destination'];
+    } else $edit['redirect'] = "main";
+    //if (isset($_SESSION['prayvine_tokens'])) drupal_set_message("<pre>" . print_r($_SESSION['prayvine_tokens'], true) . "</pre>");
+    //else drupal_set_message("no session");
+    if (isset($_SESSION['prayvine_tokens'])) {
+        foreach ($_SESSION['prayvine_tokens'] as $strToken) {
+            $rows = db_query("select p.nid, p.cid from prayvine_anonymous_posts p, prayvine_invites i where p.inviteid = i.inviteid and i.invite_code = :invite_code", array(':invite_code' => $strToken));
+            while (($row = $rows->fetchObject()) != NULL) {
+                if ($row->nid > 0) {
+                    $node = node_load($row->nid);
+                    if (($node != NULL) && ($node->uid == 0)) {
+                        $node->uid = $account->uid;
+                        node_save($node);
+                        prayvine_notify_prayer_insert($node);
+                    }
+                }
+                if ($row->cid > 0) {
+                    $comment = comment_load($row->cid);
+                    if (($comment != NULL) && ($comment->uid == 0)) {
+                        $comment->uid = $account->uid;
+                        comment_save($comment);
+                        prayvine_notify_comment_insert($comment);
+                    }
+                }
+            }
+        }
+    }
+    if (isset($_GET['nid']) && is_numeric($_GET['nid']) && ($_GET['nid'] > 0)) {
+        drupal_goto("node/" . $_GET['nid']);
+    }
+}
+
+function prayvine_get_email_footer($strEmail, $user, $strTopic) {
+    $strFooter = "\n\n \"I am the vine, you are the branches. He who abides in Me, and I in him, bears much fruit; for without Me you can do nothing.\" John 15:5 (NKJV)\n\n=========================\nFor help with Prayvine, reply to this message.\n\nThis message was sent to " . $strEmail . ", because you are also praying about " . $strTopic . ".";
+    if (!is_null($user) && ($user->uid > 0)) {
+        $strFooter .= " If you don't want to receive these emails from Prayvine in the future, click to unsubscribe: http://prayvine.org/user/" . $user->uid . "/edit";
+    }
+    $strFooter .= "\n\nPrayvine, 2700 Mission College Blvd #140-243, Santa Clara, CA 95054";
+    return $strFooter;
+}
+
+function prayvine_send_email($strFromName, $strFrom, $strTo, $strCc, $strBcc, $strSubject, $strMsg) {
+    //drupal_set_message("simulating mail from " . $strFrom . " to " . $strTo . " with subject '" . $strSubject . "' and text '" . $strMsg . "'");
+    //$strSubject = str_replace("\n", " ", $strSubject);
+    $strMsg = wordwrap(str_replace("\n", "\r\n", $strMsg), 75, "\r\n");
+    mail($strTo, $strSubject, $strMsg, "From: " . $strFromName . " <"
+         . $strFrom . ">\r\n" . "Reply-To: . $strFrom . "\r\n");
+}
+
+function prayvine_mail_alter(&$message) {
+    //prayvine_send_email("Prayvine", "z@prayvine.org", "j@lincircle.com", NULL, NULL, "message contents", print_r($message, true));
+    //drupal_set_message("<pre>" . print_r($message, true) . "</pre>");
+    switch ($message['id']) {
+    case 'user_register_no_approval_required': // cascade
+    case 'user_password_reset':
+        $account = $message['params']['account'];
+        $strFirstName = prayvine_get_name($account->uid, 1);
+        $strName = prayvine_get_name($account->uid);
+        $message['subject'] = str_replace("%first_name", $strFirstName,
+                                          $message['subject']);
+        $message['subject'] = str_replace("%name", $strName,
+                                          $message['subject']);
+        $message['body'][0] = str_replace("%first_name", $strFirstName,
+                                          $message['body'][0]);
+        $message['body'][0] = str_replace("%name", $strName,
+                                          $message['body'][0]);
+        break;
+    }
+    //drupal_set_message("<pre>" . print_r($message, true) . "</pre>");
+}
+
+function prayvine_createtopic_submit() {
+    drupal_set_message("hello");
+}
+
+function prayvine_comment_presave($comment) {
+    $created = db_query("select created from {comment} where cid = :cid", array(':cid' => $comment->cid))->fetchField();
+    if (!empty($created)) $comment->created = $created;
+}
+
+function prayvine_node_view($node, $view_mode) {
+  //drupal_set_message("<pre>" . print_r($node, true) . "</pre>");
+  if ($node->type == 'login') {
+    $node->forms = array();
+    $node->forms['user_register_form'] = drupal_get_form('user_register_form');
+    $node->forms['user_login'] = drupal_get_form("user_login");
+  }
+}
+
+function prayvine_user_insert(&$edit, $account, $category) {
+  //drupal_set_message("<pre>" . print_r($edit, true) . "</pre>");
+  //drupal_set_message("destination = " . $_GET['destination']);
+  $iNid = 0;
+  if (!empty($_GET['destination']) && (strlen($_GET['destination']) > 5)) {
+    if (substr($_GET['destination'], 0, 5) == '/add/') {
+      $iEndIndex = strpos($_GET['destination'], '/', 5);
+      if ($iEndIndex > 5)
+	$iNid = substr($_GET['destination'], 5, ($iEndIndex-5));
+    }
+  }
+  //drupal_set_message("nid = " . $iNid . "; uid = " . $edit['uid']);
+  if (($edit['uid'] > 0) && ($iNid > 0))
+    _prayvine_do_add_subscription($iNid, $edit['uid']);
+}
