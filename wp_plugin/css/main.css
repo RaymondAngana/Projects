@@ -1,0 +1,109 @@
+
+.widenTest
+{
+    width: 50%;
+    background-color: #cccccc;
+    font-weight: 1200;
+    color: red;
+    color: yellow;
+}
+
+.widen-thumbnail-column
+{
+    padding-bottom: 20px;
+    padding-top: 20px;
+    text-align: center;
+    width: 150px;
+}
+
+.widen-link-submit
+{
+    background: none;
+    border: none;
+    color: 	#21759B;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.widen-link-submit:hover
+{
+    color: red;
+}
+
+.widen-media-nav 
+{
+    float:right;
+}
+
+.widen-media-nav a 
+{
+    background: none repeat scroll 0 0 #EEEEEE;
+    border-color: #E3E3E3;
+    box-shadow: 0 1px 0 #FFFFFF inset;
+    padding: 3px 6px;
+    text-decoration: none;
+}
+
+.widen-nav-asset-range 
+{
+    font-size: 12px;
+    font-style: italic;
+    margin-right: 10px;
+}
+
+a.disabled:focus 
+{
+    color: #AAAAAA;
+}
+
+a.disabled:hover
+{
+    color: #0000A0;
+}
+
+#widen_media_loading
+{
+    background: url(../images/ajax_loader_blue_128.gif) no-repeat scroll center center #FFF;
+    background-color: #dddddd;
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    opacity:0.5;
+}
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 15%;
+    top: 0;
+    width: 100%; /* Full width */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 79%; /* Could be more or less, depending on screen size */
+    text-align: center;
+}
+
+/* The Close Button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}

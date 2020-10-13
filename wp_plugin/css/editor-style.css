@@ -1,0 +1,18 @@
+#tinymce .column{
+	width: 48%;
+	display: inline-block;
+	vertical-align: top;
+	margin-bottom: 10px;
+	background: #F1F1F1;
+}
+ 
+#tinymce .column:nth-of-type(2n+2) {
+    margin-left: 4%;
+}
+ 
+ 
+#tinymce .column img{
+    max-width: 100%;
+    margin: 0;
+    margin-bottom: 10px;
+}
