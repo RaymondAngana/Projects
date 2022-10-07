@@ -1,0 +1,8 @@
+name: 'CPW: Main Menu'
+description: 'Provides the Main Menu functionality.'
+type: module
+package: 'CPW'
+core_version_requirement: ^8.8 || ^9
+depndencies:
+  - drupal:views
+  - menu_item_extras:menu_item_extras

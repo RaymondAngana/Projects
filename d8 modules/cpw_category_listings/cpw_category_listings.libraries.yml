@@ -1,0 +1,8 @@
+cpw_category_listings:
+  js:
+    js/cpw_category_listings.js: {}
+  dependencies:
+    - core/jquery
+    - core/jquery.once
+    - core/drupalSettings
+    - slick/slick

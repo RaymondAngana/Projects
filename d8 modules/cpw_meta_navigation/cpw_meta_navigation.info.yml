@@ -1,0 +1,11 @@
+name: 'CPW Meta Navigation'
+description: 'CPW Meta Navigation Component'
+type: module
+package: 'CPW'
+core_version_requirement: ^8.8 || ^9
+dependencies:
+  - field
+  - paragraphs
+  - path
+  - options
+  - field_group

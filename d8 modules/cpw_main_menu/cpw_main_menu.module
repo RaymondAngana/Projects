@@ -1,0 +1,600 @@
+<?php
+
+/**
+ * @file
+ * Contains cpw_main_menu.module.
+ */
+
+use Drupal\Component\Utility\Html;
+use Drupal\Component\Utility\Xss;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Menu\MenuTreeParameters;
+use Drupal\Core\Render\Element;
+use Drupal\Core\Render\Markup;
+use Drupal\Core\Template\Attribute;
+use Drupal\Core\Url;
+use Drupal\views\ViewExecutable;
+use Drupal\media\Entity\Media;
+
+/**
+ * Implements hook_theme().
+ */
+function cpw_main_menu_theme($existing, $type, $theme, $path) {
+  return [
+    'menu_layout' => [
+      'variables' => [
+        'items' => [],
+      ],
+    ],
+    'menu_layout_item' => [
+      'variables' => [
+        'content' => [],
+        'layout' => '',
+        'extra' => [],
+        'attributes' => [],
+        'nodes' => [],
+        'show_all_link' => '',
+      ],
+    ],
+    'menu_layout_item__nodes' => [
+      'base hook' => 'menu_layout_item',
+      'template' => 'menu-layout-item--nodes',
+    ],
+    'menu_layout_item_content_item' => [
+      'variables' => [
+        'content' => [],
+      ],
+    ],
+    // Use the same template for all Main Menus.
+    'menu__extras__main_menu' => [
+      'base hook' => 'menu',
+      'template' => 'menu--extras--main-menu',
+    ],
+    'menu__extras__cheerios_main_menu' => [
+      'base hook' => 'menu',
+      'template' => 'menu--extras--main-menu',
+    ],
+    'menu__extras__nat_main_menu' => [
+      'base hook' => 'menu',
+      'template' => 'menu--extras--main-menu',
+    ],
+    'menu__extras__fitness_main_menu' => [
+      'base hook' => 'menu',
+      'template' => 'menu--extras--main-menu',
+    ],
+    // Use the same template for 1st level menu for all Main Menus.
+    'menu_levels__main_menu__level_1' => [
+      'base hook' => 'menu_levels',
+      'template' => 'menu-levels--main-menu--level-1',
+    ],
+    'menu_levels__cheerios_main_menu__level_1' => [
+      'base hook' => 'menu_levels',
+      'template' => 'menu-levels--main-menu--level-1',
+    ],
+    'menu_levels__nat_main_menu__level_1' => [
+      'base hook' => 'menu_levels',
+      'template' => 'menu-levels--main-menu--level-1',
+    ],
+    'menu_levels__fitness_main_menu__level_1' => [
+      'base hook' => 'menu_levels',
+      'template' => 'menu-levels--main-menu--level-1',
+    ],
+    'views_view__main_menu' => [
+      'base hook' => 'views_view',
+      'template' => 'views-view--main-menu',
+    ],
+    'views_view_unformatted__main_menu_all_topics' => [
+      'base hook' => 'views_view_unformatted',
+      'template' => 'views-view-unformatted--main-menu-all-topics',
+    ],
+    'views_view_unformatted__main_menu__brands' => [
+      'base hook' => 'views_view_unformatted',
+      'template' => 'views-view-unformatted--main-menu--brands',
+    ],
+    'views_view_unformatted__main_menu__overview' => [
+      'base hook' => 'views_view_unformatted',
+      'template' => 'views-view-unformatted--main-menu--overview',
+    ],
+    'views_view_unformatted__main_menu__campaigns' => [
+      'base hook' => 'views_view_unformatted',
+      'template' => 'views-view-unformatted--main-menu--campaigns',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Add states to the node edit/add form. Hides section fields if the user
+ * has been not selected the appropriate theme.
+ */
+function cpw_main_menu_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $theme_fields = [
+    'cheerios' => 'field_cheerios_menu_section',
+    'fitness' => 'field_fitness_menu_section',
+    'nat' => 'field_nat_menu_section',
+    'nat' => 'field_additional_wrapping_class',
+    'nbc' => 'field_menu_section',
+  ];
+
+  $forms = [
+    'node_form',
+  ];
+
+  $build_info = $form_state->getBuildInfo();
+
+  if (isset($build_info['base_form_id']) && in_array($build_info['base_form_id'], $forms)) {
+    foreach ($theme_fields as $theme_key => $theme_field) {
+      if ($field = &$form[$theme_field]['widget']) {
+        $field['#states']['visible'] = [
+          ':input[name="field_theme[0][value]"]' => [
+            'value' => $theme_key,
+          ],
+        ];
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ *
+ * Allows to use <br/> tag in the title of the menu link.
+ */
+function cpw_main_menu_preprocess_menu(array &$variables) {
+  $current_path = \Drupal::service('path.current')->getPath();
+  $get_tid_current = explode('/', $current_path);
+  $menu_name = $variables['menu_name'];
+  // List of main menus for different themes.
+  $menu_list = [
+    'main-menu',
+    'cheerios-main-menu',
+    'nat-main-menu',
+    'fitness-main-menu',
+  ];
+
+  if (in_array($menu_name, $menu_list)) {
+    foreach ($variables['items'] as $key => &$link) {
+      $safe_title = Xss::filterAdmin($link['title']);
+      $link['title'] = Markup::create($safe_title);
+
+      $id = $link['original_link']->getPluginId();
+      $uuid = str_replace('menu_link_content:', '', $id);
+      $menu_entity = \Drupal::service('entity.repository')
+        ->loadEntityByUuid('menu_link_content', $uuid);
+
+      // Replace main link URLs to pretty URLs.
+      $route_params = $link['original_link']->getRouteParameters();
+
+      if (isset($route_params['arg_0']) && $tid = $route_params['arg_0']) {
+        $variables['items'][$key]['url'] = cpw_main_menu_url_alias_builder($tid);
+
+        // If current page's TID matches the link's TID, then let's set active trail TRUE.
+        if ($tid == end($get_tid_current)) {
+          $variables['items'][$key]['in_active_trail'] = TRUE;
+        }
+      }
+
+      // Check if field_menu_section is set, append "All Topics" in the menu.
+      if (!$menu_entity->get('field_menu_section')->isEmpty()) {
+        $menu_section_id = $menu_entity->get('field_menu_section')->first()->getValue()['target_id'];
+        $variables['items'][$key]['url'] = cpw_main_menu_url_alias_builder($menu_section_id);
+        $variables['items'][$key]['below'][] = [
+          'title' => t('All Topics'),
+          'url' => cpw_main_menu_url_alias_builder($menu_section_id),
+        ];
+      }
+
+      $first_levels = $variables['items'][$key]['below'];
+      foreach (array_keys($first_levels) as $menu_id) {
+        // Remove 2nd submenu level.
+        $variables['items'][$key]['below'][$menu_id]['below'] = [];
+
+        // Replace level 1 URLs to pretty URLs.
+        $submenu_entity = $variables['items'][$key]['below'][$menu_id];
+        if (array_key_exists('original_link', $submenu_entity)) {
+          $route_param = $submenu_entity['original_link']->getRouteParameters();
+          $route_attr = array_key_first($route_param);
+          if (!empty($route_param[$route_attr]) && $route_attr != 'node') {
+            $tid = $route_param[$route_attr];
+            $variables['items'][$key]['below'][$menu_id]['url'] = cpw_main_menu_url_alias_builder($tid);
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Preprocess variables for menu-layout-item.html.twig.
+ *
+ * Renders the proper view inside the menu-layout-item twig template.
+ * The view id is 'main_menu' and display id is the same as layout field in
+ * the menu item entity.
+ *
+ * @see cpw_main_menu_preprocess_menu_levels()
+ */
+function template_preprocess_menu_layout_item(array &$variables) {
+  $display_id = $layout = $variables['layout'];
+  $context_filter = '';
+  $view_id = 'main_menu';
+  $theme = \Drupal::theme()->getActiveTheme()->getName();
+
+  if ($layout == 'nodes') {
+    $show_all_default = base_path() . 'themes/custom/nbc/assets/css/images/show-all-default.jpg';
+    $show_all_new = base_path() . 'themes/custom/' . $theme . '/assets/css/images/show-all-default.png';
+    $show_all_image = $theme != 'nbc' ? $show_all_new : $show_all_default;
+
+    $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+    if (isset($variables['nodes'])) {
+      foreach (array_slice($variables['nodes'], 0, 2) as $nid) {
+        $video_thumbnail = FALSE;
+        $hero = '';
+        /** @var \Drupal\node\NodeInterface $node */
+        $node = $node_storage->load($nid);
+        // Build the canonical URL to the node.
+        $url = Url::fromRoute('entity.node.canonical', [
+          'node' => $node->id(),
+        ])->setAbsolute(TRUE);
+
+        $image = $show_all_image;
+        // Used for Recipe content type.
+        if ($node->hasField('field_hero') && !$node->field_hero->isEmpty()) {
+          $paragraph = $node->field_hero->referencedEntities();
+          $ref_entites = $paragraph[0]->get('field_c_image')->referencedEntities();
+          $media = $ref_entites[0];
+          if ($media->bundle() == 'video') {
+            $video_thumbnail = TRUE;
+          }
+          else {
+            $hero = $paragraph[0]->field_c_image->first()->getValue();
+          }
+        }
+
+        // Used by Product and Component Page content types.
+        if ($node->hasField('field_stage_visual_image') && !$node->field_stage_visual_image->isEmpty()) {
+          $paragraph = $node->field_stage_visual_image->referencedEntities();
+          $ref_entites = $paragraph[0]->get('field_c_image')->referencedEntities();
+          $media = $ref_entites[0];
+          if ($media->bundle() == 'video') {
+            $video_thumbnail = TRUE;
+          }
+          else {
+            $hero = $paragraph[0]->image->first()->getValue();
+          }
+        }
+
+        if ($video_thumbnail) {
+          $display_options = [
+            'label' => 'hidden',
+            'type' => 'responsive_image',
+            'settings' => [
+              'responsive_image_style' => 'stage_visual',
+            ],
+          ];
+          $image = $media->field_video_->view($display_options);
+        }
+        if ($hero != '') {
+          $mediaId = $hero['target_id'];
+          $media = Media::load($mediaId)->image;
+          $image = $media->entity->getFileUri();
+        }
+
+        $title = $node->getTitle();
+        if ($node->hasField('field_stage_visual_title') && !$node->field_stage_visual_title->isEmpty()) {
+          $title = $node->get('field_stage_visual_title')->first()->getValue()['value'];
+          $title = Xss::filter($title);
+          $title = trim(preg_replace('/\s+/', ' ', $title));
+        }
+
+        $variables['items'][] = [
+          '#theme' => 'menu_layout_item_content_item',
+          '#content' => [
+            'title' => $title,
+            'url' => $url->toString(),
+            'image_style' => $hero ? TRUE : FALSE,
+            'image' => $image,
+            'is_video' => $video_thumbnail,
+          ],
+        ];
+      }
+
+      $variables['items'][] = [
+        '#theme' => 'menu_layout_item_content_item',
+        '#content' => [
+          'title' => t('Show all available recipes'),
+          'url' => $variables['show_all_link'],
+          'image-style' => FALSE,
+          // @todo Move to some settings and apply image style to it.
+          'image' => $show_all_image,
+        ],
+      ];
+    }
+
+    return;
+  }
+
+  // If selected layout is 'All Topics' we need to render another view with
+  // a list of the taxonomy terms.
+  if ($layout == 'all_topics') {
+    $view_id = 'main_menu_all_topics';
+  }
+
+  if (isset($variables['extra']) && isset($variables['extra']['tid'])) {
+    $context_filter = $variables['extra']['tid'];
+  }
+
+  // Render the view inside the menu-layout-item.
+  $variables['content'] = views_embed_view($view_id, $display_id, $context_filter);
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ *
+ * The main goal is render the view inside the 2nd depth menu item if
+ * it's necessary. We are going to render the 2nd depth menu list and view
+ * separately to make theming easier.
+ */
+function cpw_main_menu_preprocess_menu_levels(array &$variables) {
+  if (!isset($variables['menu_name'])) {
+    return;
+  }
+
+  $menu_name = $variables['menu_name'];
+  // List of main menus for different themes.
+  $menu_list = [
+    'main-menu',
+    'cheerios-main-menu',
+    'nat-main-menu',
+    'fitness-main-menu',
+  ];
+
+  if (!in_array($menu_name, $menu_list)) {
+    return;
+  }
+
+  // The wrapper for the list of rendered views.
+  $build = [
+    '#theme' => 'menu_layout',
+    '#attached' => [
+      'library' => [
+        'cpw_main_menu/menu',
+      ],
+    ],
+  ];
+
+  $children = Element::children($variables['items']);
+  $all_topics = FALSE;
+  foreach ($children as $key => $value) {
+    $item = &$variables['items'][$value];
+    $menu_layout_item = [];
+
+    // Generates the unique id by which appropriate layout will be showed.
+    $unique_id = Html::getUniqueId('menu-layout-item');
+    $item['attributes'] = new Attribute(['data-menu-target' => $unique_id]);
+    $attributes = new Attribute(['id' => $unique_id]);
+
+    // Check if this is our "All Topics" link generated dynamically.
+    if (!array_key_exists('entity', $item)) {
+      $all_topics = TRUE;
+      $item['attributes']->setAttribute('class', 'nav-all-topics');
+    }
+    else {
+      /** @var \Drupal\menu_item_extras\Entity\MenuItemExtrasMenuLinkContentInterface $menu_item */
+      $menu_item = $item['entity'];
+    }
+
+    // Add is-open class to the first menu layout item.
+    if ($value == reset($children)) {
+      $attributes->addClass('is-open');
+    }
+
+    // Get selected layout.
+    if ($menu_item != NULL) {
+      $layout = $menu_item->get('field_menu_item_layout')->first()->getString();
+      if ($layout == 'nodes') {
+        $nodes = [];
+        $parameters = (new MenuTreeParameters())->setRoot($value);
+        $tree = \Drupal::service('menu.link_tree')
+          ->load($variables['menu_name'], $parameters);
+
+        if (isset($tree[$value])) {
+          $parent = $parent = $tree[$value];
+          foreach ($parent->subtree as $child) {
+            /** @var \Drupal\menu_link_content\MenuLinkContentInterface $link */
+            $link = $child->link;
+            if ($link->getUrlObject()->getRouteName() == 'entity.node.canonical') {
+              $nodes[$link->getWeight()] = $link->getUrlObject()->getRouteParameters()['node'];
+            }
+          }
+
+          // The render array for the single rendered view.
+          // Sort by last updated.
+          $menu_layout_item = [
+            '#theme' => 'menu_layout_item',
+            '#layout' => $layout,
+            '#attributes' => $attributes,
+            '#nodes' => $nodes,
+            '#show_all_link' => $parent->link->getUrlObject()->toString(),
+          ];
+        }
+      }
+      else {
+        // The render array for the single rendered view.
+        $menu_layout_item = [
+          '#theme' => 'menu_layout_item',
+          '#layout' => $layout,
+          '#attributes' => $attributes,
+        ];
+
+        // Add taxonomy terms if exist.
+        // Rendered view will be filtered by this taxonomy term
+        // as contextual filter.
+        if ($menu_item->hasField('field_menu_section') && $menu_item->get('field_menu_section')->first() !== NULL) {
+          $menu_layout_item['#extra']['tid'] = $menu_item->get('field_menu_section')
+            ->first()
+            ->getString();
+        }
+      }
+    }
+
+    // If all topics last item.
+    if ($all_topics && $menu_item != NULL) {
+      $menu_section_id = cpw_main_menu_get_parent($menu_item);
+      $menu_layout_item = [
+        '#theme' => 'menu_layout_item',
+        '#layout' => 'all_topics',
+        '#attributes' => $attributes,
+        '#extra' => [
+          'tid' => $menu_section_id,
+        ],
+      ];
+    }
+    $build['#items'][] = $menu_layout_item;
+  }
+  $variables['menu_layout'] = $build;
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK().
+ */
+function cpw_main_menu_theme_suggestions_menu_layout_item(array $variables) {
+  $suggestions[] = 'menu_layout_item__' . $variables['layout'];
+  return $suggestions;
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter().
+ *
+ * Use the same template for all main menus.
+ */
+function cpw_main_menu_theme_suggestions_menu_levels_alter(array &$suggestions, array $variables) {
+  $menu_list = [
+    'main-menu',
+    'cheerios-main-menu',
+    'nat-main-menu',
+    'fitness-main-menu',
+  ];
+
+  if (isset($variables['items']) && in_array($variables['items']['#menu_name'], $menu_list)) {
+    $suggestions[] = 'menu_levels__main_menu';
+
+    $children = Element::children($variables['items']);
+    if (isset($children[0]) && isset($variables['items'][$children[0]]['menu_level'])) {
+      $level = 'level_' . $variables['items'][$children[0]]['menu_level'];
+      $suggestions[] = 'menu_levels__main_menu__' . $level;
+    }
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter().
+ *
+ * Use the same template for all main menus.
+ */
+function cpw_main_menu_theme_suggestions_menu_alter(array &$suggestions, array $variables) {
+  if (!isset($variables['menu_name'])) {
+    return;
+  }
+  $menu_name = $variables['menu_name'];
+
+  $menu_list = [
+    'main-menu',
+    'cheerios-main-menu',
+    'nat-main-menu',
+    'fitness-main-menu',
+  ];
+
+  if (in_array($menu_name, $menu_list)) {
+    $suggestions[] = 'menu__extras__main_menu';
+  }
+}
+
+/**
+ * Implements hook_views_pre_view().
+ */
+function cpw_main_menu_views_pre_view(ViewExecutable $view, $display_id, &$args) {
+  // Configure the display name against the allowed page types to filter.
+  $display_pagetypes = [
+    'campaigns' => ['Campaign'],
+    'promotions' => ['Promotion', 'Digital Promotion'],
+    'brands' => ['Brand', 'Brand Landing Page'],
+  ];
+
+  // Fix page type filters in the views configured in $display_pagetypes.
+  // The values are the list of "Page Types" that it will be filtered on.
+  if ($view->id() == 'main_menu' && array_key_exists($display_id, $display_pagetypes)) {
+    $tids = cpw_main_menu_get_tids($display_id, $display_pagetypes);
+    $filters = $view->getDisplay()->getOption('filters');
+
+    $filters['field_page_type_target_id']['value'] = $tids;
+    $view->display_handler->overrideOption('filters', $filters);
+  }
+}
+
+/**
+ * Implements template_preprocess_views_view().
+ */
+function cpw_main_menu_preprocess_views_view(&$variables) {
+  $view = $variables['view'];
+  $show_all_config = [
+    'campaigns' => Url::fromRoute('view.category.overview_campaigns'),
+    'promotions' => Url::fromRoute('view.category.overview_promotions'),
+  ];
+  if ($view->storage->id() == 'main_menu') {
+    $theme = \Drupal::theme()->getActiveTheme()->getName();
+    $show_all_default = base_path() . 'themes/custom/nbc/assets/css/images/show-all-default.jpg';
+    $args = $view->args;
+
+    // Check if contextual filter (taxonomy ID) exist, find alias.
+    if ($args[0]) {
+      $variables['url'] = cpw_main_menu_url_alias_builder($args[0]);
+    }
+    // Check if we have custom URL for display_id, assign a "show all" URL.
+    if (array_key_exists($variables['display_id'], $show_all_config)) {
+      $variables['url'] = $show_all_config[$variables['display_id']];
+    }
+
+    $show_all_new = base_path() . 'themes/custom/' . $theme . '/assets/css/images/show-all-default.png';
+    $show_all_image = $theme != 'nbc' ? $show_all_new : $show_all_default;
+    $variables['show_all_image'] = $show_all_image;
+  }
+}
+
+/**
+ * Build proper URL alias based on passed TID.
+ */
+function cpw_main_menu_url_alias_builder($tid) {
+  return Url::fromRoute('entity.taxonomy_term.canonical', ['taxonomy_term' => $tid]);
+}
+
+/**
+ * Get term IDs based on allowed page types.
+ */
+function cpw_main_menu_get_tids($display_name, $display_pagetypes) {
+  $filter_tids = $display_pagetypes[$display_name];
+  $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadTree('page_types');
+  $tids = [];
+  foreach ($terms as $term) {
+    if (in_array($term->name, $filter_tids)) {
+      $tids[$term->tid] = (int) $term->tid;
+    }
+  }
+  return $tids;
+}
+
+/**
+ * Return the term ID of the parent menu from field_menu_section.
+ */
+function cpw_main_menu_get_parent($menu_item) {
+  // Get parent ID's uuid and prepare entity via $parent_menu.
+  $parent_id = $menu_item->getParentId();
+  $newUuid = str_replace('menu_link_content:', '', $parent_id);
+  $parent_menu = \Drupal::service('entity.repository')
+    ->loadEntityByUuid('menu_link_content', $newUuid);
+
+  if (!$parent_menu->get('field_menu_section')->isEmpty()) {
+    $parent_menu_section_id = $parent_menu->field_menu_section->first()->getValue()['target_id'];
+    return $parent_menu_section_id;
+  }
+}

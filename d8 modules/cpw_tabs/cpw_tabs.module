@@ -1,0 +1,55 @@
+<?php
+
+/**
+ * @file
+ * Contains cpw_tabs.module.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function cpw_tabs_theme() {
+  return [
+    'paragraph__tabs' => [
+      'template' => 'paragraph--tabs',
+      'base hook' => 'paragraph',
+    ],
+    'paragraph__tab' => [
+      'template' => 'paragraph--tab',
+      'base hook' => 'paragraph',
+    ],
+    'field__paragraph__field_tab' => [
+      'template' => 'field--paragraph--field-tab',
+      'base hook' => 'field',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_preprocess_paragraph().
+ */
+function cpw_tabs_preprocess_paragraph__tabs(&$variables) {
+  $paragraph = $variables['elements']['#paragraph'];
+  $tabs = $paragraph->field_tab;
+  foreach ($tabs->referencedEntities() as $tab) {
+    if (isset($tab->field_tab_title->value)) {
+      $result['title'] = $tab->field_tab_title->value;
+    }
+    if ($tab->hasField('field_icon_list') && !$tab->field_icon_list->isEmpty()) {
+      $result['icon'] = $tab->field_icon_list->value;
+    }
+    $variables['tab_headers'][] = $result;
+  }
+  // Attach JS library.
+  $variables['#attached']['library'][] = 'cpw_tabs/cpw_tabs';
+}
+
+/**
+ * Implements hook_preprocess_paragraph().
+ */
+function cpw_tabs_preprocess_paragraph__tab(&$variables) {
+  $tab = $variables['elements']['#paragraph'];
+  if ($tab->hasField('field_tab_introtext') && !$tab->field_tab_introtext->isEmpty()) {
+    $variables['introtext'] = $tab->field_tab_introtext->value;
+  }
+}

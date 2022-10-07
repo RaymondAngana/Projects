@@ -1,0 +1,5 @@
+services:
+  cpw_contact.route_subscriber:
+    class: Drupal\cpw_contact\Routing\ContactRouteSubscriber
+    tags:
+      - { name: event_subscriber }

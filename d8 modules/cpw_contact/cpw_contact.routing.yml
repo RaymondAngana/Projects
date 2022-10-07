@@ -1,0 +1,9 @@
+cpw_contact.cpw_contact:
+  path: '/admin/config/cpw/cpw_contact'
+  defaults:
+    _form: '\Drupal\cpw_contact\Form\CpwContactSettingsForm'
+    _title: 'Cpw Contact'
+  requirements:
+    _permission: 'access administration configuration'
+  options:
+    _admin_route: TRUE

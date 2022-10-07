@@ -1,0 +1,8 @@
+name: 'CPW Header Metanav'
+description: 'CPW Header Metanav component'
+type: module
+package: 'CPW'
+core_version_requirement: ^8.8 || ^9
+dependencies:
+  - paragraphs
+version: 8.x-1.0

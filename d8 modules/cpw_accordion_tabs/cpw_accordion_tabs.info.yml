@@ -1,0 +1,5 @@
+name: 'CPW Accordion Tabs'
+type: module
+description: 'Custom module for accordion tab functionality for Splash selector.'
+core_version_requirement: ^8.8 || ^9
+package: 'CPW'

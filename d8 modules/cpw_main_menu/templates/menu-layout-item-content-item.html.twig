@@ -1,0 +1,40 @@
+{#
+/**
+ * @file
+ * Default theme implementation of the menu_layout_item_content_item.
+ *
+ * Renders the node by 'node/[nid]' link or 'Show all available recipes' item.
+ * This template is used for the 3rd depth menu items.
+ *
+ * Available variables:
+ * - content: The item values. Contains:
+ *   - title: The title of the node/item;
+ *   - image: The image of the node/item;
+ *   - url: The URL of the node/item;
+ */
+#}
+
+{%
+  set classes = [
+  'mod-navigation__subnav-content-item',
+]
+%}
+
+<div{{ create_attribute().addClass(classes) }}>
+  <a href="{{ content.url }}" title="{{ content.title }}">
+    {% if content.is_video %}
+      {{ content.image }}
+    {% else %}
+      {% if content.image is not empty %}
+        {% if content.image_style %}
+          <img alt="{{ content.title }}" src={{ content.image | image_style('main_menu_272x150') }}>
+        {% else %}
+          <img alt="{{ content.title }}" src={{ content.image }}>
+        {% endif %}
+      {% endif %}
+    {% endif %}
+    <span>
+      {{ content.title }}
+    </span>
+  </a>
+</div>

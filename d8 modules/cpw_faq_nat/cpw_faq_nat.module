@@ -1,0 +1,83 @@
+<?php
+
+/**
+ * @file
+ * Contains cpw_faq_nat.module.
+ */
+
+use Drupal\media\Entity\Media;
+use Drupal\file\Entity\File;
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_theme().
+ */
+function cpw_faq_nat_theme() {
+  return [
+    'paragraph__faq_nat' => [
+      'template' => 'paragraph--faq-nat',
+      'base hook' => 'paragraph',
+    ],
+    'node__faq' => [
+      'template' => 'node--faq',
+      'base hook' => 'node',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_preprocess_paragraph__TYPE().
+ */
+function cpw_faq_nat_preprocess_paragraph__faq_nat(&$variables) {
+  $paragraph = $variables['elements']['#paragraph'];
+
+  // Preprocess FAQ Image.
+  if (isset($paragraph->field_faq_image)) {
+    $media = $paragraph->field_faq_image->getValue();
+
+    if (isset($media)) {
+      $faq_img = cpw_faq_nat_img_url($media);
+      $variables['faq_img'] = $faq_img;
+    }
+  }
+
+  // Process FAQ CTA.
+  if (!$paragraph->field_faq_cta->isEmpty()) {
+    $cta = $paragraph->field_faq_cta->first()->getValue();
+    $faq_cta['uri'] = Url::fromUri($cta['uri'])->toString();
+    $faq_cta['title'] = $cta['title'];
+    $variables['faq_cta'] = $faq_cta;
+  }
+
+  // Process FAQ anchor.
+  if (!$paragraph->field_faq_anchor->isEmpty()) {
+    $faq_anchor = $paragraph->field_faq_anchor->first()->getValue()['value'];
+    $variables['faq_anchor'] = $faq_anchor;
+  }
+
+  // Attach js if component is in the page.
+  $variables['#attached']['library'][] = 'cpw_faq/faq';
+}
+
+/**
+ * Extract URL from media image.
+ *
+ * @param media_entity $media
+ *   The media entity to capture the URL.
+ *
+ * @return string
+ *   Valid URL of the image.
+ */
+function cpw_faq_nat_img_url($media) {
+  foreach ($media as $key => $media_id) {
+    if (array_key_exists('target_id', $media_id)) {
+      $media_data = $media_id['target_id'];
+      $media_entity = Media::load($media_data);
+      $file_id = $media_entity->image->first()->getValue()['target_id'];
+      $file = File::load($file_id);
+      $file_uri = $file->getFileUri();
+
+      return file_create_url($file_uri);
+    }
+  }
+}

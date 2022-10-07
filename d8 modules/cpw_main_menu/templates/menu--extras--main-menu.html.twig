@@ -1,0 +1,58 @@
+{#
+  /**
+   * @file
+   * Theme override to display a menu.
+   *
+   * The CSS classes structure has been migrated from the Drupal 7 and might be updated
+   * in the future.
+   *
+   * Available variables:
+   * - menu_name: The machine name of the menu.
+   * - items: A nested list of menu items. Each menu item contains:
+   *   - attributes: HTML attributes for the menu item.
+   *   - content.children: The menu item child items.
+   *   - title: The menu link title.
+   *   - url: The menu link url, instance of \Drupal\Core\Url
+   *   - content: The field item content.
+   *   - localized_options: Menu link localized options.
+   *   - is_expanded: TRUE if the link has visible children within the current
+   *     menu tree.
+   *   - is_collapsed: TRUE if the link has children within the current menu tree
+   *     that are not currently visible.
+   *   - in_active_trail: TRUE if the link is in the active trail.
+   *
+   */
+#}
+
+  {% import _self as menu %}
+
+  {{ menu.menu_links(items, attributes, 0, 'mod-navigation__menu') }}
+
+  {% macro menu_links(items, attributes, menu_level, menu_class) %}
+    <ul class="menu menu-level-{{ items|first.menu_level }} {{ menu_class }}">
+      {% for key, item in items if key|first != '#' %}
+
+        {% set menu_item_classes = [
+          'menu-item',
+          item.is_expanded ? 'menu-item--expanded',
+          item.is_collapsed ? 'menu-item--collapsed',
+          item.in_active_trail ? 'menu-item--active-trail',
+        ] %}
+
+        {% set link_current = [
+          item.in_active_trail ? 'is-selected',
+          item.in_active_trail ? 'active',
+        ] %}
+
+        {% set menuLevel = items|first.menu_level %}
+
+        <li{{ item.attributes.addClass(menu_item_classes) }} data-menu-level="{{ menuLevel }}">
+          {{ link(item.title, item.url, {'aria-haspopup': 'true', 'aria-expanded': 'false', 'class': link_current}) }}
+          {% set rendered_content = item.content|without('') %}
+          {% if rendered_content|render %}
+            {{ rendered_content }}
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endmacro %}

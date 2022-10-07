@@ -1,0 +1,27 @@
+{#
+/**
+ * @file
+ * Default theme implementation to each level of menu.
+ *
+ * The CSS classes structure has been migrated from the Drupal 7 and might be updated
+ * in the future.
+ */
+#}
+
+{% import "menu-levels.html.twig" as menu %}
+
+<div class="mod-navigation__menu--wrapper">
+  <div class="mod-navigation__menu--level-2-container">
+    <div class="mod-navigation__menu--level-2-wrapper">
+      <div class="mod-navigation__menu--level-2">
+        {{ menu.menu_links(items, attributes, 1) }}
+
+        {% if menu_layout is not empty %}
+          <div class="menu-layout">
+            {{ menu_layout }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>

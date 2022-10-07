@@ -1,0 +1,13 @@
+<div class="mod-tab__panes">
+  <div class="mod-tab__panes-inlay">
+    {% for item in items %}
+      {%  set is_active = loop.index == 1 ? ' is-active' : '' %}
+      <div id="tab-{{ loop.index }}" class="mod-tab__pane{{ is_active }}"
+           tabindex="0"
+           role="tabpanel"
+           aria-labelledby="tab{{ loop.index }}">
+        {{ item.content }}
+      </div>
+    {% endfor %}
+  </div>
+</div>

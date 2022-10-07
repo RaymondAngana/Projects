@@ -1,0 +1,95 @@
+<?php
+
+/**
+ * @file
+ * Contains cpw_header_metanav.module.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_theme().
+ */
+function cpw_header_metanav_theme() {
+  return [
+    'paragraph__header_metanav' => [
+      'template' => 'paragraph--header-metanav',
+      'base hook' => 'paragraph',
+    ],
+  ];
+}
+
+/**
+ * Hook_field_widget_entity_reference_paragraphs_form_alter().
+ */
+function cpw_header_metanav_field_widget_entity_reference_paragraphs_form_alter(&$element, FormStateInterface $form_state, &$context) {
+  if ($element['#paragraph_type'] == 'header_metanav') {
+    $element['subform']['field_blocks']['widget'][0]['subform']['field_adimo_id']['#access'] = FALSE;
+    $element['subform']['field_blocks']['widget'][0]['subform']['field_fusepump_click_collect']['#access'] = FALSE;
+
+    $provider = \Drupal::config('cpw_integrations.settings')->get('cpw_integrations');
+    if ($provider['provider'] == 'ln_adimo') {
+      $element['subform']['field_blocks']['widget'][0]['subform']['field_adimo_id']['#access'] = TRUE;
+    }
+
+    if ($provider['provider'] == 'cpw_fusepump_cac') {
+      $element['subform']['field_blocks']['widget'][0]['subform']['field_fusepump_click_collect']['#access'] = TRUE;
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_paragraph__TYPE().
+ * Preprocess for the category_listings paragraph type.
+ */
+function cpw_header_metanav_preprocess_paragraph__header_metanav(&$variables) {
+  $theme = \Drupal::theme()->getActiveTheme()->getName();
+  $paragraph = $variables['elements']['#paragraph'];
+  $provider = \Drupal::config('cpw_integrations.settings')->get('cpw_integrations');
+
+  // Check if paragraph has field_layouts.
+  if ($paragraph->hasField('field_menu_paragraph_layouts')) {
+    $layout_type = $paragraph->field_menu_paragraph_layouts->value ?? 'default';
+    $mobile_meta_nav = [];
+
+    if ($layout_type == 'mobile') {
+      if ($theme != 'nbc') {
+        $variables['not_nbc'] = TRUE;
+        $mobile_meta_nav[] = t('Weitere Informationen');
+      }
+      else {
+        $blocks = $paragraph->field_blocks->referencedEntities();
+        foreach ($blocks as $key => $block) {
+          if ($block->hasField('field_adimo_id') && !$block->field_adimo_id->isEmpty()) {
+            if ($provider['provider'] == 'ln_adimo') {
+              $variables['mobile_buy_now'] = $block->field_adimo_id->view();
+            }
+          }
+          if ($block->hasField('field_fusepump_click_collect') && !$block->field_fusepump_click_collect->isEmpty()) {
+            if ($provider['provider'] == 'cpw_fusepump_cac') {
+              $variables['mobile_buy_now'] = $block->field_fusepump_click_collect->view(['label' => 'hidden']);
+            }
+          }
+
+          // Metanav menu component.
+          if ($block->hasField('field_menu')) {
+            $menu_id = $block->get('field_menu')
+              ->first()
+              ->get('target_id')
+              ->getString();
+            $menu_tree = \Drupal::menuTree();
+            $parameters = $menu_tree->getCurrentRouteMenuTreeParameters($menu_id);
+            $tree = $menu_tree->load($menu_id, $parameters);
+            foreach ($tree as $key => $item) {
+              $mobile_meta_nav[] = [
+                'url' => $item->link->getUrlObject()->toString(),
+                'text' => $item->link->getTitle(),
+              ];
+            }
+          }
+        }
+      }
+      $variables['mobile_meta_nav'] = $mobile_meta_nav;
+    }
+  }
+}

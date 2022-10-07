@@ -1,0 +1,29 @@
+{#
+/**
+ * @file
+ * Default theme implementation of the menu_layout_item__nodes.
+ *
+ * Renders a list of nodes inside the menu-layout.html.twig wrapper.
+ *
+ * Available variables:
+ * - items: The list of items.
+ * - attributes: Menu layout item attributes.
+ *
+ * @see template_preprocess_menu_layout_item()
+ */
+#}
+
+{%
+  set classes = [
+  'menu-layout__item',
+  'menu-layout__item--' ~ layout|clean_class
+]
+%}
+
+<div{{ attributes.addClass(classes) }}>
+  <div id="{{ id }}" class="mod-navigation--subnav-content mod-navigation__subnav-content">
+    {% for item in items %}
+      {{ item }}
+    {% endfor %}
+  </div>
+</div>

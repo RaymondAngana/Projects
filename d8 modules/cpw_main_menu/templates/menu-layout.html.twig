@@ -1,0 +1,23 @@
+{#
+/**
+ * @file
+ * Default theme implementation of the menu_layout.
+ *
+ * Wrapper for the menu-layout-item.html.twig items.
+ *
+ * Available variables:
+ * - items: The list of menu_layout_items.
+ */
+#}
+
+{%
+  set classes = [
+    'menu-layout__content'
+  ]
+%}
+
+<div{{ create_attribute().addClass(classes) }}>
+  {% for item in items %}
+    {{ item }}
+  {% endfor %}
+</div>

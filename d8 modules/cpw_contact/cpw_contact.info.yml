@@ -1,0 +1,12 @@
+name: 'cpw_contact'
+type: module
+description: 'Update contact'
+core_version_requirement: ^8.8 || ^9
+package: 'Custom'
+dependencies:
+  - ln_contactus_block
+
+default_content:
+  node:
+    - 4f094ae9-b28f-4bbb-84df-3ca07a2404ed
+    - 1faa584c-dd6b-4ac3-aa7d-e7b13796b17d

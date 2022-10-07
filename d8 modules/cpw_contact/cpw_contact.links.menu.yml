@@ -1,0 +1,13 @@
+cpw.settings:
+  title: Cpw
+  description: Various settings for altering the behavior of Cpw modules.
+  parent: system.admin_config
+  route_name: cpw_contact.cpw_contact
+  weight: -15
+
+cpw_contact.index:
+  title: Cpw Contact
+  description: Various settings for altering the behavior of Engage modules.
+  parent: cpw.settings
+  route_name: cpw_contact.cpw_contact
+  weight: 10

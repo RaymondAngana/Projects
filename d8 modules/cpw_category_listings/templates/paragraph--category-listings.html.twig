@@ -1,0 +1,68 @@
+{% block paragraph %}
+  {% block content %}
+    <div class="mod mod-products-landing-slider">
+      {% for tag in tags %}
+        {% if tag.products is not empty %}
+          {% set link_class = 'slideshow-content__item taxonomy-term vocabulary-categories slick-slide slick-current' %}
+          {% set class_id = 'mod-products-landing-' ~ tag.class_name %}
+          <div class="term-{{ tag.tid }} mod {{ class_id }} {{ class_id }}--{{ tag.orientation }}" data-t-name="ProductsLanding">
+          <div class="container-fluid">
+            {% if tag.brandbg is not empty %}
+              <div class="{{ class_id }}__back-image">
+                {{ tag.brandbg }}
+              </div>
+            {% endif %}
+
+            <div class="{{ class_id }}__textbox">
+              {% if content.field_c_title %}
+                <h2>{{  content.field_c_title }}</h2>
+              {% endif %}
+
+              {% if tag.brandlogo is not empty %}
+                <div class="textbox-logo">
+                  {{ tag.brandlogo }}
+                </div>
+              {% endif %}
+
+              {% if tag.introtext is not empty %}
+                <p class="rte">
+                  {{ tag.introtext|raw }}
+                </p>
+              {% endif %}
+            </div>
+
+            <div class="mod {{ class_id }}__product">
+            {% for product in tag.products %}
+              <div class="product-item">
+                {% if product.packshot_img is not empty %}
+                  <div class="product-item__image">
+                    {{ product.packshot_img }}
+                  </div>
+                {% endif %}
+                {% if product.titles %}
+                  <div class="product-item__text">
+                    <h2>
+                      {% for title in product.titles %}
+                        <span class="product-title-colour-{{ loop.index }}">{{ title }}</span>
+                      {% endfor %}
+                    </h2>
+                  </div>
+                {% endif %}
+
+                <div class="product-item__cta">
+                  <a href="{{ product.url }}" class="btn btn--primary">{{ 'Learn More'|t }}</a>
+
+                  {% if product.buy_now %}
+                    {{ product.buy_now }}
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+            </div>
+          </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endblock %}
+{% endblock paragraph %}

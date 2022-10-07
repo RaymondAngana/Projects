@@ -1,0 +1,7 @@
+name: 'CPW FAQ (Nat)'
+type: module
+description: 'Custom module for FAQ (Nat).'
+core_version_requirement: ^8.8 || ^9
+package: 'CPW'
+dependencies:
+  - cpw_faq

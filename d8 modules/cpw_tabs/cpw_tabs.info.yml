@@ -1,0 +1,7 @@
+name: 'CPW Tabs'
+type: module
+description: 'Custom module for tab functionality.'
+core_version_requirement: ^8.8 || ^9
+package: 'CPW'
+
+version: '8.x-1.0'

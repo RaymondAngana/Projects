@@ -1,0 +1,8 @@
+cpw_tabs:
+  js:
+    js/tab.js: {}
+  dependencies:
+    - core/jquery
+    - core/jquery.once
+    - core/drupalSettings
+    - cpw_carousel_items/carousel-js

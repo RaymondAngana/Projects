@@ -1,0 +1,7 @@
+cpw_contact:
+  js:
+    js/cpw_contact_form.js: {}
+  dependencies:
+    - core/jquery
+    - core/jquery.once
+    - core/drupalSettings

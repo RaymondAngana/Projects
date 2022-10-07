@@ -1,0 +1,88 @@
+<?php
+
+/**
+ * @file
+ * Contains cpw_contact.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function cpw_contact_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the cpw_contact module.
+    case 'help.page.cpw_contact':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Update contact') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function cpw_contact_theme($existing, $type, $theme, $path) {
+  return [
+    'webform__contact_us__engage' => [
+      'template' => 'webform--contact-us--engage',
+      'base hook' => 'webform',
+    ],
+    'webform__contact_us' => [
+      'template' => 'webform--contact-us',
+      'base hook' => 'webform',
+    ],
+    'webform__contact_us_iframe' => [
+      'template' => 'webform--contact-iframe',
+      'base hook' => 'webform',
+    ],
+    'webform_confirmation__contact_us' => [
+      'template' => 'webform-confirmation--contact-us',
+      'base hook' => 'webform',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_theme_suggestions_page_alter().
+ * https://www.drupal.org/node/2521876#comment-10684366.
+ */
+function cpw_contact_theme_suggestions_webform_alter(array &$suggestions, array $variables) {
+  $config = Drupal::config('cpw_contact.settings');
+  if ($config->get('cpw_contact.iframe_source') && $variables['element']['#webform_id'] === 'contact_iframe') {
+    $suggestions[] = 'webform__contact_us_iframe';
+  }
+  if ($variables['element']['#form_id'] === 'webform_submission_contact_us_add_form') {
+    $suggestions[] = 'webform__contact_us__engage';
+  }
+  if ($variables['element']['#webform_id'] === 'contact_us') {
+    $suggestions[] = 'webform__contact_us__engage';
+  }
+}
+
+/**
+ * Implements hook_preprocess_paragraph__TYPE().
+ */
+function cpw_contact_preprocess_webform__contact_us_iframe(&$variables) {
+  $config = Drupal::config('cpw_contact.settings');
+  if ($config && $config->get('cpw_contact.iframe_source')) {
+    $variables['iframe_source'] = $config->get('cpw_contact.iframe_source');
+  }
+}
+
+/**
+ * Implements hook_preprocess_paragraph__TYPE().
+ */
+function cpw_contact_preprocess_webform__contact_us__engage(&$variables) {
+  // Attach JS library.
+  $variables['#attached']['library'][] = 'cpw_contact/cpw_contact';
+
+  $param = \Drupal::request()->query->get('s');
+  if ($param !== NULL) {
+    $variables['#attached']['drupalSettings']['question_param'] = $param;
+  }
+}

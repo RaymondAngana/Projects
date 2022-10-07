@@ -1,0 +1,171 @@
+<?php
+
+/**
+ * @file
+ * Contains cpw_category_listings.module.
+ */
+
+use Drupal\node\NodeInterface;
+use Drupal\media\Entity\Media;
+use Drupal\node\Entity\Node;
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_theme().
+ */
+function cpw_category_listings_theme() {
+  return [
+    'paragraph__category_listings' => [
+      'template' => 'paragraph--category-listings',
+      'base hook' => 'paragraph',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_preprocess_paragraph__TYPE().
+ * Preprocess for the category_listings paragraph type.
+ */
+function cpw_category_listings_preprocess_paragraph__category_listings(&$variables) {
+  $paragraph = $variables['elements']['#paragraph'];
+  $provider = \Drupal::config('cpw_integrations.settings')->get('cpw_integrations');
+  $tags = [];
+
+  // Preprocess based from the given taxonomy term IDs.
+  if (isset($paragraph->field_category_term)) {
+    foreach ($paragraph->field_category_term as $key => $term) {
+      $tid = $term->getValue()['target_id'];
+      $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($tid);
+      $nodeIds = cpw_category_listings__get_node_ids($tid);
+      $class_id = count($nodeIds) > 1 ? 'duo' : 'solo';
+      $tags[$key]['class_name'] = $class_id;
+      $tags[$key]['tid'] = $tid;
+
+      // If the category has contents associated with them.
+      if (count($nodeIds)) {
+        foreach ($nodeIds as $index => $nid) {
+          $node = Node::load($nid);
+          if ($node instanceof NodeInterface) {
+            $product = [];
+            $product['titles'] = explode(' ', $node->label());
+            $product['url'] = $node->toUrl()->toString();
+
+            if ($node->hasField('field_packshot') && !$node->field_packshot->isEmpty()) {
+              $ref_entities = $node->field_packshot->referencedEntities();
+
+              // Fetch the packshot paragraph.
+              $packshot_paragraph = $ref_entities[0];
+
+              // Get image.
+              $ref_image = $packshot_paragraph->field_packshot->referencedEntities();
+              $media = $ref_image[0];
+              $packshot_img = \Drupal::entityTypeManager()->getViewBuilder('media')->view($media);
+              $product['packshot_img'] = $packshot_img;
+
+              // Get orientation value.
+              $tags[$key]['orientation'] = $tags[$key]['orientation'] ?? $packshot_paragraph->field_packshot_orientation->value;
+            }
+
+            // Check if Fusepump ID is set.
+            if ($node->hasField('field_fusepump') && !$node->field_fusepump->isEmpty()) {
+              if ($provider['provider'] == 'cpw_fusepump_cac') {
+                $product['buy_now'] = $node->field_fusepump->view(['label' => 'hidden']);
+              }
+            }
+            // Check if Adimo is set.
+            if ($node->hasField('field_adimo_id') && !$node->field_adimo_id->isEmpty()) {
+              if ($provider['provider'] == 'ln_adimo') {
+                $product['buy_now'] = $node->field_adimo_id->view();
+              }
+            }
+            $tags[$key]['products'][$index] = $product;
+          }
+        }
+        // Get intro text.
+        if (!$term->description->isEmpty()) {
+          $tags[$key]['introtext'] = $term->description->value;
+        }
+
+        // Get Brand Logo.
+        if ($term->hasField('field_logo') && !$term->field_logo->isEmpty()) {
+          $logo = $term->field_logo;
+          if (!empty($logo[0])) {
+            $mediaId = $logo->getValue()[0]['target_id'];
+            if (isset($mediaId)) {
+              $tags[$key]['brandlogo'] = cpw_category_listings__get_img($mediaId);
+            }
+          }
+        }
+
+        // Get Brand Background.
+        $bg = $term->get('field_bg_for_category_listings');
+        if (!empty($bg[0])) {
+          $mediaId = $bg->getValue()[0]['target_id'];
+          if (isset($mediaId)) {
+            $tags[$key]['brandbg'] = cpw_category_listings__get_img($mediaId, 'category_listing_background');
+          }
+        }
+      }
+    }
+    $variables['tags'] = $tags;
+    $variables['#attached']['library'][] = 'cpw_category_listings/cpw_category_listings';
+  }
+}
+
+/**
+ * Return image entity based from mediaId passed.
+ *
+ * @param $mediaId
+ */
+function cpw_category_listings__get_img($mediaId, $display = 'default') {
+  if (isset($mediaId)) {
+    $media_entity = Media::load($mediaId);
+    $display_options = [
+      'label' => 'hidden',
+      'type' => 'responsive_image',
+      'settings' => [
+        'responsive_image_style' => $display,
+      ],
+    ];
+
+    // Get image, apply display options.
+    if ($media_entity->hasField('image')) {
+      $image = $media_entity->image->view($display_options);
+      return $image;
+    }
+  }
+}
+
+/**
+ * Get 2 latest nodes given term ID and similar theme of current node.
+ *
+ * @param $tid
+ *
+ * @return array|int
+ */
+function cpw_category_listings__get_node_ids($tid) {
+  $theme = \Drupal::theme()->getActiveTheme()->getName();
+  $query = \Drupal::entityQuery('node')
+    ->condition('status', 1)
+    ->condition('type', 'dsu_product')
+    ->condition('field_theme', $theme)
+    ->condition('field_main_category.entity:taxonomy_term.tid', $tid)
+    ->sort('changed', 'DESC')
+    ->range(0, 2);
+  $nIds = $query->execute();
+  return $nIds;
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function cpw_category_listings_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if ($form_id == "taxonomy_term_category_form") {
+    $selector = "#edit-field-allow-stage-value";
+    $form['field_bg_for_category_listings']['#states'] = [
+      'visible' => [
+        "$selector" => ['checked' => TRUE],
+      ],
+    ];
+  }
+}

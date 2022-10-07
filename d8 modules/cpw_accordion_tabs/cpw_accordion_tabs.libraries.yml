@@ -1,0 +1,7 @@
+cpw_accordion_tabs:
+  js:
+    js/tab.js: {}
+  dependencies:
+    - core/jquery
+    - core/jquery.once
+    - core/drupalSettings

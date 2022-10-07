@@ -1,0 +1,78 @@
+<?php
+
+/**
+ * @file
+ * Contains cpw_accordion_tabs.module.
+ */
+
+use Drupal\media\Entity\Media;
+
+/**
+ * Implements hook_theme().
+ */
+function cpw_accordion_tabs_theme() {
+  return [
+    'paragraph__accordion_tabs' => [
+      'template' => 'paragraph--accordion-tabs',
+      'base hook' => 'paragraph',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_preprocess_paragraph__TYPE().
+ */
+function cpw_accordion_tabs_preprocess_paragraph__accordion_tabs(&$variables) {
+  $paragraph = $variables['elements']['#paragraph'];
+  $tab_header = $paragraph->field_tab;
+  $variables['paragraph_id'] = $paragraph->id->value;
+  foreach ($tab_header->referencedEntities() as $key => $tabs) {
+    // Tab title.
+    if (isset($tabs->field_tab_title->value)) {
+      $variables['tab_headers'][] = $tabs->field_tab_title->value;
+    }
+
+    // Tab body.
+    if (isset($tabs->field_tab_content)) {
+      $tab_content = $tabs->field_tab_content;
+      foreach ($tab_content->referencedEntities() as $tab) {
+        if (isset($tab->field_choose_country)) {
+          $country_term = $tab->field_choose_country->first()->getValue();
+          $tid = $country_term['target_id'];
+          $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($tid);
+
+          // Get logo field.
+          $logo = $term->get('field_c_icon');
+          $logo_url = '';
+          if (!empty($logo[0])) {
+            $mediaId = $logo->getValue()[0]['target_id'];
+            if (isset($mediaId)) {
+              $image = Media::load($mediaId)->image;
+              $logo_url = file_url_transform_relative(file_create_url($image->entity->getFileUri()));
+            }
+          }
+
+          $countries[$key][$term->label()] = [
+            'country_name' => $term->label(),
+            'cta' => $tab->field_c_link,
+            'flag' => $logo_url,
+          ];
+        }
+      }
+    }
+  }
+
+  // Sort countries alphabetically.
+  foreach ($countries as $index => $value) {
+    ksort($value);
+    foreach ($value as $k => $country_arr) {
+      $countries_sorted[] = $country_arr;
+    }
+    $country_tabs[$index] = $countries_sorted;
+    $countries_sorted = [];
+  }
+  $variables['country_tabs'] = $country_tabs;
+
+  // Attach JS library.
+  $variables['#attached']['library'][] = 'cpw_accordion_tabs/cpw_accordion_tabs';
+}
