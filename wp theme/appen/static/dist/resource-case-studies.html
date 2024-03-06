@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="description" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimal-ui">
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' />
+
+<title>Appen</title>
+
+<!-- Disable tap highlight on IE -->
+<meta name="msapplication-tap-highlight" content="no">
+
+<meta name="format-detection" content="telephone=no">
+<meta http-equiv="x-rim-auto-match" content="none">
+
+<!-- Add to homescreen for Chrome on Android -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="">
+
+<!-- Add to homescreen for Safari on iOS -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="">
+
+<!-- Tile icon for Win8 (144x144 + tile color) -->
+<meta name="msapplication-TileColor" content="#2F3BA2">
+
+<!-- Color the status bar on mobile devices -->
+<meta name="theme-color" content="#ffffff">
+
+
+
+<link rel="stylesheet" href="styles/app.css" media="all">
+<link rel="stylesheet" href="styles/fonts.css" media="all">
+</head>
+<body>
+    <main>
+        <section class="appen-hero resourses-hero">
+        <div class="appen-wrap">
+            <ul class="appen-hero__breadcrumbs">
+                <li><a href="#">Resources</a></li>
+            </ul>
+            <h1>AI Resource Center</h1>
+            <p>Created and curated for data science and machine learning teams</p>
+        </div>
+        <div class="appen-hero__decor">
+            <span class="appen-hero__decor-wrap"><img src="./images/red-dots.png" alt=""></span>
+        </div>
+           <div class="resourses-filter">
+        <div class="resourses-filter__top">
+            <button class="resourses-filter__drop js-filter-drop">Filter By <span class="hide">Category</span><span class="category">Automotive</span></button>
+            <div class="resourses-filter__active">Automotive</div>
+        </div>
+        <div class="menu-resources-filter-container js-filter-content">
+            <ul id="menu-resources-filter" class="menu">
+                <li id="menu-item-30086" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-30086"><a href="http://localhost/appen/resources/roles/">ROLES</a>
+                    <ul class="sub-menu">
+                        <li id="menu-item-30087" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-30087"><a href="http://localhost/appen/resources/roles/business/">Business</a></li>
+                        <li id="menu-item-30088" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-30088"><a href="http://localhost/appen/resources/roles/technology/">Technology</a></li>
+                    </ul>
+                </li>
+                <li id="menu-item-30079" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-30079"><a href="http://localhost/appen/resources/industries/">INDUSTRIES</a>
+                    <ul class="sub-menu">
+                        <li id="menu-item-30080" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-30080"><a href="http://localhost/appen/resources/industries/automotive/">Automotive</a></li>
+                        <li id="menu-item-30081" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-30081"><a href="http://localhost/appen/resources/industries/financial/">Financial</a></li>
+                        <li id="menu-item-30082" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-30082"><a href="http://localhost/appen/resources/industries/government/">Government</a></li>
+                        <li id="menu-item-30083" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-30083"><a href="http://localhost/appen/resources/industries/healthcare/">Healthcare</a></li>
+                        <li id="menu-item-30084" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-30084"><a href="http://localhost/appen/resources/industries/retail/">Retail</a></li>
+                        <li id="menu-item-30085" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-30085"><a href="http://localhost/appen/resources/industries/technology-industries/">Technology</a></li>
+                    </ul>
+                </li>
+                <li id="menu-item-30072" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-30072"><a href="http://localhost/appen/resources/content-types/">CONTENT TYPES</a>
+                    <ul class="sub-menu">
+                        <li id="menu-item-30073" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-30073"><a href="http://localhost/appen/resources/content-types/blogs/">Blogs</a></li>
+                        <li id="menu-item-30074" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-30074"><a href="http://localhost/appen/resources/content-types/cases-study/">Cases Study</a></li>
+                        <li id="menu-item-30075" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-30075"><a href="http://localhost/appen/resources/content-types/datasets/">Datasets</a></li>
+                        <li id="menu-item-30076" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-30076"><a href="http://localhost/appen/resources/content-types/e-books/">E-Books</a></li>
+                        <li id="menu-item-30077" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-30077"><a href="http://localhost/appen/resources/content-types/webinars-content-types/">Webinars</a></li>
+                        <li id="menu-item-30078" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-30078"><a href="http://localhost/appen/resources/content-types/whitepapers-content-types/">Whitepapers</a></li>
+                    </ul>
+                </li>
+                <li id="menu-item-30089" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-30089"><a href="http://localhost/appen/resources/topics/">TOPICS</a>
+                    <ul class="sub-menu">
+                        <li id="menu-item-30090" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-30090"><a href="http://localhost/appen/resources/topics/artificial-intelligence/">Artificial Intelligence</a></li>
+                        <li id="menu-item-30091" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-30091"><a href="http://localhost/appen/resources/topics/education/">Education</a></li>
+                        <li id="menu-item-30092" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-30092"><a href="http://localhost/appen/resources/topics/machine-learning/">Machine Learning</a></li>
+                        <li id="menu-item-30093" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-30093"><a href="http://localhost/appen/resources/topics/platforms/">Platforms</a></li>
+                        <li id="menu-item-30094" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-30094"><a href="http://localhost/appen/resources/topics/tools/">Tools</a></li>
+                    </ul>
+                </li>
+                <a class="js-reset-filter">Reset Filter</a>
+            </ul>
+        </div>
+    </div>
+</section>
+        <section class="resourses__featured">
+    <div class="appen-wrap">
+        <h2>Discover Featured <span>Case Studies</span></h2>
+        <div class="swiper-container resourses__featured-alternative-container js-feature-slider">
+            <div class="swiper-wrapper resourses__featured-alternative">
+                <div class="swiper-slide resourses__featured-item">
+                    <div class="resourses__featured-img">
+                        <img src="" alt="">
+                    </div>
+                    <h3>Technology</h3>
+                    <p>Breaking new ground in online customer experiences: Flamingo AI & Appen</p>
+                    <a class="resourses__read-more" href="#">Read More</a>
+                </div>
+                <div class="swiper-slide resourses__featured-item">
+                    <div class="resourses__featured-img">
+                        <img src="" alt="">
+                    </div>
+                    <h3>Technology</h3>
+                    <p>Breaking new ground in online customer experiences: Flamingo AI & Appen</p>
+                    <a class="resourses__read-more" href="#">Read More</a>
+                </div>
+                <div class="swiper-slide resourses__featured-item">
+                    <div class="resourses__featured-img">
+                        <img src="" alt="">
+                    </div>
+                    <h3>Technology</h3>
+                    <p>Breaking new ground in online customer experiences: Flamingo AI & Appen</p>
+                    <a class="resourses__read-more" href="#">Read More</a>
+                </div>
+                <div class="swiper-slide resourses__featured-item">
+                    <div class="resourses__featured-img">
+                        <img src="" alt="">
+                    </div>
+                    <h3>Technology</h3>
+                    <p>Breaking new ground in online customer experiences: Flamingo AI & Appen</p>
+                    <a class="resourses__read-more" href="#">Read More</a>
+                </div>
+                <div class="swiper-slide resourses__featured-item">
+                    <div class="resourses__featured-img">
+                        <picture class="attachment-medium size-medium wp-post-image">
+                            <source type="image/webp" srcset="https://s33709.pcdn.co/wp-content/uploads/2020/04/Zefr-Case-Study-300x169.png.webp 300w, https://s33709.pcdn.co/wp-content/uploads/2020/04/Zefr-Case-Study-768x433.png.webp 768w, https://s33709.pcdn.co/wp-content/uploads/2020/04/Zefr-Case-Study-100x56.png.webp 100w, https://s33709.pcdn.co/wp-content/uploads/2020/04/Zefr-Case-Study.png.webp 824w" sizes="(max-width: 300px) 100vw, 300px">
+                            <img width="300" height="169" src="https://s33709.pcdn.co/wp-content/uploads/2020/04/Zefr-Case-Study-300x169.png" alt="Zefr Case Study" srcset="https://s33709.pcdn.co/wp-content/uploads/2020/04/Zefr-Case-Study-300x169.png 300w, https://s33709.pcdn.co/wp-content/uploads/2020/04/Zefr-Case-Study-768x433.png 768w, https://s33709.pcdn.co/wp-content/uploads/2020/04/Zefr-Case-Study-100x56.png 100w, https://s33709.pcdn.co/wp-content/uploads/2020/04/Zefr-Case-Study.png 824w" sizes="(max-width: 300px) 100vw, 300px">
+                        </picture>
+                    </div>
+                    <h3>Technology</h3>
+                    <p>Breaking new ground in online customer experiences: Flamingo AI & Appen</p>
+                    <a class="resourses__read-more" href="#">Read More</a>
+                </div>
+            </div>
+            <div class="resourses__navigation">
+                <div class="resourses__navigation-prev-btn js-alternative-prev"></div>
+                <div class="resourses__navigation-next-btn js-alternative-next"></div>
+            </div>
+        </div>
+    </div>
+</section>
+        <section class="resourses__cards">
+    <div class="appen-wrap">
+        <h2>Resources Tailored by <span>Role</span></h2>
+        <div class="resourses__featured-list resourses__featured-list--not-slider">
+            <div class="resourses__featured-item">
+                <div class="resourses__featured-img">
+                    <img src="" alt="">
+                </div>
+                <h3>Technology</h3>
+                <p>Breaking new ground in online customer experiences: Flamingo AI & Appen</p>
+                <a class="resourses__read-more" href="#">Read More</a>
+            </div>
+            <div class="resourses__featured-item">
+                <div class="resourses__featured-img">
+                    <img src="" alt="">
+                </div>
+                <h3>Technology</h3>
+                <p>Breaking new ground in online customer experiences: Flamingo AI & Appen</p>
+                <a class="resourses__read-more" href="#">Read More</a>
+            </div>
+            <div class="resourses__featured-item">
+                <div class="resourses__featured-img">
+                    <img src="" alt="">
+                </div>
+                <h3>Technology</h3>
+                <p>Breaking new ground in online customer experiences: Flamingo AI & Appen</p>
+                <a class="resourses__read-more" href="#">Read More</a>
+            </div>
+            <div class="resourses__featured-item">
+                <div class="resourses__featured-img">
+                    <img src="" alt="">
+                </div>
+                <h3>Technology</h3>
+                <p>Breaking new ground in online customer experiences: Flamingo AI & Appen</p>
+                <a class="resourses__read-more" href="#">Read More</a>
+            </div>
+            <div class="resourses__featured-item">
+                <div class="resourses__featured-img">
+                    <img src="" alt="">
+                </div>
+                <h3>Technology</h3>
+                <p>Breaking new ground in online customer experiences: Flamingo AI & Appen</p>
+                <a class="resourses__read-more" href="#">Read More</a>
+            </div>
+            <div class="resourses__featured-item">
+                <div class="resourses__featured-img">
+                    <img src="" alt="">
+                </div>
+                <h3>Technology</h3>
+                <p>Breaking new ground in online customer experiences: Flamingo AI & Appen</p>
+                <a class="resourses__read-more" href="#">Read More</a>
+            </div>
+        </div>
+    </div>
+</section>
+    </main>
+</body>
+<script src="scripts/swiper.min.js"></script>
+<script src="scripts/app.js"></script>
+</html>

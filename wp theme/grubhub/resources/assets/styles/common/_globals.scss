@@ -1,0 +1,390 @@
+// Fonts
+
+$light-font-path: "../fonts/Grubhub-Sans-Light";
+$bold-font-path: "../fonts/Grubhub-Sans-Bold";
+
+@font-face {
+  font-family: "Grubhub Sans";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../assets/fonts/Grubhub-Sans-Light.eot");
+  src:
+    url("../assets/fonts/Grubhub-Sans-Light.eot?#iefix") format("embedded-opentype"),
+    url("../assets/fonts/Grubhub-Sans-Light.woff2") format("woff2"),
+    url("../assets/fonts/Grubhub-Sans-Light.woff") format("woff"),
+    url("../assets/fonts/Grubhub-Sans-Light.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Grubhub Sans";
+  font-style: normal;
+  font-weight: 700;
+  src: url("../assets/fonts/Grubhub-Sans-Bold.eot");
+  src:
+    url("../assets/fonts/Grubhub-Sans-Bold.eot?#iefix") format("embedded-opentype"),
+    url("../assets/fonts/Grubhub-Sans-Bold.woff2") format("woff2"),
+    url("../assets/fonts/Grubhub-Sans-Bold.woff") format("woff"),
+    url("../assets/fonts/Grubhub-Sans-Bold.ttf") format("truetype");
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+strong,
+b {
+  font-family: $body-font-family;
+  font-weight: 700;
+}
+
+p {
+  font-size: rem-calc(16);
+  line-height: rem-calc(24);
+  color: $black;
+}
+
+.locked {
+  overflow: hidden;
+  height: 100vh;
+}
+
+.locked-mob {
+  overflow: hidden;
+  height: 95vh;
+}
+
+.fixed {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+}
+
+.sc {
+  text-transform: capitalize;
+}
+
+.wrp {
+  background-color: $white;
+}
+
+.txt-pad {
+  padding-top: 20px;
+}
+
+.wrap.container {
+  padding-top: 55px;
+
+  @include breakpoint(xlarge) {
+    padding-top: 80px;
+  }
+}
+
+main {
+  overflow-y: hidden;
+}
+
+.subhead {
+  font-weight: normal;
+}
+
+.blueberry {
+  color: $secondary;
+}
+
+.widget_search_meter {
+  ul {
+    li {
+      &:first-child {
+        display: none;
+      }
+    }
+  }
+}
+
+section {
+  padding: 27.5px 0;
+
+  &:first-of-type {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  &:last-child {
+    &:not(.bottom-form) {
+      padding-bottom: 0;
+    }
+  }
+
+  &.general {
+    padding: 55px 0 !important;
+
+    a {
+      font-size: inherit;
+    }
+  }
+}
+
+.button {
+  &.primary {
+    @include brand-button(none, 30px, 700, $white, $secondary, #4329A3, $white);
+
+    &:focus {
+      color: $white;
+      background-color: $secondary;
+      outline-width: 0;
+    }
+  }
+
+  &.secondary {
+    @include brand-button(2px solid $secondary, 30px, 700, $secondary, transparent, transparent, #4329A3);
+
+    &:focus {
+      color: $secondary;
+      background-color: transparent;
+      outline-width: 0;
+    }
+  }
+
+  &.reverse {
+    @include brand-button( 2px solid $white, 30px, 700, $white, $secondary, #4329A3, $white);
+
+    &:focus {
+      outline-width: 0;
+      outline-offset: 2px;
+    }
+  }
+
+  &:hover {
+    box-shadow: 0 5px 0 #dedede;
+  }
+}
+
+.button.secondary:hover {
+  color: #4329a3;
+  border: 2px solid #4329a3;
+}
+
+.arrow-link {
+  font-size: 1.25rem;
+  line-height: 1.2;
+  font-weight: 700;
+  text-transform: none;
+  color: $secondary;
+  transition: 0.3s;
+
+  @include breakpoint(medium) {
+    font-size: 1.5rem;
+  }
+
+  &::after {
+    content: url("../assets/images/arrow-purple.svg");
+    position: relative;
+    margin-right: -25px;
+    margin-left: 15px;
+    bottom: -5px;
+    transition: 0.3s;
+  }
+
+  &:hover,
+  &:active {
+    color: darken($secondary, 10%);
+    text-decoration: underline;
+    text-underline-position: under;
+
+    &::after {
+      opacity: 1.2;
+    }
+  }
+}
+
+.text-link {
+  font-size: 1.5rem;
+  line-height: 1.2;
+  font-weight: 700;
+  text-transform: none;
+  color: $secondary;
+  transition: 0.3s;
+
+  &:hover,
+  &:active {
+    color: darken($secondary, 10%);
+    text-decoration: underline;
+    text-underline-position: under;
+  }
+}
+
+#bug-trigger {
+  position: absolute;
+  top: 600px;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  visibility: hidden;
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  margin: 0 auto;
+  max-width: 700px;
+
+  &::before,
+  &::after {
+    display: none;
+  }
+
+  ul {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 4vw;
+
+    li {
+      margin: 0;
+      text-align: center;
+      display: block;
+
+      a {
+        padding: 2px 0 0;
+        font-weight: 700;
+        font-size: 14px;
+
+        @include breakpoint(medium) {
+          font-size: 16px;
+          padding: 5px 0 0;
+        }
+      }
+
+      span {
+        &.current {
+          border-radius: 50%;
+          background-color: $black;
+          color: $white;
+          font-weight: 700;
+          width: 25px;
+          height: 25px;
+          padding: 1px 0 0;
+          display: block;
+
+          @include breakpoint(medium) {
+            width: 35px;
+            height: 35px;
+            padding: 5px 0 0;
+          }
+        }
+      }
+    }
+  }
+
+  .start,
+  .end {
+    display: block;
+  }
+
+  .dbl {
+    margin-top: 10px;
+  }
+
+  .inactive,
+  a {
+    max-height: 45px;
+    padding: 0;
+
+    &.r,
+    &.fp {
+      padding-right: 10px;
+    }
+
+    &.l,
+    &.lp {
+      padding-left: 10px;
+    }
+  }
+}
+
+.bug {
+  position: fixed;
+  top: 25vh;
+  right: -100px;
+  z-index: 9999;
+  width: 60px;
+  height: 120px;
+
+  &.buried {
+    z-index: -2;
+  }
+
+  &.mobile-nav-open {
+    z-index: 9;
+  }
+}
+
+.no-form {
+  text-align: center;
+  background-color: $lighter-gray;
+  color: $black;
+  font-style: italic;
+}
+
+.searchwp-live-search-results {
+  .searchwp-live-search-result {
+    p {
+      border-color: $smoke !important;
+
+      a {
+        color: $nearblack;
+        font-size: 16px;
+        line-height: 24px;
+      }
+    }
+  }
+}
+
+.components {
+  section {
+    &:last-child {
+      &:not(.bottom-form) {
+        padding-bottom: 50px;
+      }
+    }
+  }
+}
+
+.general {
+  ul {
+    list-style: disc;
+  }
+}
+
+section > div.row {
+  position: relative;
+  z-index: 5;
+}
+
+.bp {
+  padding-bottom: 0 !important;
+}
+
+:not(.button) a {
+  &:hover {
+    color: darken($secondary, 10%);
+    text-decoration: underline;
+    text-underline-position: under;
+  }
+}
+
+:not(.button) {
+  p a:hover,
+  p a:active {
+    color: darken($secondary, 10%);
+    text-decoration: underline;
+    text-underline-position: under;
+  }
+}
+

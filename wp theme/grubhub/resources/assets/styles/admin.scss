@@ -1,0 +1,40 @@
+.repeat-horizontal {
+  background-color: red;
+}
+
+.repeat-horizontal .acf-repeater tbody {
+  display: flex;
+  flex-direction: row;
+}
+
+.repeat-horizontal .acf-repeater tr.acf-row:not(.acf-clone) {
+  width: 100%;
+}
+
+.repeat-horizontal .acf-repeater tr.acf-row {
+  border-left: 1px solid #ddd;
+}
+
+.repeat-horizontal .acf-repeater tr.acf-row:first-child {
+  border-left: none;
+}
+
+.repeat-horizontal .acf-repeater tr.acf-row:not(.acf-clone) td.acf-fields {
+  width: 100% !important; /* important is necessary because it gets overwritten on drag&drop  */
+}
+
+.repeat-horizontal .acf-repeater.-row > table > tbody > tr > td,
+.acf-repeater.-block > table > tbody > tr > td {
+  border-top: none !important;
+}
+
+.repeat-horizontal .acf-repeater .acf-row-handle .acf-icon {
+  position: relative;
+  margin: 10px 0;
+  display: block !important;
+}
+
+.acf-link .link-wrap .link-title {
+  font-weight: bold;
+  font-size: 16px;
+}

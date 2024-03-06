@@ -1,0 +1,130 @@
+.datasets-aside {
+    .appen-menu {
+        margin-bottom: 70px;
+    }
+    .btn {
+        margin-bottom: 40px;
+        padding: 12px;
+        width: 188px;
+        height: 55px;
+    }
+    @media screen and (max-width: 979px) {
+        display: none;
+    }
+}
+.datasets-content {
+    .download-option.child-download-option .download-main {
+        position: relative;
+        padding-left: 20px;
+        &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 7px;
+            width: 12px;
+            height: 2px;
+            background-color: #EF4126;
+        }
+
+    }
+    .download-options {
+        border: 1px solid #ECEEEF;
+        border-bottom: none;
+        @media screen and (max-width: $mobile) {
+            border: none;
+            margin: 0 -25px;
+        }
+    }
+    .download-option {
+        display: flex;
+        align-items: center;
+        padding: 9px 18px;
+        border-bottom: 1px solid #ECEEEF;
+        transition: all .3s ease;
+        &:hover {
+            background-color: #F5F5F5 !important;
+        }
+        @media screen and (max-width: $mobile) {
+            flex-wrap: wrap;
+            padding: 26px 24px 20px;
+            &:last-child {
+                border-bottom: none;
+            }
+        }
+    }
+    .download-main {
+        width: 55%;
+        margin-right: 15px;
+        font-family: "Grotesque";
+        font-size: 14.4px;
+        letter-spacing: 0.0357rem;
+        color: #373A3C;
+        line-height: 1;
+        @media screen and (max-width: $mobile) {
+            width: 100%;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+    }
+    .download-links {
+        width: 45%;
+        display:flex;
+        align-items:center;
+        justify-content:flex-end;
+        @media screen and (max-width: $mobile) {
+            justify-content: flex-start;
+            width: 100%;
+        }
+        a {
+            &:last-child {
+                margin-left: 50px;
+            }
+            font-family: "Grotesque";
+            font-size: 14.4px;
+            font-weight: 500;
+            line-height: 1.7;
+            color: rgb(0,0,0);
+            @media screen and (max-width: $mobile) {
+                margin-right: 46px;
+                position: relative;
+                font-size: 16px;
+                &::after {
+                    position: relative;
+                    top: 2px;
+                    content: '';
+                    display: inline-block;
+                    margin-left: 9px;
+                    transition: all 0.2s cubic-bezier(.42,0,1,1);
+                    width: 8px;
+                    height: 14px;
+                    background-position: center;
+                    background-repeat: no-repeat;
+                    background-size: contain;
+                    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg width='8' height='14' viewBox='0 0 8 14' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cmask id='path-1-inside-1' fill='white'%3e%3cpath fill-rule='evenodd' clip-rule='evenodd' d='M0.666829 13.3637L7.3335 7.00011L0.666829 0.636475'/%3e%3c/mask%3e%3cpath d='M7.3335 7.00011L8.71445 8.44682L10.23 7.00011L8.71445 5.5534L7.3335 7.00011ZM2.04778 14.8105L8.71445 8.44682L5.95254 5.5534L-0.714122 11.917L2.04778 14.8105ZM8.71445 5.5534L2.04778 -0.810237L-0.714122 2.08319L5.95254 8.44682L8.71445 5.5534Z' fill='%23EF4126' mask='url(%23path-1-inside-1)'/%3e%3c/svg%3e ");
+                }
+                &:last-child {
+                    margin-right: 0;
+                    margin-left: 0;
+                }
+            }
+        }
+    }
+    .dataset-icon {
+        display: none;
+    }
+}
+.datasets__sticky {
+    position: sticky;
+    top: 90px;
+    form {
+        position: static;
+        @media screen and (max-width: 1023px) {
+            max-width: 500px;
+            margin: 0px auto !important;
+        }
+    }
+    @media screen and (max-width: 1023px) {
+        position: static;
+        padding-bottom: 60px;
+    }
+}

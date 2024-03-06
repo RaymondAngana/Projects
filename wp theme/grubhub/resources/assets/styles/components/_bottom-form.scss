@@ -1,0 +1,149 @@
+.bottom-form {
+  background-color: $dark;
+
+  &.force-padding {
+    padding: 30px 0 !important;
+
+    @include breakpoint(large) {
+      padding: 60px 0 !important;
+    }
+  }
+
+  h2,
+  h3,
+  p {
+    color: $white;
+    text-align: center;
+  }
+
+  h3 {
+    font-weight: 400;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  p {
+    color: $white;
+  }
+
+  .form-text-area {
+    color: $white;
+    text-align: center;
+    margin: 0 auto;
+    max-width: 330px;
+
+    a {
+      color: $white;
+      text-decoration: underline;
+
+      &:hover {
+        color: inherit;
+        text-underline-position: initial;
+      }
+    }
+
+    @include breakpoint(small) {
+      font-size: 1.25rem;
+    }
+
+    @include breakpoint(large) {
+      font-size: initial;
+    }
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="email"] {
+    border: 1px solid $white !important;
+    border-radius: 6px !important;
+    margin: 0 !important;
+    padding: 0.5rem !important;
+    height: auto !important;
+    background-color: transparent !important;
+    max-width: 100% !important;
+    color: $white !important;
+    font-size: 1rem !important;
+  }
+
+  select {
+    border: 1px solid $white !important;
+    border-radius: 6px !important;
+    margin: 0 !important;
+    padding: 0.5rem !important;
+    height: auto !important;
+    background-color: transparent !important;
+    max-width: 100% !important;
+    color: $white !important;
+    font-size: 1rem !important;
+    background-image: url("../assets/images/chevron-down-light.svg");
+    background-size: 20px;
+    background-position: right center;
+
+    &::after {
+      content: "";
+      border: solid black;
+      border-width: 0 3px 3px 0;
+      display: inline-block;
+    }
+
+    option {
+      color: $black;
+    }
+  }
+
+  .row {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .button {
+    margin-top: 20px;
+  }
+
+  .oneField {
+    position: relative;
+    margin: 0 0 0.5rem !important;
+
+    label {
+      font-size: 1rem !important;
+      line-height: 1 !important;
+      margin: 0 !important;
+      color: $white !important;
+      padding: 5px !important;
+      background-color: $dark;
+      min-width: 0 !important;
+      position: absolute;
+      top: 8px;
+      left: 15px;
+      z-index: 1;
+    }
+  }
+
+  .actions {
+    text-align: center;
+  }
+
+  input[type="submit"] {
+    @include brand-button(2px solid $white !important, 25px !important, 700 !important, $white !important, $secondary !important, #4329A3 !important, $white !important);
+
+    width: 50vw;
+    max-width: 150px;
+    font-size: 18px !important;
+    padding: 1rem 1.5rem !important;
+
+    @include breakpoint(medium) {
+      width: 30vw;
+      max-width: 150px;
+    }
+
+    @include breakpoint(large) {
+      width: 25vw;
+      max-width: 150px;
+    }
+
+    &:hover {
+      box-shadow: none;
+    }
+  }
+}

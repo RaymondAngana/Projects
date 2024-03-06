@@ -1,0 +1,26 @@
+{
+  "extends": "standard",
+  "env": {
+    "browser": true,
+    "mocha": true,
+    "es6": true,
+    "node": false
+  },
+  "globals": {
+    "document": true,
+    "global": true,
+    "window": true,
+    "bodymovin": true,
+    "Vue": true,
+    "module": true
+  },
+  "rules": {
+    "no-new": 0,
+    "semi": [2, "always"],
+    "space-before-function-paren": ["error", "never"],
+    "indent": ["off", 2],
+    "no-trailing-spaces": "off",
+		"quotes": 0,
+		"no-useless-escape": 0
+  }
+}

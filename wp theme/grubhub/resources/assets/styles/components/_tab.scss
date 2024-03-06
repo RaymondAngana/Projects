@@ -1,0 +1,249 @@
+.tab-component {
+  max-width: 90%;
+
+  @include breakpoint(small) {
+    margin: auto;
+
+    .tab-content li.is-active .accordion-content {
+      display: none;
+    }
+  }
+
+  @include breakpoint(mid) {
+    max-width: 511px;
+  }
+
+  @include breakpoint(large) {
+    max-width: $global-width;
+  }
+
+  h2 {
+    height: 120px;
+
+    &.blue {
+      color: $secondary;
+    }
+
+    &.orange {
+      color: $primary;
+    }
+  }
+
+  .align-center h2 {
+    text-align: center;
+  }
+
+  .contained {
+    border: 1px solid #bebebe;
+    border-radius: 6px;
+    margin: auto;
+    background: $white;
+
+    @include breakpoint(large) {
+      max-width: $global-width;
+      filter: drop-shadow(9px 9px 4px $gray);
+    }
+  }
+
+  .top-content {
+    text-align: center;
+    padding: 30px;
+
+    h3 {
+      &.blue {
+        color: $secondary;
+      }
+
+      &.orange {
+        color: $primary;
+      }
+    }
+
+    p {
+      &.blue {
+        color: $secondary;
+      }
+
+      &.orange {
+        color: $primary;
+      }
+    }
+
+    .btn-wrap {
+      margin-top: 50px;
+    }
+
+    img {
+      margin: 0 auto;
+      max-height: 400px;
+      padding: 0;
+    }
+  }
+
+  .tab-content {
+    border-top: 1px solid $smoke;
+
+    .accordion-title {
+      text-align: center;
+      border-top: 1px solid $smoke;
+      font-weight: bold;
+      color: $secondary;
+      padding: 2rem;
+      text-decoration: none;
+      font-size: 1.25rem;
+
+      @include breakpoint(medium) {
+        font-size: 1.5rem;
+      }
+
+      &::before {
+        display: none;
+      }
+
+      &::after {
+        font-family: "Font Awesome 5 Pro";
+        content: "\f054";
+        font-size: 15px;
+        font-weight: 900;
+        margin-left: 10px;
+        letter-spacing: -12px;
+        display: inline-block;
+      }
+    }
+
+    p {
+      padding: 0 3vw;
+    }
+
+    li {
+      &.is-active .accordion-title {
+        color: $black;
+        text-decoration: none;
+
+        &::after {
+          font-family: "Font Awesome 5 Pro";
+          content: "\f078";
+          display: inline-block;
+          color: $secondary;
+        }
+      }
+
+      &:first-child .accordion-title {
+        border-top: 0;
+      }
+    }
+
+    .accordion-content {
+      text-align: center;
+      padding: 0 1rem 1.5rem;
+
+      @include breakpoint(large) {
+        img {
+          width: 50%;
+        }
+      }
+    }
+  }
+
+  .tabs-title {
+    margin: auto;
+    text-align: center;
+
+    @include breakpoint(large) {
+      max-width: initial;
+    }
+
+    .tab-row {
+      flex-flow: column;
+
+      @include breakpoint(large) {
+        flex-flow: row;
+      }
+    }
+  }
+
+  .columns.image-column {
+    max-width: 300px;
+  }
+
+  .tab-wrap {
+    padding-left: 0;
+    padding-right: 0;
+
+    .accordion {
+      margin-bottom: 0;
+    }
+
+    .tabs {
+      li {
+        position: relative;
+        width: 25%;
+
+        a {
+          font-weight: 700;
+          font-size: 1.25rem;
+          line-height: 1.2rem;
+
+          @include breakpoint(large) {
+            font-size: 1.5rem;
+          }
+
+          &:hover {
+            text-decoration: none;
+          }
+        }
+
+        span {
+          font-size: 1rem;
+          font-weight: 300;
+
+          &::before {
+            content: "\0028";
+            display: inline-block;
+          }
+
+          &::after {
+            content: "\0029";
+            display: inline-block;
+          }
+        }
+
+        &::after {
+          content: "";
+          width: 100%;
+          height: 9px;
+          background-color: $gray;
+          display: block;
+        }
+
+        &.is-active::after {
+          background-color: $black;
+        }
+      }
+
+      &.items3 li {
+        width: 33.33%;
+      }
+
+      &.items2 li {
+        width: 50%;
+      }
+
+      &.orange li.is-active::after {
+        background-color: $primary;
+      }
+
+      &.blue li.is-active::after {
+        background-color: $secondary;
+      }
+    }
+
+    .tabs-content {
+      border: none;
+    }
+
+    .tabs-panel {
+      padding: 4rem 1rem;
+    }
+  }
+}

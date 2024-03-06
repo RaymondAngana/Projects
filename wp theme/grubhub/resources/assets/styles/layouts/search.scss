@@ -1,0 +1,306 @@
+.search-wrap {
+  padding: 30px 0 !important;
+
+  @include breakpoint(large) {
+    padding: 90px 0 !important;
+  }
+
+  .term-wrap {
+    text-align: center;
+    border-radius: 6px;
+    border: 1px solid $smoke;
+    padding: 20px 0;
+
+    h4 {
+      font-weight: 300;
+    }
+  }
+
+  .top-results {
+    overflow: hidden;
+
+    a {
+      &:hover {
+        text-decoration: none;
+      }
+    }
+  }
+
+  .tab-wrap {
+    padding-left: 0;
+    padding-right: 0;
+
+    .tabs {
+      margin-top: 30px;
+      border-bottom: 1px solid $smoke;
+
+      @include breakpoint(medium) {
+        margin-top: 60px;
+      }
+
+      li {
+        position: relative;
+        float: none;
+
+        @include breakpoint(medium) {
+          float: left;
+        }
+
+        a {
+          font-weight: 700;
+        }
+
+        span {
+          font-size: 1rem;
+          font-weight: 300;
+
+          &::before {
+            content: "\0028";
+            display: inline-block;
+          }
+
+          &::after {
+            content: "\0029";
+            display: inline-block;
+          }
+        }
+
+        &.is-active {
+          &::after {
+            content: "";
+            width: 9px;
+            height: 9px;
+            background-color: $primary;
+            display: block;
+            position: absolute;
+            top: 27px;
+            left: 0;
+
+            @include breakpoint(medium) {
+              width: 100%;
+              top: auto;
+              left: auto;
+              position: relative;
+            }
+          }
+        }
+      }
+    }
+
+    .tabs-content {
+      border: none;
+      height: 500px;
+      overflow: auto;
+    }
+  }
+
+  h3 {
+    margin: 40px 0 20px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid $smoke;
+  }
+
+  .result {
+    border-bottom: 1px solid $smoke;
+    padding-top: 25px;
+    padding-bottom: 25px;
+
+    a {
+      font-size: inherit;
+
+      h4 {
+        color: $secondary;
+      }
+
+      .excerpt {
+        font-size: inherit;
+      }
+
+      &:hover {
+        text-decoration: none;
+
+        h4,
+        .excerpt {
+          text-decoration: none;
+        }
+      }
+    }
+
+    .excerpt {
+      color: $black;
+    }
+  }
+
+  .last-button {
+    margin-top: 15px;
+  }
+
+  .left-rail {
+    display: none;
+
+    @include breakpoint(large) {
+      border: 1px solid $smoke;
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    h4 {
+      margin: 25px 25px 25px 35px;
+      padding-left: 0 !important;
+    }
+
+    table {
+      margin-bottom: 0;
+
+      tbody {
+        border: none;
+      }
+
+      tr {
+        padding-bottom: 10px;
+        border: none;
+
+        &:first-of-type {
+          display: none;
+        }
+
+        td {
+          padding: 0;
+
+          div {
+            color: $secondary;
+            font-weight: 700;
+            padding: 0 0 10px 35px;
+            word-break: break-all;
+          }
+
+          &:nth-child(even) {
+            display: none;
+          }
+        }
+      }
+    }
+  }
+
+  .pagination {
+    ul {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 555px;
+      margin: 20px auto;
+
+      li {
+        margin: 0;
+        width: 25px;
+        height: 25px;
+        text-align: center;
+        display: block;
+
+        @include breakpoint(medium) {
+          width: 35px;
+          height: 35px;
+        }
+
+        &.adv {
+          width: 35px;
+          height: 35px;
+
+          @include breakpoint(medium) {
+            width: 50px;
+            height: 50px;
+          }
+
+          a {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 35px;
+
+            @include breakpoint(medium) {
+              width: 100px;
+            }
+          }
+        }
+
+        &:first-child {
+          margin-right: 0;
+          display: none;
+
+          @include breakpoint(medium) {
+            margin-right: 20px;
+            display: inline-block;
+          }
+
+          a {
+            padding-top: 7px;
+          }
+        }
+
+        &:last-child {
+          margin-left: 0;
+          display: none;
+
+          @include breakpoint(medium) {
+            margin-left: 20px;
+            display: inline-block;
+          }
+
+          a {
+            padding-top: 7px;
+          }
+        }
+
+        a {
+          padding: 2px 0 0;
+          font-weight: 700;
+          font-size: 14px;
+
+          @include breakpoint(medium) {
+            font-size: 16px;
+            padding: 5px 0 0;
+          }
+        }
+
+        &.active {
+          border-radius: 50%;
+          background-color: $black;
+          width: 25px;
+          height: 25px;
+
+          @include breakpoint(medium) {
+            width: 35px;
+            height: 35px;
+          }
+
+          a {
+            color: $white;
+          }
+        }
+
+        svg {
+          max-width: 100%;
+          max-height: 30px;
+
+          @include breakpoint(medium) {
+            max-height: 100%;
+          }
+        }
+      }
+    }
+  }
+}
+
+.gh_loadmore {
+  @include brand-button(2px solid $white, 25px, 700, $white, $secondary, $secondary, $white);
+
+  max-width: 200px;
+  margin: 15px auto 0;
+  cursor: pointer;
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}

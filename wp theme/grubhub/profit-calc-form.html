@@ -1,0 +1,37 @@
+<label for="daily-orders font-weight-bold">Projected Daily Grubhub orders</label>
+<input type="number" step="1" min="1" class="form-control" id="daily-orders" style="width: 89px; height: 38px;" onfocusout="x_Orders()">
+
+
+
+<label for="average-ticket">Average Ticket <span class="text-muted small">($)</span><br><small class="text-muted">The size of an average order at your restaurant</small></label>
+
+<span class="input-group-text">$</span>
+<input type="number" step="0.01" min="0.01" class=" col-md-2" id="average-ticket">
+
+
+
+<label for="delivery-services">Use Grubhub Delivery services? <br><small class="text-muted">Payment for Grubhub Delivery Services only applies if you choose to take advantage of Grubhub Delivery.
+</small></label>
+
+<input class="form-check-input" type="radio" name="pc-radio" id="pc-yes" value="yes">
+<label class="form-check-label" for="pc-yes">Yes</label>
+
+
+<input class="form-check-input" type="radio" name="pc-radio" id="pc-no" value="no">
+<label class="form-check-label" for="pc-no">No</label>
+
+<label for="food-cost">Food Percentage Cost <span class="text-muted small">(%)</span><br><small class="text-muted">Percentage of each order that goes toward covering the cost of food</small></label>
+
+<input type="number" step="1" max="100" class="col-md-2" id="food-cost" onfocusout="x_Food_Cost()">
+<span class="input-group-text">%</span>
+
+
+<label for="labor-cost">Additional daily labor costs needed to fulfill <span class="x-orders"></span> incremental Grubhub daily orders: <br><small class="text-muted">Many restaurants find that they can fulfill a substantial number of additional Grubhub orders with their existing staff.</small></label>
+
+<span class="input-group-text">$</span>
+<input type="number" step="0.01" min="0.01" placeholder="0" class="col-md-2" id="labor-cost">
+
+<label for="add-overhead">Additional daily overhead needed to fulfill <span class="x-orders"></span> incremental Grubhub daily orders: <br><small class="text-muted">Boost your orders without necessarily increasing your overhead costs. </small></label>
+
+<span class="input-group-text">$</span>
+<input type="number" step="0.01" min="0.01" class=" col-md-2" placeholder="0" id="add-overhead">

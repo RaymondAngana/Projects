@@ -1,0 +1,148 @@
+.large-cards {
+  h3,
+  h4 {
+    color: $black;
+  }
+
+  h3 {
+    font-size: 2.625rem;
+    line-height: 2.875rem;
+    font-weight: 700;
+
+    @include breakpoint(large) {
+      font-size: 4rem;
+      line-height: 4.2rem;
+    }
+  }
+
+  .divider {
+    width: 30%;
+    height: 13px;
+    display: block;
+    margin: 0 0 20px;
+
+    @include breakpoint(large) {
+      height: 20px;
+      margin: 25px 0;
+    }
+
+    &.purple {
+      background-color: $secondary;
+    }
+
+    &.black {
+      background-color: $black;
+    }
+
+    &.orange {
+      background-color: $primary;
+    }
+  }
+
+  h4 {
+    font-size: 1.5rem;
+    line-height: 1.8rem;
+    font-weight: 400;
+    margin-bottom: 2.5rem;
+
+    @include breakpoint(large) {
+      font-size: 2.25rem;
+      line-height: 2.263rem;
+      margin-bottom: 5rem;
+    }
+  }
+
+  .card-col {
+    margin-top: 20px;
+    opacity: 1;
+    transform: translateY(0);
+
+    &.card-anim {
+      opacity: 0;
+      transform: translateY(50px);
+    }
+
+    .card {
+      background-size: cover;
+      background-position: 0 -115px;
+      background-repeat: no-repeat;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      padding: 31px 21px 25px 24px;
+      border: 1px solid #bebebe;
+      border-radius: 6px;
+      filter: drop-shadow(5px 5px 4px $gray);
+      background-color: $white;
+      transform: scale(1);
+      transition: all 0.6s ease-in-out;
+
+      @include breakpoint(large) {
+        filter: drop-shadow(9px 9px 4px $gray);
+        padding: 49px 33px 45px 57px;
+      }
+
+      &:hover {
+        filter: drop-shadow(14px 14px 6px $gray);
+        transform: scale(1.05);
+      }
+
+      a {
+        display: block;
+        margin-top: auto;
+        width: auto;
+        margin-right: 15px;
+        margin-left: auto;
+        max-width: 230px;
+
+        @include breakpoint(large) {
+          max-width: 100%;
+        }
+      }
+
+      &.img-card {
+        background-color: transparent;
+        box-shadow: none;
+        border: none;
+        padding: 10px 0 20px;
+
+        h4 {
+          color: $secondary;
+          padding-left: 15%;
+          padding-right: 15%;
+        }
+
+        p {
+          padding-left: 8%;
+          padding-right: 8%;
+        }
+
+        .button {
+          // max-width: fit-content;
+          width: auto;
+          margin-right: auto;
+          margin-left: auto;
+        }
+      }
+
+      &.purple {
+        h3 {
+          color: $secondary;
+        }
+      }
+
+      &.black {
+        h3 {
+          color: $black;
+        }
+      }
+
+      &.orange {
+        h3 {
+          color: $primary;
+        }
+      }
+    }
+  }
+}
+

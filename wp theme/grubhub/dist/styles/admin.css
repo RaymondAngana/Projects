@@ -1,0 +1,67 @@
+/* line 1, stdin */
+
+.repeat-horizontal {
+  background-color: red;
+}
+
+/* line 5, stdin */
+
+.repeat-horizontal .acf-repeater tbody {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+}
+
+/* line 10, stdin */
+
+.repeat-horizontal .acf-repeater tr.acf-row:not(.acf-clone) {
+  width: 100%;
+}
+
+/* line 14, stdin */
+
+.repeat-horizontal .acf-repeater tr.acf-row {
+  border-left: 1px solid #ddd;
+}
+
+/* line 18, stdin */
+
+.repeat-horizontal .acf-repeater tr.acf-row:first-child {
+  border-left: none;
+}
+
+/* line 22, stdin */
+
+.repeat-horizontal .acf-repeater tr.acf-row:not(.acf-clone) td.acf-fields {
+  width: 100% !important;
+  /* important is necessary because it gets overwritten on drag&drop  */
+}
+
+/* line 26, stdin */
+
+.repeat-horizontal .acf-repeater.-row > table > tbody > tr > td,
+.acf-repeater.-block > table > tbody > tr > td {
+  border-top: none !important;
+}
+
+/* line 31, stdin */
+
+.repeat-horizontal .acf-repeater .acf-row-handle .acf-icon {
+  position: relative;
+  margin: 10px 0;
+  display: block !important;
+}
+
+/* line 37, stdin */
+
+.acf-link .link-wrap .link-title {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+
+/*# sourceMappingURL=admin.css.map*/

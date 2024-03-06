@@ -1,0 +1,36 @@
+@import './common/scss-variables';
+@import './common/mixins';
+@import './common/general';
+@import './common/reset';
+@import './common/typography';
+@import './partials/fonts';
+@import './partials/btn';
+@import './components/appen-socials';
+
+
+//--resourses--//
+@import './sections/hero';
+@import './sections/cards';
+@import './sections/featured';
+@import './components/filter';
+
+//--blog posts--//
+@import './sections/blog/appen-menu';
+@import './sections/blog/blog-content';
+@import './sections/blog/blog-form';
+@import './sections/blog/blog-quote';
+@import './sections/blog/datasets';
+@import './sections/blog/recommended';
+@import './sections/blog/case-study';
+@import './sections/blog/video-section';
+@import './sections/blog/blog-hero';
+@import './sections/blog/blog-single';
+@import './sections/blog/quote-slider';
+@import './sections/blog/marketo-form';
+@import './sections/blog/popup';
+@import './sections/blog/social-widget';
+@import './sections/contact';
+
+
+
+

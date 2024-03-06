@@ -1,0 +1,27 @@
+.resourses-hero {
+    position: relative;
+    background-color: white;
+    padding-top: 86px;
+    padding-bottom: 134px;
+    border-bottom: 1px solid #EFF1F2;
+    z-index: 11;
+    .appen-wrap {
+        position: relative;
+        z-index: 1;
+    }
+    @media(max-width:$mobile) {
+        padding-top: 48px;
+        padding-bottom: 0px;
+        min-height: auto;
+    }
+    &.appen-hero {
+        min-height: 401px;
+        padding-bottom: 80px !important;
+        @media(max-width: 979px) {
+            min-height: 310px;
+        }
+        @media(max-width: 375px) {
+            min-height: 376px;
+        }
+    }
+}

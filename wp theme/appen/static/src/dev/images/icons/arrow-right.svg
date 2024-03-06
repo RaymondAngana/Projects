@@ -1,0 +1,4 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
+ "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" width="8" height="14" viewBox="0 0 8 14" fill="none"><mask id="path-1-inside-1" fill="white"><path fill-rule="evenodd" clip-rule="evenodd" d="M0.666829 13.3637L7.3335 7.00011L0.666829 0.636475"/></mask><path d="M7.3335 7.00011L8.71445 8.44682L10.23 7.00011L8.71445 5.5534L7.3335 7.00011ZM2.04778 14.8105L8.71445 8.44682L5.95254 5.5534L-0.714122 11.917L2.04778 14.8105ZM8.71445 5.5534L2.04778 -0.810237L-0.714122 2.08319L5.95254 8.44682L8.71445 5.5534Z" fill="#EF4126" mask="url(#path-1-inside-1)"/></svg>

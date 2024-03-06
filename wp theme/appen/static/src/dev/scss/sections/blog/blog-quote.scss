@@ -1,0 +1,80 @@
+.blog-quote {
+    position: relative;
+    padding: 56px 64px 66px 56px;
+    background-color: rgb(241,241,244);
+    @media (max-width: 979px) {
+        padding: 56px 64px 47px 56px;
+    }
+    @media (max-width: 768px) {
+        padding: 24px 30px 40px;
+    }
+    @media (max-width: 680px) {
+        padding: 24px 24px 40px;
+    }
+    &__text {
+        margin-bottom: 46px;
+        font-family: "Grotesque";
+        font-size: 28.8px;
+        font-weight: 400;
+        line-height: 1.5;
+        letter-spacing: 0.01428rem;
+        color: #000;
+        @media(max-width: 979px) {
+            font-size: 28px;
+        }
+        @media(max-width: 680px) {
+            font-size: 26px;
+        }
+        @media(max-width: 575px) {
+            font-size: 24px;
+        }
+        @media(max-width: 480px) {
+            font-size: 23px;
+        }
+        @media screen and (max-width: $mobile) {
+            margin-bottom: 33px;
+        }
+    }
+    &__author-name {
+        font-family: "Grotesque";
+        font-size: 16.2px;
+        font-weight: 500;
+        line-height: 1.7;
+        letter-spacing: 0.1px;
+        color: #000;
+        @media (max-width:680px) {
+            font-size: 18px;
+        }
+    }
+    &__author-job {
+        font-family: "Grotesque";
+        font-size: 16.2px;
+        font-weight: 400;
+        line-height: 1.7;
+        letter-spacing: 0.1px;
+        color: #a2aaad;
+        @media (max-width:680px) {
+            font-size: 18px;
+        }
+    }
+    &::before {
+        position: absolute;
+        content: '';
+        background-size: contain;
+        background-image: url("data:image/svg+xml,%3Csvg width='57' preserveAspectRatio='none' height='48' viewBox='0 0 57 48' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M22.2078 26.3346V48H0V26.3346L21.6234 0L25.9091 2.98833L13.2468 26.3346H22.2078ZM53.2987 26.3346V48H31.0909V26.3346L52.7143 0L57 2.98833L44.3377 26.3346H53.2987Z' fill='%23EF4126'/%3E%3C/svg%3E%0A");
+        width: 51px;
+        height: 43px;
+        top: -30px;
+    }
+    @media screen and (max-width: 768px) {
+        padding: 76px 30px 33px 25px;
+        line-height: 1.4;
+        &::before {
+            width: 38px;
+            height: 32px;
+            background-size: contain;
+            top: -24px;
+            left: 16px;
+        }
+    }  
+}

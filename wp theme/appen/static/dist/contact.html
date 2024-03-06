@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="description" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimal-ui">
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' />
+
+<title>Appen</title>
+
+<!-- Disable tap highlight on IE -->
+<meta name="msapplication-tap-highlight" content="no">
+
+<meta name="format-detection" content="telephone=no">
+<meta http-equiv="x-rim-auto-match" content="none">
+
+<!-- Add to homescreen for Chrome on Android -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="">
+
+<!-- Add to homescreen for Safari on iOS -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="">
+
+<!-- Tile icon for Win8 (144x144 + tile color) -->
+<meta name="msapplication-TileColor" content="#2F3BA2">
+
+<!-- Color the status bar on mobile devices -->
+<meta name="theme-color" content="#ffffff">
+
+
+
+<link rel="stylesheet" href="styles/app.css" media="all">
+<link rel="stylesheet" href="styles/fonts.css" media="all">
+</head>
+<body>
+    <main>
+        <section class="appen-hero resourses-hero">
+            <div class="appen-wrap">
+                <h1>Contact Us</h1>
+                <p>Please complete the form below and a member of our team will be in touch with you</p>
+            </div>
+        </section>
+
+        <section class="contact-content">
+            <div class="appen-wrap">
+                <form class="contact-form">
+                    <div class="blog-form__fields">
+                        <label class="blog-form__label blog-form__label_lg js-select" data-select="reason">
+                            Reason for contacting us <span class="blog-form__required">*</span>
+                            <div class="blog-form__select-wrapper">
+                                <div class="blog-form__select">
+                                    <div class="blog-form__select-trigger"><span>Select</span>
+                                        <div class="blog-form__arrow"></div>
+                                    </div>
+                                    <div class="blog-form__options">
+                                        <span class="blog-form__option selected" data-value="---">---</span>
+                                        <span class="blog-form__option" data-value="---">Reason 1</span>
+                                        <span class="blog-form__option" data-value="---">Reason 2</span>
+                                        <span class="blog-form__option" data-value="---">Reason 3</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+    
+                        <div class="contact-form__grid">
+                            <label class="blog-form__label">
+                                First name <span class="blog-form__required">*</span>
+                                <input type="text" class="blog-form__input" required>
+                            </label>
+                            <label class="blog-form__label">
+                                Last name <span class="blog-form__required">*</span>
+                                <input type="text" class="blog-form__input" required>
+                            </label>
+                            <label class="blog-form__label">
+                                Company <span class="blog-form__required">*</span>
+                                <input type="text" class="blog-form__input">
+                            </label>
+                            <label class="blog-form__label">
+                                Job title <span class="blog-form__required">*</span>
+                                <input type="text" class="blog-form__input">
+                            </label>
+                            <label class="blog-form__label">
+                                Email <span class="blog-form__required">*</span>
+                                <input type="email" class="blog-form__input" required>
+                            </label>
+                            <label class="blog-form__label">
+                                Phone number <span class="blog-form__required">*</span>
+                                <input type="tel" class="blog-form__input" required>
+                            </label>
+                            <label class="blog-form__label js-select" data-select="country">
+                                Country <span class="blog-form__required">*</span>
+                                <div class="blog-form__select-wrapper">
+                                    <div class="blog-form__select">
+                                        <div class="blog-form__select-trigger"><span>Select your country</span>
+                                            <div class="blog-form__arrow"></div>
+                                        </div>
+                                        <div class="blog-form__options">
+                                            <span class="blog-form__option selected" data-value="---">---</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+    
+                        <label class="blog-form__label blog-form__label_lg">
+                            What would you like to talk to us about? <span class="blog-form__required">*</span>
+                            <textarea type="text" class="blog-form__input blog-form__textarea" required></textarea>
+                        </label>
+    
+                        <label class="blog-form__label blog-form__label_lg js-select" data-select="find">
+                            How did you find us?
+                            <div class="blog-form__select-wrapper">
+                                <div class="blog-form__select">
+                                    <div class="blog-form__select-trigger"><span>Select</span>
+                                        <div class="blog-form__arrow"></div>
+                                    </div>
+                                    <div class="blog-form__options">
+                                        <span class="blog-form__option selected" data-value="---">---</span>
+                                        <span class="blog-form__option" data-value="---">Media</span>
+                                        <span class="blog-form__option" data-value="---">News</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+    
+                        
+                        <input type="text" hidden id="js-hidden-reason">
+                        <input type="text" hidden id="js-hidden-country">
+                        <input type="text" hidden id="js-hidden-find">
+                    </div>
+
+                    <label class="blog-form__policy">
+                        <input type="checkbox">
+                        <span class="checkbox"></span>
+                        By checking this box, you agree to receive email communications from Appen
+                    </label>
+                    
+                    <p class="blog-form__text">
+                        By submitting this form, you consent to allow Appen to store and process the personal information submitted above to provide you the content requested. For information on our commitment to protecting your privacy, please review our Privacy Statement.
+                    </p>
+
+                    <button class="blog-form__btn btn btn-black" type="submit"><span>Submit</span></button>
+                </form>
+            </div>
+        </section>
+    </main>
+</body>
+<script src="scripts/blogWithForm.js"></script>
+</html>

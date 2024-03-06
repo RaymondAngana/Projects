@@ -1,0 +1,755 @@
+.marquee-bg {
+  width: 100%;
+  position: static;
+  z-index: 0;
+
+  @include breakpoint(xlarge) {
+    min-height: 800px;
+  }
+}
+
+#curve_overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: none;
+  opacity: 0;
+  z-index: 0;
+
+  @include breakpoint(large) {
+    display: block;
+    transform: translateY(100%);
+  }
+
+  @media only screen and (min-width: 2000px) {
+    bottom: -15px;
+    height: 340px;
+  }
+}
+
+#curve_overlay_mobile {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 35vw;
+  display: block;
+  opacity: 1;
+  z-index: 1;
+
+  // @include breakpoint(small) {
+  //   top: 50vw;
+  // }
+
+  @include breakpoint(medium) {
+    top: 35vw;
+  }
+
+  @include breakpoint(large) {
+    display: none;
+  }
+}
+
+.marq-row {
+  position: initial;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 10;
+
+  @include breakpoint(large) {
+    position: absolute;
+  }
+}
+
+.marq-col-content {
+  opacity: 0;
+  align-self: end;
+
+  @include breakpoint(large) {
+    opacity: 0;
+  }
+}
+
+#marqForm {
+  border-bottom: 20px solid $primary;
+  position: relative;
+  max-width: 125rem;
+  margin: auto;
+  overflow: hidden;
+
+  @include breakpoint(large) {
+    min-height: 800px;
+    position: relative;
+  }
+
+  .marq-col-content {
+    align-self: end;
+    opacity: 0;
+    z-index: 4;
+    transform: translateY(100%);
+
+    @include breakpoint(large) {
+      align-self: center;
+      margin-top: 45vw;
+    }
+
+    @media only screen and (min-width: 1120px) {
+      margin-top: 40vw;
+    }
+
+    @include breakpoint(xlarge) {
+      margin-top: 33vw;
+    }
+
+    @media only screen and (min-width: 1525px) {
+      margin-top: 30vw;
+    }
+
+    @media only screen and (min-width: 1700px) {
+      margin-top: 28vw;
+    }
+
+    @media only screen and (min-width: 1920px) {
+      margin-top: 24vw;
+    }
+
+    @media only screen and (min-width: 2200px) {
+      margin-top: 26%;
+    }
+  }
+
+  .xlarge-justify {
+    justify-content: space-around;
+  }
+
+  h3.subhead {
+    font-weight: 700 !important;
+  }
+
+  .cta-form .oneField label {
+    color: $chia !important;
+    background-color: $white;
+  }
+
+  .column-form {
+    background-color: white;
+    margin: 0;
+    border-radius: 6px;
+    border: none;
+    bottom: 100%;
+    opacity: 0;
+    transform: unset;
+    position: relative;
+    z-index: 4;
+    max-width: 600px;
+
+    @include breakpoint(large) {
+      border: 1px solid #bebebe;
+      margin: 20px 0;
+      opacity: 1;
+      transform: translateY(-150%);
+    }
+
+    h3 {
+      text-align: center;
+      padding-top: 32px;
+    }
+
+    p {
+      text-align: center;
+      max-width: 500px;
+      margin: auto;
+    }
+
+    a {
+      color: $secondary;
+      font-size: inherit;
+    }
+  }
+
+  .cta-form {
+    input[type="text"],
+    input[type="number"],
+    input[type="tel"],
+    input[type="email"] {
+      border: 1px solid $chia !important;
+      color: $black;
+    }
+
+    select {
+      border: 1px solid $chia !important;
+      border-radius: 6px !important;
+      margin: 0 !important;
+      padding: 0.5rem !important;
+      height: auto !important;
+      background-color: transparent !important;
+      max-width: 100% !important;
+      color: black !important;
+      font-size: 1rem !important;
+      background-image: url("../assets/images/chevron-down-light.svg");
+      background-size: 20px;
+      background-position: right center;
+
+      &::after {
+        content: "";
+        border: solid black;
+        border-width: 0 3px 3px 0;
+        display: inline-block;
+      }
+    }
+  }
+
+  .wForm .oneField {
+    border: 2px solid transparent;
+
+    &.errFld {
+      div.errMsg {
+        position: absolute !important;
+        top: 0 !important;
+        right: 0 !important;
+      }
+    }
+  }
+
+  .form-text-area {
+    color: $black;
+    text-align: left;
+    margin: 0 auto;
+    max-width: 330px;
+
+    a {
+      color: $secondary;
+      text-decoration: none;
+    }
+  }
+
+  .bottom-form-text {
+    text-align: center;
+    position: initial;
+    left: 18vw;
+    bottom: 14px;
+    padding-bottom: 30px;
+
+    @media only screen
+      and (min-width: 1024px)
+      and (max-width: 1279px) {
+      max-width: 230px;
+      position: absolute;
+      padding-bottom: 0;
+      bottom: 12px;
+      text-align: left;
+
+      p {
+        text-align: left !important;
+      }
+    }
+
+    @include breakpoint(xlarge) {
+      max-width: 250px;
+      position: absolute;
+      padding-bottom: 0;
+      left: 15vw;
+
+      p {
+        text-align: left !important;
+      }
+    }
+
+    @media only screen and (min-width: 1600px) {
+      left: 12vw;
+    }
+
+    @media only screen and (min-width: 1800px) {
+      left: 11vw;
+    }
+
+    @media only screen and (min-width: 2000px) {
+      left: 10vw;
+    }
+
+    .bottom-form-head p {
+      font-size: rem-calc(14);
+      margin-bottom: 10px;
+      margin-top: 20px;
+      font-weight: 600;
+
+      @include breakpoint(large) {
+        margin: 0;
+        margin-bottom: 10px;
+      }
+    }
+
+    h6 {
+      margin-bottom: 5px;
+
+      a {
+        font-weight: normal;
+      }
+    }
+
+    p {
+      font-size: rem-calc(10);
+      text-align: center;
+      line-height: 1.2;
+    }
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="email"] {
+    border: 1px solid $medium-gray !important;
+    border-radius: 6px !important;
+    margin: 0 !important;
+    padding: 0.5rem !important;
+    height: auto !important;
+    background-color: transparent !important;
+    max-width: 100% !important;
+    color: $black !important;
+    font-size: 1rem !important;
+  }
+
+  select {
+    border: 1px solid $medium-gray !important;
+    border-radius: 6px !important;
+    margin: 0 !important;
+    padding: 0.5rem !important;
+    height: auto !important;
+    background-color: transparent !important;
+    max-width: 100% !important;
+    color: $medium-gray !important;
+    font-size: 1rem !important;
+    background-image: url("../assets/images/chevron-down-light.svg");
+    background-size: 20px;
+    background-position: right center;
+
+    &::after {
+      content: "";
+      border: solid black;
+      border-width: 0 3px 3px 0;
+      display: inline-block;
+    }
+  }
+
+  .row {
+    padding-top: 0;
+
+    @include breakpoint(large) {
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+      overflow: hidden;
+      max-width: 125rem;
+    }
+  }
+
+  .button {
+    margin-top: 20px;
+  }
+
+  .oneField {
+    position: relative;
+    margin: 0 !important;
+
+    label {
+      font-size: 1rem !important;
+      line-height: 1 !important;
+      margin: 0 !important;
+      color: $medium-gray !important;
+      padding: 5px !important;
+      background-color: $white !important;
+      min-width: 0 !important;
+      position: absolute;
+      top: 8px;
+      left: 15px;
+      z-index: 1;
+    }
+  }
+
+  .actions {
+    text-align: center;
+    display: center;
+
+    @include breakpoint(large) {
+      margin: 0 !important;
+      display: inline-flex;
+    }
+  }
+
+  input[type="submit"] {
+    @include brand-button(none, 30px, 500, $white, $secondary, #4329A3, $white);
+
+    width: auto;
+    max-width: 300px;
+    font-size: 18px !important;
+    padding: 1.169rem 35px !important;
+
+    &:hover {
+      box-shadow: 0 5px 0 #dedede;
+    }
+  }
+}
+
+#marqHalfUnique {
+  .half-half {
+    overflow: hidden;
+    max-width: 125rem;
+    flex-flow: wrap-reverse;
+
+    @include breakpoint(large) {
+      flex-flow: wrap;
+    }
+  }
+
+  h1 {
+    // font-size: rem-calc(42);
+    // line-height: rem-calc(46);
+    padding-left: 8px;
+    padding-right: 8px;
+
+    @include breakpoint(large) {
+      // font-size: rem-calc(48);
+      // line-height: rem-calc(52);
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    @include breakpoint(xlarge) {
+      // font-size: rem-calc(64);
+      // line-height: rem-calc(70.4);
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+
+  time {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+
+  h3 {
+    font-size: rem-calc(36);
+    font-weight: normal;
+    padding-bottom: 40px;
+
+    @include breakpoint(large) {
+      padding-bottom: 90px;
+    }
+
+    .subhead {
+      font-family: 700;
+    }
+  }
+
+  .marq-h-content {
+    margin-left: initial;
+    display: flex;
+    flex-flow: column;
+    padding-top: 2.5rem;
+    background-color: $lighter-gray;
+    z-index: 3;
+
+    @include breakpoint(medium) {
+      padding-top: 4rem;
+      background-color: transparent;
+    }
+
+    h1 {
+      margin-top: 25px;
+    }
+  }
+
+  .article-info {
+    display: flex;
+    margin-left: 0;
+
+    h4 {
+      font-weight: normal;
+    }
+
+    li {
+      padding-right: 10px;
+    }
+
+    .duration {
+      display: flex;
+
+      &::before {
+        display: block;
+        content: "";
+        background-repeat: no-repeat;
+        background-image: url("../images/clock.svg");
+        width: 24px;
+        margin-right: 10px;
+      }
+    }
+  }
+
+  .social-row {
+    padding: 0 8px;
+    background-color: initial;
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 40px;
+    flex-flow: row wrap;
+    padding-top: 30px;
+
+    .social-row-right {
+      padding-top: 40px;
+
+      @include breakpoint(large) {
+        padding-top: 0;
+        padding-right: 50px;
+        padding-left: 0;
+      }
+
+      a {
+        color: $secondary;
+
+        &.social {
+          font-size: 24px;
+        }
+      }
+
+      ul {
+        list-style: none;
+        color: $black;
+        font-family: $headline-font-family;
+        font-size: rem-calc(14);
+        font-weight: 400;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 0;
+      }
+    }
+  }
+
+  &::before {
+    content: "";
+    width: 100%;
+    height: 650px;
+    background-image: url("../images/curve-top-mobile.png");
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    position: absolute;
+    top: 330px;
+    display: block;
+    z-index: 2;
+
+    @media screen and (min-width: 440px) {
+      background-image: url("../images/curve-top.svg");
+      top: 200px;
+    }
+
+    @include breakpoint(medium) {
+      top: 400px;
+    }
+
+    @include breakpoint(large) {
+      background-image: none !important;
+      display: none !important;
+    }
+  }
+}
+
+#marqHalf {
+  border-bottom: 20px solid $primary;
+  position: relative;
+  overflow: hidden;
+
+  .row {
+    max-width: 125rem;
+  }
+
+  .img-headline {
+    img {
+      margin: 0;
+      max-width: 500px;
+    }
+  }
+
+  .half-half {
+    flex-flow: wrap-reverse;
+
+    @include breakpoint(large) {
+      flex-flow: row;
+    }
+
+    .marq-bg {
+      height: 250px;
+      background-repeat: no-repeat;
+      background-position: top;
+      background-size: cover;
+      position: relative;
+
+      @include breakpoint(mid) {
+        height: 300px;
+        background-repeat: no-repeat;
+      }
+
+      @include breakpoint(medium) {
+        height: 450px;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+
+      @include breakpoint(large) {
+        height: 600px;
+        background-repeat: no-repeat;
+      }
+
+      &::before {
+        content: "";
+        width: auto;
+        background-image: url("../images/DOUBLEcurve.svg");
+        // background-image: url("../images/curve-top-mobile-white.svg");
+        background-size: cover;
+        background-position: center center;
+        background-repeat: no-repeat;
+        position: absolute;
+        display: block;
+        z-index: 2;
+        bottom: -20vw;
+        height: 104vw;
+        transform: rotate(270deg);
+        left: -2vw;
+        right: -2vw;
+
+        @media screen and (min-width: 440px) {
+          bottom: -22vw;
+        }
+
+        @include breakpoint(large) {
+          transform: rotate(0);
+          background-image: url("../images/DOUBLEcurve.svg");
+          position: absolute;
+          left: -8vw;
+          bottom: -30px;
+          top: -1vw;
+          z-index: 2;
+          height: 800px;
+        }
+      }
+    }
+
+    .subscription-form {
+      .oneField {
+        margin-bottom: 15px !important;
+
+        @include breakpoint(large) {
+          margin-bottom: 0 !important;
+        }
+
+        label {
+          font-size: 1rem !important;
+          line-height: 1 !important;
+          margin: 0 !important;
+          color: #707070 !important;
+          padding: 5px !important;
+          background-color: #fff !important;
+          min-width: 0 !important;
+          position: absolute;
+          top: -8px;
+          left: 15px;
+          z-index: 1;
+        }
+      }
+
+      .actions {
+        left: 0;
+        width: 1vw;
+        margin: 10px 0 0 !important;
+        padding: 0;
+        position: relative;
+        top: auto;
+        right: auto;
+
+        @media screen and (min-width: 1440px) {
+          top: -61%;
+          right: 24%;
+          position: absolute;
+          left: unset;
+        }
+      }
+
+      .form-wrap {
+        max-width: 580px;
+      }
+    }
+
+    .marq-h-content {
+      h1 {
+        margin-top: 25px;
+      }
+    }
+  }
+
+  h3.subhead {
+    font-weight: 700 !important;
+  }
+
+  .marq-h-content {
+    margin-left: initial;
+    z-index: 3;
+    margin-bottom: 20px;
+
+    @include breakpoint(large) {
+      margin-left: 6%;
+    }
+  }
+
+  .newsletter-form .row {
+    flex-flow: column;
+
+    @include breakpoint(medium) {
+      flex-flow: row;
+    }
+  }
+
+  .actions {
+    text-align: center;
+
+    @include breakpoint(medium) {
+      margin: 0 !important;
+    }
+  }
+
+  .wFormContainer .inputWrapper input[type="text"] {
+    max-width: 400px !important;
+  }
+
+  .cta-form input[type="email"] {
+    border: 1px solid $chia !important;
+    color: $black !important;
+  }
+
+  input[type="submit"] {
+    @include brand-button(none, 30px, 500, $white, $secondary, darken($secondary, 10%), $white);
+
+    position: initial;
+    left: 0;
+    margin-top: 20px !important;
+
+    @include breakpoint(xxlarge) {
+      position: absolute;
+    }
+  }
+
+  .cta-form .button {
+    margin-top: 20px;
+  }
+}
+
+#simpleMarq {
+  width: 100%;
+  margin: auto;
+  text-align: center;
+  height: 500px;
+  display: flex;
+  // h1 {
+  //   padding-bottom: 40px;
+  // }
+}

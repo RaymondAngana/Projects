@@ -1,0 +1,54 @@
+.component-wrap-outer {
+  .component-wrap {
+    background-color: $white;
+    position: relative;
+
+    &.gray {
+      background-color: $lighter-gray;
+      padding: 27.5px 0;
+    }
+
+    &.gray-curved {
+      background-color: $lighter-gray;
+
+      &.decoration {
+        background-image: url("../images/decorative-bg-home.svg");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: top center;
+      }
+    }
+
+    &.white {
+      background-color: $white;
+      padding: 27.5px 0;
+
+      &.decoration {
+        background-image: url("../images/decorative-bg.svg");
+        background-size: auto;
+        background-repeat: no-repeat;
+        background-position: top center;
+      }
+    }
+  }
+
+  .gray-curve {
+    width: 100%;
+    height: 8vw;
+    background-image: url("../images/curve-top-short.svg");
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    display: block;
+  }
+
+  .gray-bottom-curve {
+    width: 100%;
+    height: 8vw;
+    background-image: url("../images/curve-top-short-bottom.svg");
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    display: block;
+  }
+}

@@ -1,0 +1,17 @@
+.error-page {
+  min-height: 400px;
+  text-align: left;
+  -webkit-box-align: start;
+  -ms-flex-align: start;
+  align-items: start;
+
+  h4 {
+    border-bottom: 1px solid #eee;
+    margin: 0;
+    padding: 30px 0 10px;
+  }
+
+  p {
+    margin: 1rem 0;
+  }
+}

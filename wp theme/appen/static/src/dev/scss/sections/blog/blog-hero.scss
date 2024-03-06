@@ -1,0 +1,164 @@
+.appen-hero.blog-hero {
+    padding-top: 86px;
+    padding-bottom: 83px;   
+    border-bottom: 1px solid rgb(199,201,200);
+    @media screen and (max-width: 979px) {
+        border: none;
+        padding-top: 48px;
+        padding-bottom: 0 !important;
+    }
+
+    .appen-row {
+        @media screen and (max-width: $mobile) {
+            flex-direction: row;
+        }
+    }
+
+    .blog-hero__col {
+        display: flex;
+        flex-direction: column;
+        @media screen and (max-width: 979px) {
+            flex-basis: 100%;
+            min-height: 456px;
+        }
+    }
+    .blog-hero__col_img {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        @media screen and (max-width: 979px) {
+            flex-basis: 100%;
+            align-items: center;
+        }
+    }
+
+    .appen-hero__breadcrumbs {
+        padding-top: 21px;
+    }
+
+    .appen-hero__date {
+        position: relative;
+        padding-left: 48px;
+        padding-top: 0;
+        margin-top: auto;
+        line-height: 1;
+        max-width: 100% !important;
+        @media screen and (max-width: 979px) {
+            padding-top: 80px;
+            padding-left: 48px;
+            margin-bottom: 22px;
+            &::before {
+                position: absolute;
+                content: '';
+                display: block;
+                width: 100vw;
+                height: 1px;
+                background-color: #E4E4E4;
+                top: 0;
+                left: -25px;
+            }
+        }
+        @media screen and (max-width: 498px) {
+            padding-top: 50px;
+        }
+        time {
+            position: relative;
+            font-size: 16.2px;
+            color: rgb(14, 20, 27);
+            letter-spacing: 0.18px;
+            line-height: 27px;
+            @media screen and (max-width: 979px) {
+                font-size: 18px;
+                letter-spacing: 0.2px;
+                line-height: 30px;
+            }
+            &::before {
+                position: absolute;
+                top: -8px;
+                left: -48px;
+                width: 37px;
+                height: 37px;
+                content: '';
+                background-image: url("data:image/svg+xml,%3C%3Fxml version='1.0' encoding='UTF-8'%3F%3E%3Csvg width='37px' height='37px' viewBox='0 0 37 37' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'%3E%3Ctitle%3ESymbol%3C/title%3E%3Cdesc%3ECreated with Sketch.%3C/desc%3E%3Cg id='Mobile' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'%3E%3Cg id='Blog---1' transform='translate(-24.000000, -677.000000)' fill='%23F1572A'%3E%3Cg id='Author-/-Date' transform='translate(24.000000, 677.000000)'%3E%3Cg id='Symbol'%3E%3Cg id='Logo'%3E%3Cpath d='M18.4471429,21.3338917 C20.2649881,21.3338917 23.5170238,24.6026655 24.3816786,25.4673202 C25.2943452,26.3799869 25.7502381,27.7489869 25.2939048,29.1175464 C24.65125,31.0468321 19.3598095,35.9651893 18.4471429,36.877856 C17.5344762,35.9651893 12.2430357,31.0468321 11.5999405,29.1175464 C11.1440476,27.7489869 11.5999405,26.3799869 12.5121667,25.4673202 L12.8268187,25.1538874 C13.9928973,24.0006124 16.8052181,21.3338917 18.4471429,21.3338917 Z M29.1278976,11.5921881 C31.0571833,12.2348429 35.9755405,17.5262833 36.8882071,18.43895 C35.9755405,19.3516167 31.0571833,24.6430571 29.1278976,25.2857119 C27.7593381,25.7420452 26.3903381,25.2861524 25.4776714,24.3734857 L25.2818221,24.1773482 C24.2048451,23.095183 21.3442429,20.1395149 21.3442429,18.43895 C21.3442429,16.6211048 24.6130167,13.369069 25.4776714,12.5044143 C26.3903381,11.5917476 27.7593381,11.1358548 29.1278976,11.5921881 Z M11.4105798,12.5044143 L11.6064239,12.7005518 C12.6833511,13.782717 15.5435679,16.7383851 15.5435679,18.43895 C15.5435679,20.2567952 12.2752345,23.508831 11.4105798,24.3734857 C10.4979131,25.2861524 9.1289131,25.7420452 7.76035357,25.2857119 C5.83106786,24.6430571 0.912710714,19.3516167 4.4047619e-05,18.43895 C0.912710714,17.5262833 5.83106786,12.2348429 7.76035357,11.5921881 C9.1289131,11.1358548 10.4979131,11.5917476 11.4105798,12.5044143 Z M18.4471429,0 C19.3598095,0.912666667 24.65125,5.83102381 25.2939048,7.76030952 C25.7502381,9.12886905 25.2943452,10.497869 24.3816786,11.4105357 L24.1855411,11.6063851 C23.1033759,12.683362 20.1477078,15.5439643 18.4471429,15.5439643 C16.6292976,15.5439643 13.3768214,12.2751905 12.5121667,11.4105357 C11.5999405,10.497869 11.1440476,9.12886905 11.5999405,7.76030952 C12.2430357,5.83102381 17.5344762,0.912666667 18.4471429,0 Z' id='Combined-Shape'%3E%3C/path%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-size: contain;
+                background-position: center;
+            }
+        }
+    }
+
+    h1 {
+        color: #000000;
+        letter-spacing: 0.0104166em;
+        padding-bottom: 30px;
+        max-width: 820px;
+        font-size: 43.2px;
+        line-height: 1.4;
+        @media(max-width: 979px) {
+            font-size: 44px;
+        }
+        @media(max-width: 768px) {
+            font-size: 42px;
+        }
+        @media(max-width: 680px) {  
+            font-size: 40px;
+        }
+        @media(max-width: 576px) {
+            font-size: 38px;
+        }
+        @media(max-width: 480px) {
+            font-size: 36px;
+            line-height: 1.2;
+        }
+    }
+
+    p {
+        font-size: 18px;
+        color: #4B4F54;
+        letter-spacing: 0.45px;
+        line-height: 32.4px;
+        color: #4b4f54;
+        max-width: 500px;
+        @media (max-width: 979px) {
+            font-size: 22px;
+            letter-spacing: 0.21px;
+            line-height: 32px;
+        }
+        @media (max-width: 575px) {
+            font-size: 21px;
+            line-height: 31px;
+        }
+    }
+
+    .blog-hero-status {
+        padding-top: 47px;
+        align-items: center;
+
+        p {
+            padding-top: 0;
+        }
+    }
+
+    .appen-socials {
+        justify-content: flex-end;
+
+        &__icon {
+            font-size: 0;
+        }
+    }
+
+    .appen-hero-img {
+        img {
+            width: 100%;
+        }
+    }
+    .appen-hero__desc {
+        position: relative;
+        padding-bottom: 30px;
+        max-width: 500px;
+        @media screen and (max-width: 979px) {
+            margin-bottom: 70px;
+            max-width: 100%;
+        }
+    }
+}

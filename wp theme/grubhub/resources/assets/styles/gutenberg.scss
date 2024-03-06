@@ -1,0 +1,16 @@
+body#tinymce {
+  margin: 12px !important;
+}
+
+.wp-block {
+  max-width: 92% !important;
+}
+
+.component-wrap {
+  border: 1px solid #707070;
+
+  &.gray,
+  &.gray-curved {
+    background-color: #e6e6e6;
+  }
+}

@@ -1,0 +1,286 @@
+footer {
+  position: relative;
+  z-index: 9;
+  padding: 40px 30px;
+  background-color: $dark;
+  box-shadow: 0 0 50px 2px rgba(0, 0, 0, 0.65);
+
+  @include breakpoint(large) {
+    padding: 40px 80px;
+  }
+
+  a {
+    color: $white;
+
+    &:hover,
+    &:active,
+    &:focus {
+      color: $white !important;
+      text-decoration: underline;
+    }
+
+    &.social {
+      font-size: 24px;
+    }
+  }
+
+  ul {
+    background-color: transparent;
+    list-style: none;
+    margin-left: 0;
+    margin-right: 10px;
+
+    li {
+      color: $white;
+
+      p {
+        color: $white;
+      }
+    }
+  }
+}
+
+// Desktop Top
+ul {
+  background-color: transparent;
+  list-style: none;
+
+  &.left {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.social-row {
+  padding-bottom: 40px;
+  max-width: 100%;
+
+  ul {
+    list-style: none;
+    color: $white;
+    font-family: $headline-font-family;
+    font-size: rem-calc(14);
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+
+    li {
+      &.home {
+        .social {
+          padding: 0;
+
+          img {
+            max-width: 350px;
+            height: auto;
+          }
+        }
+      }
+    }
+
+    &.left {
+      justify-content: flex-start;
+      padding-bottom: 20px;
+
+      @include breakpoint(medium) {
+        padding-bottom: 0;
+      }
+    }
+
+    &.right {
+      justify-content: flex-start;
+
+      @include breakpoint(medium) {
+        justify-content: flex-end;
+      }
+
+      li {
+        padding-left: 20px;
+
+        &:first-child {
+          padding-left: 0;
+        }
+
+        a {
+          img {
+            padding-bottom: 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+.resources-row {
+  max-width: 100%;
+
+  @include breakpoint(medium) {
+    max-width: 90%;
+  }
+
+  @include breakpoint(large) {
+    max-width: 100%;
+  }
+
+  h3.head3-special {
+    color: $white;
+    padding: 15px;
+    margin-bottom: 0;
+    font-size: 1.25rem;
+    line-height: 1.2;
+
+    @include breakpoint(medium) {
+      font-size: 1.5rem;
+    }
+  }
+
+  h3 {
+    font-size: rem-calc(16);
+    color: $white;
+  }
+
+  ul {
+    li {
+      font-size: rem-calc(16);
+    }
+  }
+
+  .newsletter-form {
+    margin: auto;
+    border: 1px solid #fff !important;
+    border-radius: 6px !important;
+
+    .form-wrap {
+      padding: 0 15px 15px;
+    }
+
+    #submit_button {
+      padding-top: 20px;
+      box-shadow: none;
+    }
+
+    .oneField {
+      position: relative;
+      margin: 0 0 0.5rem !important;
+
+      label {
+        font-size: 1rem !important;
+        line-height: 1 !important;
+        color: $white !important;
+        padding: 5px !important;
+        background-color: $dark;
+        min-width: 0 !important;
+        position: absolute;
+        left: 15px;
+        z-index: 1;
+        top: 5px;
+      }
+
+      label#tfa_28-L {
+        top: 0;
+      }
+    }
+
+    .actions {
+      text-align: left;
+    }
+
+    input[type="submit"] {
+      @include brand-button(2px solid $white !important, 25px !important, 700 !important, $white !important, $secondary !important, darken($secondary, 10%) !important, $white !important);
+
+      width: 50vw;
+      max-width: 150px;
+      font-size: 18px !important;
+      padding: 1rem 1.5rem !important;
+
+      @include breakpoint(medium) {
+        width: 30vw;
+        max-width: 150px;
+      }
+
+      @include breakpoint(large) {
+        width: 25vw;
+        max-width: 150px;
+      }
+    }
+
+    input[type="email"],
+    input[type="text"] {
+      border: 1px solid #fff !important;
+      border-radius: 6px !important;
+      margin: 0 !important;
+      padding: 0.5rem !important;
+      height: auto !important;
+      background-color: transparent !important;
+      max-width: 100% !important;
+      color: #fff !important;
+      font-size: 1rem !important;
+    }
+
+    .wFormContainer {
+      padding: 0;
+    }
+  }
+}
+
+.resources-section {
+  display: flex;
+  flex-direction: column;
+  padding-top: 60px;
+  padding-bottom: 100px;
+
+  @include breakpoint(medium) {
+    flex-flow: row wrap;
+  }
+
+  .menu-row {
+    flex: 0 1 100%;
+
+    @media screen and (min-width: 768px) and (max-width: 1023px) {
+      flex: 0 0 50%;
+    }
+
+    @include breakpoint(large) {
+      flex: 0 0 25%;
+    }
+  }
+}
+
+.legal-row {
+  font-size: rem-calc(12);
+  color: $white;
+  max-width: 100%;
+
+  @include breakpoint(medium) {
+    max-width: 90%;
+  }
+
+  @include breakpoint(large) {
+    max-width: 100%;
+  }
+
+  .legal-wrap {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+
+    @include breakpoint(large) {
+      flex-direction: row;
+      max-width: 480px;
+    }
+  }
+
+  p {
+    font-size: rem-calc(12);
+    line-height: rem-calc(14);
+    color: $white;
+  }
+
+  .legal-link {
+    text-decoration: underline;
+    font-size: inherit;
+  }
+
+  .cell.large-9 {
+    max-width: 86%;
+  }
+}

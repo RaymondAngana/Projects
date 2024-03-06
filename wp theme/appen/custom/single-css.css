@@ -1,0 +1,1170 @@
+.x-container.max_750{max-width:750px !important;}
+.single-job .x-breadcrumb-wrap, .single-flexible_job .x-breadcrumb-wrap, .single-white-papers .x-breadcrumb-wrap {
+    display: none;
+	
+}
+.content_body {
+    padding-top: 20px;
+}
+.single_breadcrumbs {
+    font-weight: 300;
+    padding: 15px 0;
+    color: #636362;
+	margin-top:-15px;
+}
+.single .x-container.offset {
+    margin-top: 0;
+}
+.single .entry-content.content p {
+    margin-bottom: 20px;
+}
+.job_header_section {
+    background: url(https://appen.com/wp-content/uploads/2017/08/Appen-About-Career.jpg) no-repeat;
+    background-size: cover;
+    padding: 35px 0;
+    color: #fff;
+}
+.job_name h3 {
+    font-size: 35px;
+    margin: 0;
+    padding-bottom: 10px;
+    color: #fff !important;
+}
+.job_meta>div {
+    display: inline-block;
+    padding-right: 15px;
+    font-size: 18px;
+}
+.top_apply_now a, .last_apply_now_btn a{ 
+    display: table;
+    padding: 0 25px;
+    height: 40px;
+    line-height: 40px;
+    margin-top: 18px;
+    vertical-align: middle;
+    text-transform: none;
+    border-radius: 2px 2px 20px 2px;
+    box-shadow: 2px 2px 6px 0px rgba(0, 0, 0, 0.37);
+    font-weight: 600;
+}
+.top_apply_now a{
+	background: #fff;
+	color: #bd1622;
+	float: right;
+}
+.last_apply_now_btn a{
+	color: #fff !important;
+	background: #bd1622;
+	padding: 0 30px 0 25px;
+}
+.content_body .sections {
+    padding-bottom: 20px;
+	color: #666;
+    font-weight: 300;
+}
+.single-job .share_btns {
+    margin-top: 30px;
+}
+
+.single-job .x-entry-share {
+    text-align: initial;
+	border-bottom: none;
+}
+
+.share_btns .x-share-options * {
+    display: inline-block;
+    height: auto;
+    line-height: auto;
+    width: auto;
+    margin: 0px 2px;
+}
+.x-entry-share .x-share-options, .x-entry-share p {
+    margin: 0 5px 0 0;
+    display: inline-block;
+    vertical-align: middle;
+    text-transform: none;
+    font-weight: normal;
+}
+.content_body ul {
+    list-style: none;
+    padding: 0;
+    margin-left: 0;
+    margin-bottom: 25px;
+}
+.content_body ul ul {
+    margin-left: 20px;
+}
+.content_body .sections ul li {
+    padding: 0 0 0 12px;
+    margin: 0;
+    position: relative;
+}
+.content_body .sections ul li:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.7em;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #bc1622;
+}
+.section_heading {
+    color: #4D4D4D;
+    font-weight: 600;
+    font-size: 20px;
+    margin: 0;
+    padding: 15px 0 15px;
+}
+a.x-share .x-icon-facebook-square {
+    color: #2e3190;
+}
+a.x-share .x-icon-twitter-square {
+    color: #29a9e2;
+}
+.share_btns .x-icon-google-plus-square {
+    color: #ea4335;
+}
+.share_btns .x-icon-linkedin-square {
+    color: #0071bc;
+}
+.share_btns .x-icon-envelope-square {
+    color: #e75a4d;
+}
+.share_btns .x-share-options a:hover {
+    background: transparent;
+    opacity: .7;
+}
+.top_apply_now a.out_date, .last_apply_now_btn a.out_date{
+    line-height: 1.3;
+    padding: 10px;
+}
+
+/*==== single post ====*/
+.se-entry-author.co-author img {
+    border-radius: 50%;
+}
+.single .x-video .x-video-inner img {
+    transform: translateY(-50%);
+    -webkit-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    top: 50%;
+    height: auto;
+}
+.single-post .x-breadcrumb-wrap {
+    display: none;
+}
+.single_post_outer {
+	/* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#faf5f5+0,ffffff+17,ffffff+38,ffffff+100 */
+	background: #faf5f5; /* Old browsers */
+	background: -moz-linear-gradient(top, #faf5f5 0%, #ffffff 17%, #ffffff 38%, #ffffff 100%); /* FF3.6-15 */
+	background: -webkit-linear-gradient(top, #faf5f5 0%,#ffffff 17%,#ffffff 38%,#ffffff 100%); /* Chrome10-25,Safari5.1-6 */
+	background: linear-gradient(to bottom, #faf5f5 0%,#ffffff 17%,#ffffff 38%,#ffffff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#faf5f5', endColorstr='#ffffff',GradientType=0 ); /* IE6-9 */
+    padding-top: 15px;
+    padding-bottom: 10px;
+}
+.single_post_outer .entry-wrap {
+    box-shadow: none;
+    border: transparent !important;
+	background: transparent !important;
+    padding: 0;
+}
+.post-category {
+    padding-top: 10px;
+    font-size: 18px;
+    color: #BC1622;
+}
+.single_post_outer .entry-title, .post .entry-title{
+    font-size: 35px;
+    font-weight: 600;
+	color:#494444;
+}
+.post_date, .post_author, .share_btns {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0;
+}
+.single-post .post_meta_fields {
+    display: table;
+    width: 100%;
+    padding: 20px 0 15px;
+}
+ .share_btns{
+	float: right;
+}
+ .share_btns .x-entry-share {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+.post_meta_fields .post_author a {
+    font-weight: 600;
+    color: #464646;
+}
+.the_tags {
+    padding: 20px 0 0;
+}
+.the_tags a {
+    color: #BC1622;
+    display: inline-block;
+    border: 1px solid;
+    margin: 0 2px;
+    padding: 0 6px;
+}
+.netx_prev_post_link {
+    display: table;
+    width: 100%;
+    padding: 20px 15px;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    margin-top: 20px;
+}
+.netx_prev_post_link .btn_prev {
+    float: left;
+}
+.netx_prev_post_link .btn_next {
+    float: right;
+}
+div#respond {
+    position: relative;
+    background: #E4E8EB;
+    padding: 20px;
+}
+footer.entry-footer.cf {
+    display: none;
+}
+form#commentform label {
+    font-size: 16px;
+    font-weight: normal;
+}
+.x-comments-area {
+    margin: 6em 0 0;
+}
+#reply-title {
+    margin: 0;
+    position: absolute;
+    top: -50px;
+    font-size: 30px;
+    left: 0;
+}
+.x-comments-list{ 
+margin-bottom: 70px;
+}
+p.comment-notes {
+    display: none;
+}
+.comment-form-author, .comment-form-email, .comment-form-url {
+    display: inline-block;
+    width: calc(33.33% - 3px);
+}
+#commentform input, #commentform textarea {
+    border: #fff;
+}
+#commentform input[type="submit"] {
+    padding-left: 30px;
+    padding-right: 40px;
+    border-radius: 0 0px 26px 0px;
+}
+
+.quote_heading_outer {
+    padding: 20px 30px;
+    background: #00f;
+    background: url(https://appen.com/wp-content/uploads/2017/08/Appen-Quote-background.jpg) no-repeat;
+    background-size: cover;
+}
+.case_studies_heading_outer {
+    padding: 20px 30px;
+    background: #00f;
+    background: url(https://appen.com/wp-content/uploads/2017/08/Appen-case-studies-background.png) no-repeat;
+    background-size: cover;
+}
+.quote_heading_icon, .case_studies_heading_icon {
+    display: inline-block;
+    background: #fff;
+    width: 100px;
+    height: 100px;
+    text-align: center;
+    line-height: 100px;
+    border-radius: 50%;
+    box-shadow: 1px 3px 9px 0px rgba(0, 0, 0, 0.52);
+    margin-right: 20px;
+}
+.quote_heading {
+    display: inline-block;
+    font-size: 30px;
+    vertical-align: middle;
+    color: #fff;
+    font-weight: normal;
+}
+.quote_comment .content {
+    font-size: 24px;
+    margin: 0;
+    padding: 10px 0 35px;
+}
+.quote_small_head {
+    color: #bc1622;
+    font-size: 18px;
+	padding: 10px 0 5px;
+}
+.single.single-quote .quote.type-quote, .single.single-case-studies .case-studies.type-case-studies {
+    margin: 10px 0 0;
+}
+.btn_padd_sec {
+    padding-top: 38px;
+	padding-bottom:20px;
+}
+.btn_padd_sec a {
+    background: #bd1622 !important;
+    display: table !important;
+    padding: 0 40px 0 35px !important;
+    height: 40px !important;
+    line-height: 40px !important;
+    vertical-align: middle !important;
+    text-transform: none !important;
+    color: #fff !important;
+    border-radius: 0 0 20px 0;
+    box-shadow: 1px 2px 4px 0 rgba(0, 0, 0, 0.48);
+}
+.single-quote .x-breadcrumb-wrap, .single-case-studies .x-breadcrumb-wrap, .single-events .x-breadcrumb-wrap {
+    display: none !important;
+}
+/*----------/+ events page design -------------*/
+.event_m {
+    display: inline-block;
+    padding: 10px 20px 10px 0;
+}
+.event_meta {
+    padding-bottom: 15px;
+}
+.meeting_popup {
+    position: fixed;
+    top: 0;
+    background: #333333;
+    width: 100%;
+    left: 0;
+    height: 100%;
+    z-index: 99999;
+    display: none;
+}
+.meeting_pop_inn {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    width: 94%;
+    max-width: 850px;
+}
+h3.single_event_head {
+    font-weight: 600;
+}
+.single_event_subhead{
+	font-weight: 300;
+    font-size: 20px;
+}
+.pop_body_inn li.gfield.gf_left_half, .pop_body_inn li.gfield.gf_right_half {
+    clear: none !important;
+	margin-top: 0;
+    margin-bottom: 7px !important;
+}
+.pop_body_inn label.gfield_label {
+    display: none !important;
+}
+.pop_body_inn {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 5px;
+    box-shadow: -1px 5px 10px 0px rgba(0, 0, 0, 0.58);
+}
+.pop_body_inn {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 5px;
+    box-shadow: -1px 5px 10px 0px rgba(0, 0, 0, 0.58);
+    background-image: url(https://appen.com/wp-content/uploads/2017/08/Appen-Event-Popup-Back.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: left top;
+}
+.pop_body_inn textarea {
+    height: 100px !important;
+    border-radius: 4px;
+}
+.pop_top {
+    text-align: right;
+}
+.m_pop_close {
+    display: inline-block;
+    padding: 0 0px 0 10px;
+    color: #fff;
+    cursor: pointer;
+}
+.pop_body_inn .gform_footer.top_label input[type="submit"] {
+    margin: 0 !important;
+    width: 150px !important;
+}
+.pop_body_inn .gform_footer.top_label {
+    margin: 0 !important;
+}
+body .pop_body_inn div.gform_wrapper .top_label div.ginput_container input[type="text"], body .pop_body_inn div.gform_wrapper .top_label div.ginput_container textarea {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.pop_body_inn div.gform_wrapper .top_label div.ginput_container select{
+outline: none;
+    background: #fff url(https://appen.com/wp-content/uploads/2017/08/appen_select_arrow.png) no-repeat !important;
+    background-position: right 10px center !important;
+    background-size: 12px !important;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.single-events header.entry-header {
+    margin-top: 10px;
+}
+
+.single-events .entry-content.content {
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: #494444;
+}
+/*----------/- events page design -------------*/
+
+@media screen and (max-width:767px){
+	.top_apply_now a, .last_apply_now_btn a{ 
+		float:none;
+	}
+	.job_name h3 {
+		font-size: 24px;
+	}
+	.job_meta>div {
+		font-size: 16px;
+	}
+	.single_post_outer .entry-title, .post .entry-title {
+		font-size: 24px;
+	}
+	.comment-form-author, .comment-form-email, .comment-form-url {
+		width: 100%;
+	}
+	.single-events .entry-content.content {
+		font-size: 20px;
+	}
+}
+@media screen and (max-width:480px){
+	body .pop_body_inn div.gform_wrapper .top_label div.ginput_container input[type="text"], .pop_body_inn div.gform_wrapper .top_label div.ginput_container select{
+	height: 30px;
+    margin: 0;
+    line-height: 1;
+	}
+	body .pop_body_inn div.gform_wrapper .top_label div.ginput_container textarea {
+		height: 60px;
+		line-height:1.2 !important;
+		margin: 0;
+	}
+	h3.single_event_head {
+		margin: 0;
+		font-size: 20px;
+	}
+	.pop_body_inn {
+		background-color: #fff;
+		padding: 15px;
+	}
+	.meeting_pop_inn {
+		height: 80%;
+		overflow: scroll;
+	}
+	.event_m:first-child {
+		width: 100%;
+	}
+}
+
+
+
+
+
+/* Code for Sticky Contact form on Bottom Right */
+.hbspt-form .hs-button.primary.large, .hbspt-form .hs-button.primary.large:hover{
+  background: #bd1622 !important; 
+  border: none !important;  
+  color: #fff !important;
+  padding: 0 50px !important; 
+  display: block;  
+  max-width: 160px;  
+  height: 42px;
+  line-height: 42px; 
+  font-weight: 600 !important;  
+  border-radius: 2px 2px 20px 2px; 
+  box-shadow: 4px 4px 4px 0px rgba(35,33,33,0.22);
+  margin:auto;
+}
+.hs-button.primary.large:focus {
+  outline: 0;
+}
+.hbspt-form label#label-why_are_you_reaching_out_-86ee0c4f-ec89-4a1c-98a5-f5b83e86bf26 {
+  color: #696969;
+  font-weight: 700 !important;
+}
+.hbspt-form ul li {
+  list-style: none;
+  display: inline-block;
+  padding: 0 0 0 12px;
+  margin-right: 25px;
+}
+.hbspt-form ul li:first-child {
+  padding: 0;
+}
+.hbspt-form ul li:before, .hbspt-form ul li:after {
+    display: none;
+}
+.hbspt-form input[type="radio"], .hbspt-form input[type="checkbox"] {
+  vertical-align: text-top;
+}
+.hbspt-form input[type="radio"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  appearance: none;
+  background: transparent url(https://cdn.appenresources.com/wp-content/uploads/2019/02/redio_bg.png) top left no-repeat;
+  background-size: cover;
+  width: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+  border: none;
+}
+.hbspt-form input[type="radio"]:checked {
+  background: transparent url(https://cdn.appenresources.com/wp-content/uploads/2019/02/redio_bg_active.png) top left no-repeat;
+  background-size: cover;
+}
+.hbspt-form input[type="radio"]:focus {
+  outline: 0;
+}
+.hbspt-form input[type="checkbox"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  appearance: none;
+  background: transparent url(https://cdn.appenresources.com/wp-content/uploads/2019/02/check_bg.png) top left no-repeat;
+  background-size: cover;
+  width: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+  border: none;
+}
+.hbspt-form input[type="checkbox"]:checked {
+  background: transparent url(https://cdn.appenresources.com/wp-content/uploads/2019/02/check_bg_checked.png) top left no-repeat;
+  background-size: cover;
+}
+.hbspt-form input[type="checkbox"]:focus {
+  outline: 0;
+}
+.hbspt-form label.hs-form-radio-display {
+  font-weight: 400;
+}
+.hbspt-form label.hs-form-radio-display span {
+  padding-left: 5px;
+  color: #696969;
+}
+.hbspt-form label.hs-form-booleancheckbox-display span {
+  padding-left: 5px;
+  color: #696969;
+}
+.form_box {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 6% 8% 3% 8%;
+  font-size: 1em;
+  font-weight: 400;
+  line-height: 1.4;
+  color: rgba(0,0,0,1);
+  background-color: #ffffff;
+  box-shadow: -2px 9.58px 14.37px 0px rgba(0,0,0,0.2);
+}
+.bottom_contact .hbspt-form .hs-form-field.hs_why_are_you_reaching_out_on_page_form_ {
+  min-height: 95px;
+}
+.bottom_contact .hbspt-form .hs-form-field:nth-child(-n+7):not(.hs_how_did_you_find_us_):not(.hs-fieldtype-booleancheckbox):not(.hs_why_are_you_reaching_out_on_page_form_) label {
+  width: 40%;
+  float: left;
+  padding: 2% 0;
+  line-height: 1.1;
+}
+.bottom_contact .hbspt-form .hs-form-field:nth-child(-n+7):not(.hs_how_did_you_find_us_):not(.hs-fieldtype-booleancheckbox):not(.hs_why_are_you_reaching_out_on_page_form_) .input {
+  width: 60%;
+  float: left;
+}
+.bottom_contact .hbspt-form .hs-form-field:not(.hs_how_did_you_find_us_):not(.hs-fieldtype-booleancheckbox):not(.hs_why_are_you_reaching_out_on_page_form_) {
+  min-height: 60px;
+  display: table;
+  width: 100%;
+}
+.bottom_contact .hbspt-form .hs-form-field:nth-child(1):not(.hs_how_did_you_find_us_):not(.hs-fieldtype-booleancheckbox):not(.hs_why_are_you_reaching_out_on_page_form_) {
+  /*min-height: 150px;*/
+}
+.hbspt-form .hs-form-field:nth-child(-n+7):not(.hs_how_did_you_find_us_):not(.hs-fieldtype-booleancheckbox):not(.hs_why_are_you_reaching_out_on_page_form_):after {
+  clear: both;
+  display: block;
+}
+.bottom_contact .hbspt_forms p a {
+  font-weight: inherit !important;
+  color: #bc1622 !important;
+}
+.hbspt-form select, 
+.hbspt-form textarea, 
+.hbspt-form input[type="text"], 
+.hbspt-form input[type="password"], 
+.hbspt-form input[type="datetime"], 
+.hbspt-form input[type="datetime-local"], 
+.hbspt-form input[type="date"], 
+.hbspt-form input[type="month"], 
+.hbspt-form input[type="time"], 
+.hbspt-form input[type="week"], 
+.hbspt-form input[type="number"], 
+.hbspt-form input[type="email"], 
+.hbspt-form input[type="url"], 
+.hbspt-form input[type="search"], 
+.hbspt-form input[type="tel"], 
+.hbspt-form input[type="color"] {
+  border-radius: 3px;
+  padding: 10px 16px !important;
+  height: auto;
+  width: 100%;
+  color: #696969;
+  margin-bottom: 9px;
+  font-size: 14px !important;
+  font-weight: 500;
+  font-style: italic;
+  background-color: #f9f9f9;
+}
+.hbspt-form input[type="text"]:focus,
+.hbspt-form input[type="tel"]:focus,
+.hbspt-form input[type="email"]:focus,
+.hbspt-form textarea:focus {
+  /*box-shadow: inset 0px 0px 12px 0px rgba(34,34,34,1);*/
+}
+.hbspt-form select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  appearance: none;
+  background-image: url(https://cdn.appenresources.com/wp-content/uploads/2019/02/select_bg.png) !important;
+  background-repeat: no-repeat;
+  background-size: 10px;
+  background-position: 98% center;
+}
+
+.hbspt-form select:focus {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  appearance: none;
+  background-image: url(https://cdn.appenresources.com/wp-content/uploads/2019/02/select_bg.png) !important;
+  background-repeat: no-repeat;
+  background-size: 10px;
+  background-position: 98% center;
+  outline: 0;
+}
+.hbspt-form textarea {
+    height: 100px;
+  padding: 16px 16px !important;
+}
+.hbspt-form ul.hs-error-msgs {
+  margin: 0;
+}
+.hbspt-form ul.hs-error-msgs, .hbspt-form ul.hs-error-msgs label {
+    color: red;
+  font-size: 12px;
+}
+.hbspt-form label {
+  font-weight: 500;
+  margin-bottom: 5px;
+  color: #696969;
+  font-size: 16px;
+}
+.hbspt-form label .hs-form-required {
+  display: none;
+}
+.hbspt-form .legal-consent-container .hs-richtext {
+  /*display: none;*/
+  line-height: 1.4;
+}
+.hbspt-form .hs_submit {
+  margin-top: 45px;
+}
+.top_img  {
+  position: absolute;
+  top: -6%;
+  left: 45%;
+  width: 11%;
+}
+.bottom_contact {
+  position: fixed;
+  width: 100%;
+  max-width: 350px;
+  bottom: 0;
+  right: 0px;
+  z-index: 999;
+}
+.bottom_contact .bottom_contact_header {
+ }
+.bottom_contact .bottom_contact_header span:before {
+    content: '';
+    background: transparent url(https://cdn.appenresources.com/wp-content/uploads/2019/02/services_bottom.png) left center no-repeat;
+    position: absolute;
+    display: block;
+    width: 109px;
+    height: 100px;
+    background-size: auto 150px;
+    border-radius: 50%;
+    background-position: top -14px left -10px;
+    box-shadow: 0px 0px 7px 0px rgba(0, 0, 0, 0.69);
+    left: -5px;
+    top: -5px;
+    opacity: 1;
+}
+.bottom_contact .bottom_contact_header span { 
+    position: relative;
+    z-index: 99;
+    margin-left: -20px;
+    display: block;
+    background: #d37e49;
+    background: -moz-linear-gradient(left, #d37e49 0%, #d37e49 40%, #b63c37 84%);
+    background: -webkit-linear-gradient(left, #d37e49 0%,#d37e49 40%,#b63c37 84%);
+    background: linear-gradient(to right, #d37e49 0%,#d37e49 40%,#b63c37 84%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d37e49', endColorstr='#b63c37',GradientType=1 );
+    background-position: center center;
+    padding: 45px 0 45px 120px;
+    background-size: cover;
+    font-size: 20px;
+    float: right;
+    border-radius: 50px 0px 0 50px;
+    margin-bottom: 10px;
+    transition:.3s;
+    text-align: left;
+    width: 250px;
+    cursor: pointer;
+}
+.bottom_contact .bottom_contact_header strong.close_wrap {
+	display: none;
+	font-size: 25px;
+    color: #FFFFFF;
+    cursor: pointer;
+    float: left;
+    position: absolute;
+    right: 10%;
+    z-index: 999;
+    top: 2%;
+}
+.bottom_contact .bottom_contact_header span.flt_active{
+    width: 102%;
+}
+.bottom_contact h2 span {
+  display: block !important;
+  font-size: 26px;
+  color: #FFFFFF !important;
+  text-align: center;
+  font-weight: 500;
+  padding: 38px 0;
+  margin: -43px 0;
+  line-height: 0;
+}
+.bottom_contact h2 span {
+  color: #FFFFFF !important;
+}
+.widget .bottom_contact h2 span:hover {
+	color: #FFFFFF !important;
+	text-decoration: none;
+}
+.bottom_contact .hbspt_forms {
+  display: block;
+  background: #FFF;
+  box-shadow: -2px 0px 6.05px 1px rgba(0,0,0,0.1575);
+  line-height: 100%;
+  text-align: left;
+  position: relative;
+  margin-top: -30px;
+  width: 100%;
+  float: right;
+  padding: 35px 20px 12px 20px;
+  height: 65vh;
+  overflow-y: scroll;
+}
+.bottom_contact .hbspt-form label .hs-form-required {
+  display: inline-block;
+  color: red;
+  font-weight: 800;
+  display: none !important;
+}
+/*.hbspt_forms p:last-child {
+  display: none;
+}*/
+.bubble {
+  display: none;
+  position: absolute;
+  top: 110%;
+  left: -26%;
+  width: 250px;
+  padding: 15px;
+  background: #FFFFFF;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 8px;
+  box-shadow: -2px 9.58px 14.37px 0px rgba(0,0,0,0.2);
+  border: 1px solid rgba(0,0,0,0.2);
+  z-index: 9999;
+}
+.bubble:after {
+  content: '';
+  position: absolute;
+  border-style: solid;
+  border-width: 0 10px 10px;
+  border-color: #FFFFFF transparent;
+  display: block;
+  width: 0;
+  z-index: 1;
+  top: -10px;
+  left: 30px;
+}
+.bubble:before {
+  content: '';
+  position: absolute;
+  border-style: solid;
+  border-width: 0 10px 10px;
+  border-color: rgba(0,0,0,0.2) transparent;
+  display: block;
+  width: 0;
+  z-index: 0;
+  top: -11px;
+  left: 30px;
+}
+@media only screen and (max-width: 768px) and (min-width: 601px) {
+  .hbspt-form ul li {
+    display: block;
+    padding: 0;
+  }
+  .top_img  {
+    top: -5%;
+    left: 40%;
+    width: 20%;
+  }
+  .bottom_contact, .bottom1_contact {
+    width: 60%;
+  }
+  .bottom_contact .hbspt_forms {
+    height: 400px;
+  }
+}
+@media only screen and (max-width: 600px) {
+  .x-bg-layer-lower-image {
+    background-size: cover !important;
+    }
+  .hbspt-form ul li {
+    display: block;
+    padding: 0;
+  }
+  .top_img  {
+    top: -3.5%;
+    left: 35%;
+    width: 30%;
+  }
+  .bottom_contact, .bottom1_contact {
+    width: 80%;
+    max-width: 275px;
+  }
+  .bottom_contact .hbspt-form .hs-form-field:nth-child(-n+7):not(.hs_how_did_you_find_us_):not(.hs-fieldtype-booleancheckbox):not(.hs_why_are_you_reaching_out_on_page_form_) label {
+    font-size: 12px;
+    margin-top: 7px;
+}
+.hbspt-form label {
+    font-size: 12px;
+    margin-bottom: 7px;
+}
+  .hbspt-form .hs_submit {
+    margin-top: 0;
+  }
+  .bottom_contact .bottom_contact_header {
+    padding: 7% 0;
+  }
+  .bottom_contact .hbspt_forms {
+    height: 68vh;
+  }
+  .bottom_contact .bottom_contact_header span:before {
+        content: '';
+        background: transparent url(https://cdn.appenresources.com/wp-content/uploads/2019/02/services_bottom.png) left center no-repeat;
+        position: absolute;
+        display: block;
+        width: 59px;
+        height: 60px;
+        background-size: auto 82px;
+        border-radius: 50%;
+        background-position: top -5px left -6px;
+        box-shadow: 0px 0px 7px 0px rgba(0, 0, 0, 0.69);
+        left: 0;
+        top: -5px;
+  }
+  .bottom_contact .bottom_contact_header span {
+        width: 200px;
+        /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#d37e49+0,d37e49+40,b63c37+84 */
+background: #d37e49; /* Old browsers */
+background: -moz-linear-gradient(left, #d37e49 0%, #d37e49 40%, #b63c37 84%); /* FF3.6-15 */
+background: -webkit-linear-gradient(left, #d37e49 0%,#d37e49 40%,#b63c37 84%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(to right, #d37e49 0%,#d37e49 40%,#b63c37 84%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d37e49', endColorstr='#b63c37',GradientType=1 ); /* IE6-9 */
+background-position: center center;
+        padding: 25px 0 25px 70px;
+        background-size: cover;
+        font-size: 20px;
+        float: right;
+        border-radius: 30px 0px 0 30px;
+    }
+}
+@media only screen and (max-width: 1200px) and (min-width: 769px) {
+  .top_img  {
+    top: -6%;
+    left: 40%;
+    width: 15%;
+  }
+  .bottom_contact, .bottom_contact {
+    width: 50%;
+  }
+}
+/*
+@media only screen and (min-width: 1800px) {
+  .bottom_contact .hbspt_forms {
+    height: 70vh;
+    margin-top: -40px;
+  }
+  .bottom_contact .bottom_contact_header {
+    padding: 50px 0;
+  }
+  .bottom_contact {
+    right: -34px;
+  }
+}
+*/
+/* ---- End ----*/
+
+
+
+
+
+.postbox_inner .uk_blog_breadcrumb {
+    padding: 10px 20px 0;
+}
+.single_uk_blog_outer {
+      background-repeat: no-repeat;
+      background-size: 100% auto;
+      background-position: top center;
+      padding-top: 45px;
+  }
+  .uk_blog_content {
+      position: relative;
+      padding-left: 80px;
+      margin-top: 30px;
+  }
+  .uk_blog_social {
+      position: absolute;
+      left: 0;
+      width: 50px;
+  }
+
+  .uk_blog_social .x-entry-share {
+      padding: 0;
+        border: none;
+  }
+  .uk_blog_social .x-entry-share p{ margin: 0; }
+  .uk_blog_social .x-entry-share .x-share {
+      height: auto !important;
+      width: auto;
+      text-align: left !important;
+      float: left;
+      font-size: 30px;
+      margin-bottom: 5px;
+      line-height: 1;
+  }
+  .uk_blog_social .x-entry-share .x-share:hover{
+    background-color: transparent;
+  }
+  .uk_blog_author .co-author img {
+      margin-bottom: 3px !important;
+      margin-right: 3px !important;
+  }
+  .uk_box_form {
+      background: #fff;
+      padding: 20px 30px;
+      border-radius: 6px;
+      box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.3);
+  }
+
+.uk_box_form .gform_confirmation_message, .uk_bottom .gform_confirmation_message{
+    text-align: center;
+    padding: 15px 10px 0;
+    color: #bd1622;
+    font-weight: bold;
+}
+  .newletter_heading h3 {
+      font-size: 18px;
+      color: #494444 !important;
+      margin: 0 0 12px;
+      font-weight: bold !important;
+  }
+  .uk_box_form label.gfield_label {
+      display: none !important;
+  }
+  .uk_box_form .ginput_container input[type="text"] {
+      width: 100% !important;
+      background: #fafafa;
+  }
+  .uk_box_form .gform_wrapper .gform_body .gfield {
+      margin-bottom: 0 !important;
+  }
+  .uk_box_form .gform_footer.top_label {
+      margin-top: 0 !important;
+  }
+  .uk_box_form .gform_wrapper {
+      margin-bottom: 0 !important;
+  }
+  section.uk_bottom {
+      background: #fff;
+      padding: 40px 30px;
+      border-radius: 6px;
+      box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.3);
+      margin-top: 50px;
+  }
+  .uk_box_form_bottom {
+      max-width: 520px;
+      text-align: center;
+      margin: auto;
+  }
+  .uk_post_content {
+      padding-top: 20px;
+  }
+  .uk_blog_author {
+      padding-top: 15px;
+  }
+  .uk_box_form_bottom .newletter_heading h3 {
+      font-size: 22px;
+  }
+  .uk_box_form_bottom label.gfield_label {
+      display: none !important;
+  }
+  .uk_box_form_bottom form {
+      display: flex;
+      align-items: center;
+  }
+  .uk_box_form_bottom .gform_footer.top_label {
+      margin: 0 !important;
+      padding: 0 !important;
+  }
+  .uk_box_form_bottom .gform_footer.top_label input[type="submit"]{
+    margin:0 !important;
+  }
+  .uk_box_form_bottom .gform_body {
+      min-width: 70%;
+      padding-right: 20px;
+  } 
+  .uk_box_form_bottom .ginput_container input[type="text"] {
+    width: 100% !important;
+    background: #fafafa;
+  }
+  body .uk_box_form_bottom .gform_wrapper {
+      margin: 0;
+  }
+  .single-uk_blog h4.widget-title {
+      font-size: 22px;
+  }
+  .single-uk_blog .x-breadcrumb-wrap {
+      display: none;
+  }
+  .single-uk_blog .pt-cv-title a{color:#000 !important;}
+  .single-uk_blog .se-entry-author.co-author a {color: #666666;}
+  .uk_post_content p {
+    margin-bottom: 20px;
+}
+
+.uk_blog_container {
+      padding: 45px 0;
+      background-size: 100% auto;
+      background-position: top center;
+      background-repeat: no-repeat;
+  }
+
+  .se_post_outer_sec{ display: flex; flex-wrap: wrap; }
+  .se_post_outer_sec .up_pb_single {
+      width: 50%;
+      padding: 0 15px;
+  }
+  .se_post_outer_sec .up_pb_single:first-child {
+      width: 100%;
+  }
+  .loadmore {
+      background: #ccc;
+      position: relative;
+      margin: 50px 0 30px;
+      padding: 1px;
+  }
+  .btn_load_more {
+      background: #fff;
+      position: absolute;
+      left: 50%;
+      transform: translate(-50%,-50%);
+      padding: 10px;
+  }
+  .lm_inn {
+      box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
+      font-size: 25px;
+      height: 50px;
+      width: 50px;
+      text-align: center;
+      line-height: 50px;
+      border-radius: 50%;
+      color: #BC1622;
+      font-weight: bold;
+      cursor: pointer;
+  }
+  .tax-uk_blog_category .x-breadcrumb-wrap, .tax-uk_blog_tags .x-breadcrumb-wrap{
+      display: none;
+  }
+  ul.uk_p_0 {
+    margin: 0;
+    list-style: none;
+    font-size: 18px;
+}
+.uk_box_form .pt-cv-title{ margin-bottom: 0 !important; }
+.uk_box_form .pt-cv-title a{ color:#000 !important; display: block; height: 50px; overflow: hidden; }
+
+.uk_blog_social .x-icon-linkedin-square{ color: #0071bc; }
+.uk_box_form h4 { font-size: 22px; }
+@media screen and (max-width: 979px){
+  section.uk_bottom {
+      display: none;
+  }
+  .archive .font_size_54 {
+      font-size: 34px !important;
+  }
+  .uk_blog_container, .single_uk_blog_outer{
+    background-size: auto 450px !important;
+  }
+ 
+  .font_30 {
+      font-size: 24px;
+  }
+}
+@media screen and (max-width: 767px){
+  .uk_blog_social {
+      display: none;
+  }
+  .uk_blog_content {
+      padding-left: 0;
+  }
+  .se_post_outer_sec .up_pb_single {
+    width: 100%;
+    padding: 0;
+  }
+   .uk_blog_container, .single_uk_blog_outer {
+      background-size: auto 300px !important;
+  }
+}

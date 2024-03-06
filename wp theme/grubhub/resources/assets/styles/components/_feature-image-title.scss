@@ -1,0 +1,48 @@
+.feature-image-title {
+  padding: 0 20px;
+  margin: auto;
+
+  @include breakpoint(large) {
+    max-width: initial;
+  }
+
+  .feature-row {
+    flex-flow: column;
+
+    @include breakpoint(large) {
+      flex-flow: row;
+    }
+  }
+}
+
+img {
+  display: block;
+  margin: auto;
+  padding-bottom: 20px;
+
+  @include breakpoint(large) {
+    padding-bottom: 0;
+  }
+}
+
+.columns.image-column {
+  max-width: 300px;
+}
+
+.pull-quote-row {
+  text-align: center;
+  margin: auto;
+  position: relative;
+  height: unset;
+  max-width: 1000px;
+
+  @include breakpoint(large) {
+    text-align: left;
+    height: 370px;
+  }
+
+  h4 {
+    font-weight: normal;
+    padding-bottom: 20px;
+  }
+}

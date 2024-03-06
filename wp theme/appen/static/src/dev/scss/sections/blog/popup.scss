@@ -1,0 +1,157 @@
+.popup-overlay {
+    position: fixed;
+    display: none;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(#fff, 0.7);
+    // display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: showOverlay 1s ease-in-out;
+    z-index: 10000;
+}
+.popup-close {
+    position: absolute;
+    top: 23px;
+    right: 22px;
+    width: 20px;
+    height: 15px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAPCAYAAADtc08vAAAABGdBTUEAALGPC/xhBQAAAHpJREFUKBWlU0EOgCAM22+8+hfPvt0X+AZtFZKhUFhY0mRsbTdIMDPbgANYgdEglxpqbQHOhBETcjKf2id8UZlInmxiTK8vNxkSv5f5TwqJayb5wWgUih3sK4F5KPza4Q28mPn3LDdpkVv1wqxHkn3ZdGOqvOm/MPUbb3XUPM20KFWzAAAAAElFTkSuQmCC');
+    cursor: pointer;    
+    @media screen and (max-width: $mobile) {
+        top: 16px;
+        right: 13px;
+    }
+}
+.popup {
+    position: relative;
+    max-width: 1320px;
+    max-height: 650px;
+    width: 90vw;
+    height: 85vh;
+    background: #FFFFFF;
+    box-shadow: 0 0 8px 2px rgba(0,0,0,0.03), 0 16px 24px 0 rgba(0,0,0,0.10);
+}
+.popup-body {
+    overflow-y: auto;
+    height: 100%;
+    padding: 46px 36px 40px 36px;
+    @media screen and (max-width: $mobile) {
+        padding: 27px 15px 30px 15px;
+        .popup-content .dataTables_wrapper {
+            margin: 0 -15px 30px !important;
+        }
+    }
+}
+.popup-content {
+    .dataTables_wrapper {
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+    .dataTables_filter, .dataTables_length {
+        margin-top: 20px !important;
+        margin-bottom: 20px !important;
+        display: none !important;
+    }
+    .dataTables_paginate {
+        display: none !important;
+    }
+    @media screen and (max-width: $mobile) {
+        .dataTables_filter {
+            margin-bottom: 0 !important;
+        }
+        .dataTables_length {
+            margin-top: 0 !important;
+        }
+    }
+    h2 {
+        word-break: break-all;
+    }
+    .tabs {
+        display: flex;
+        border-bottom: 1px solid #D0D3D4;
+        margin-bottom: 20px;
+        @media screen and (max-width: $mobile) {
+            margin-bottom: 30px;
+        }
+        li {
+            padding-left: 0;
+            margin-right: 25px;
+            padding-bottom: 15px;
+            &:last-child {
+                margin-right: 0;
+            }
+            @media screen and (max-width: $mobile) {
+                line-height: 1;
+                padding-bottom: 4px;
+            }
+            &::before {
+                display: none !important;
+            }
+            &::after {
+                position: absolute;
+                opacity: 0;
+                display: block;
+                content: '';
+                background-color: #000;
+                width: 100%;
+                height: 1px;
+                bottom: -1px;
+                left: 0;
+                transition: all .2s ease;
+            }
+            a {
+                font-family: 'Grotesque';
+                font-size: 21px;
+                color: #A2AAAD;
+                letter-spacing: 0.5px;
+                cursor: pointer;
+                transition: all .2s ease;
+                @media(max-width: 979px) {
+                    font-size: 16px;
+                }
+                @media(max-width: 480px) {
+                    font-size: 14px;
+                }
+            }
+            &.is-active {
+                a {
+                    color: #000000;
+                }
+                &::after {
+                    opacity: 1;
+                }
+            }
+        }
+    }
+    .tab-content {
+        display: none;
+        &.is-active {
+            display: block;
+        }
+    }
+    td, th {
+        border-right: 1px solid #ECEEEF !important;
+        &:last-child {
+            border-right: none !important;
+        }
+    }
+}
+
+
+
+@keyframes showOverlay {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}

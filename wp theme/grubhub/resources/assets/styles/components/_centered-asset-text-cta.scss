@@ -1,0 +1,65 @@
+.centered-content {
+  text-align: center;
+
+  p {
+    padding-bottom: 40px;
+    max-width: 840px;
+    margin: auto;
+  }
+
+  img {
+    max-width: 85%;
+    padding-bottom: 0;
+
+    @include breakpoint(medium) {
+      max-width: 100%;
+      padding-bottom: initial;
+    }
+  }
+}
+
+.video-container {
+  position: relative;
+  margin-bottom: 0;
+}
+
+.video-container iframe.has-label {
+  display: none;
+}
+
+.video-container label {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  display: block;
+
+  img {
+    width: 100%;
+  }
+}
+
+.video-container label::before {
+  position: absolute;
+  display: block;
+  content: " ";
+  width: 105px;
+  height: 110px;
+  cursor: pointer;
+  background-repeat: no-repeat;
+  background-image: url(/wp-content/themes/GrubHub/dist/images/play-icon.png);
+  top: calc(50% - 21px);
+  left: calc(50% - 21px);
+  background-size: 35px;
+
+  @include breakpoint(large) {
+    top: calc(50% - 55px);
+    left: calc(50% - 50px);
+    background-size: initial;
+  }
+}
+
+.btm {
+  margin-top: 32px;
+}

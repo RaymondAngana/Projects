@@ -1,0 +1,32 @@
+@mixin bgsize($size: cover) {
+  background-size: $size;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+@mixin overlay($background-color: $white) {
+  background-color: $background-color;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+@mixin brand-button($border: 5px solid $black, $rad: 5px, $weight: 700, $color: $white, $bg-color: $brand-primary, $hover-color: #4329A3, $hover-text: $brand-primary) {
+  background-color: $bg-color;
+  border-radius: $rad;
+  border: $border;
+  color: $color;
+  text-transform: none;
+  font-weight: $weight;
+  transition: 0.3s;
+
+  &:hover {
+    background-color: $hover-color;
+    transition: 0.3s;
+    color: $hover-text;
+    text-decoration: none;
+    // box-shadow: 0 5px 0 #dedede !important;
+  }
+}

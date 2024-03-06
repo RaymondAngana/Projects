@@ -1,0 +1,27 @@
+/* line 1, stdin */
+
+body#tinymce {
+  margin: 12px !important;
+}
+
+/* line 5, stdin */
+
+.wp-block {
+  max-width: 92% !important;
+}
+
+/* line 9, stdin */
+
+.component-wrap {
+  border: 1px solid #707070;
+}
+
+/* line 12, stdin */
+
+.component-wrap.gray,
+.component-wrap.gray-curved {
+  background-color: #e6e6e6;
+}
+
+
+/*# sourceMappingURL=gutenberg.css.map*/

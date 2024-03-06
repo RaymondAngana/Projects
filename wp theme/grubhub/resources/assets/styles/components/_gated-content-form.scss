@@ -1,0 +1,53 @@
+#gcForm {
+  .gc-form {
+    background-color: white;
+    margin: 0;
+    border-radius: 6px;
+    border: none;
+    bottom: 100%;
+    opacity: 1;
+    transform: unset;
+    position: relative;
+    z-index: 4;
+
+    @include breakpoint(large) {
+      border: 1px solid #bebebe;
+      margin: 20px 0;
+    }
+
+    h3 {
+      margin-top: 1rem;
+    }
+
+    p {
+      text-align: center;
+    }
+
+    a {
+      color: $secondary;
+    }
+
+    input[type="submit"] {
+      color: #fff !important;
+      text-transform: none;
+      font-weight: 700 !important;
+      -webkit-transition: 0.3s;
+      -o-transition: 0.3s;
+      transition: 0.3s;
+      max-width: 200px;
+      font-size: 18px !important;
+      padding: 1.169rem 35px !important;
+
+      @include brand-button(none, 30px, 700, $white, $secondary, #4329A3, $white);
+
+      &:hover {
+        box-shadow: 0 5px 0 #dedede;
+      }
+    }
+
+    .wFormContainer .wForm .actions {
+      margin: auto;
+      text-align: center;
+    }
+  }
+}

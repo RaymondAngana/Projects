@@ -1,0 +1,75 @@
+.profit-calculator {
+  h4 {
+    padding: 0 0 20px;
+  }
+
+  table {
+    margin-top: 15px;
+  }
+
+  .fixed {
+    max-width: 100px;
+  }
+
+  .inc-head {
+    background-color: $primary;
+    color: $white;
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    padding: 10px 0;
+  }
+
+  .card {
+    h5 {
+      padding: 20px 0;
+      text-align: center;
+      min-height: 85px;
+    }
+  }
+
+  .form-wrap {
+    padding: 0 0 10px;
+
+    label {
+      color: $dark;
+      font-weight: 700;
+
+      small {
+        display: block;
+      }
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="tel"],
+    input[type="email"] {
+      border: 1px solid $smoke;
+      border-top-right-radius: 6px;
+      border-bottom-right-radius: 6px;
+      margin: 0;
+      padding: 0.5rem;
+      height: auto;
+      background-color: $white;
+      max-width: 100%;
+      color: $dark;
+      font-size: 1rem;
+
+      &.standard {
+        border-radius: 6px;
+      }
+    }
+
+    .input-group-label {
+      border-top-left-radius: 6px;
+      border-bottom-left-radius: 6px;
+    }
+  }
+}
+
+#negative-disclaimer {
+  background-color: $lighter-gray;
+  padding: 15px;
+  margin: 15px auto 0;
+  display: none;
+}

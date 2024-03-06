@@ -1,0 +1,161 @@
+#videoCarousel {
+  .columns.medium-8.large-12 {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+.video-carousel {
+  font-family: $headline-font-family;
+  text-align: center;
+  padding: 20px 0;
+  height: 100%;
+  background-color: #fff;
+  border: 1px solid #bebebe;
+  border-radius: 6px;
+  filter: drop-shadow(10px 10px 4px #ccc);
+
+  @include breakpoint(large) {
+    margin: auto;
+  }
+
+  h2 {
+    font-style: normal;
+    display: flex;
+    text-align: center;
+    flex-flow: column;
+    margin: 15px 0;
+  }
+
+  h3 {
+    text-align: center;
+    font-weight: normal;
+    font-size: 1.4rem;
+    margin: 0 0 15px;
+  }
+
+  .vc-pull-quote {
+    text-align: center;
+    margin: 0 auto;
+    padding: 60px 0 15px;
+    position: relative;
+    display: block;
+    max-width: 700px;
+
+    @include breakpoint(large) {
+      padding: 0 0 25px;
+    }
+
+    &::before,
+    &::after {
+      color: $primary;
+      font-style: normal;
+      font-weight: bold;
+      font-size: 120px;
+      font-family: $body-font-family;
+      max-height: 100px;
+      position: absolute;
+      top: -10px;
+    }
+
+    &::before {
+      content: "\00201C";
+      left: 0;
+
+      @include breakpoint(large) {
+        font-size: 170px;
+        left: -100px;
+      }
+    }
+
+    &::after {
+      content: "\201D";
+      right: 0;
+      top: -15px;
+
+      @include breakpoint(large) {
+        font-size: 170px;
+        right: -100px;
+      }
+    }
+  }
+
+  .quotee {
+    cursor: default;
+
+    &::before {
+      content: "\2014";
+      font-style: normal;
+      font-weight: normal;
+      font-family: $body-font-family;
+      padding-right: 5px;
+      margin-bottom: 1.5rem;
+    }
+  }
+
+  .vid-wrap {
+    padding-left: 15px;
+    padding-right: 15px;
+
+    @include breakpoint(large) {
+      padding: 0 10vw;
+    }
+  }
+
+  .story-link {
+    color: $secondary;
+    font-size: rem-calc(24);
+    font-weight: 700;
+    display: block;
+    margin-bottom: 1.2rem;
+  }
+
+  .slider {
+    .slick-dots {
+      padding-top: 15px;
+    }
+  }
+
+  .slick-slide img {
+    margin: auto;
+    padding: 0;
+  }
+
+  .video-container {
+    position: relative;
+    margin-bottom: 0;
+  }
+
+  .video-container iframe.has-label {
+    display: none;
+  }
+
+  .video-container label {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    display: block;
+  }
+
+  .video-container label::before {
+    position: absolute;
+    display: block;
+    content: " ";
+    width: 105px;
+    height: 110px;
+    cursor: pointer;
+    background-repeat: no-repeat;
+    background-image: url(/wp-content/themes/GrubHub/dist/images/play-icon.png);
+    top: calc(50% - 21px);
+    left: calc(50% - 21px);
+    background-size: 35px;
+
+    @include breakpoint(large) {
+      top: calc(50% - 55px);
+      left: calc(50% - 50px);
+      background-size: initial;
+    }
+  }
+}

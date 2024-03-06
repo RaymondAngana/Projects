@@ -1,0 +1,267 @@
+.featured-post {
+  background-image: url("../images/decorative-bg.svg");
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  .eyebrow {
+    color: $dark;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  h3,
+  p {
+    margin-bottom: 2rem;
+  }
+
+  img {
+    width: 100%;
+    min-height: 325px;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+
+  &.bottom {
+    background-color: $lighter-gray;
+    background-image: url("../images/decorative-bg-white.svg");
+    background-position: center -5vw;
+    position: relative;
+    margin-bottom: 50px;
+
+    .row {
+      position: relative;
+      z-index: 10;
+    }
+
+    &::after {
+      content: "";
+      background-image: url("../images/bottom-cap.svg");
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center center;
+      position: absolute;
+      bottom: -30px;
+      left: 0;
+      width: 100vw;
+      height: 210px;
+    }
+  }
+}
+
+.feat-bottom {
+  .button {
+    text-transform: uppercase;
+    margin-top: auto;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 200px;
+
+    &.solid {
+      @include brand-button(none, 30px, 400, $white, $secondary, darken($secondary, 10%), $white);
+    }
+
+    &.outline {
+      @include brand-button(2px solid $secondary, 25px, 400, $secondary, $white, $secondary, $white);
+    }
+  }
+
+  p {
+    margin-bottom: 20px !important;
+  }
+
+  .text-center {
+    text-align: center !important;
+  }
+
+  .text-left {
+    text-align: left !important;
+  }
+
+  .text-right {
+    text-align: right !important;
+  }
+}
+
+.blog-wrap {
+  background-color: $lighter-gray;
+
+  .card-col {
+    margin-bottom: 20px;
+
+    .card {
+      text-align: left;
+    }
+
+    .card-link {
+      color: inherit;
+
+      &:hover {
+        text-decoration: none;
+      }
+    }
+
+    .bsf-rt-display-label {
+      display: none;
+    }
+  }
+
+  .left-rail {
+    border: 1px solid $smoke;
+    border-radius: 6px;
+    padding: 25px;
+    margin-bottom: 20px;
+
+    @include breakpoint(large) {
+      padding: 0;
+    }
+
+    .wFormContainer {
+      padding: 0 25px 0 30px !important;
+    }
+
+    h4 {
+      margin: 0;
+      padding: 0;
+
+      @include breakpoint(large) {
+        margin: 25px 25px 25px 35px;
+        padding-left: 0 !important;
+      }
+
+      &.black {
+        color: $black;
+      }
+
+      &.blue {
+        color: $secondary;
+      }
+    }
+
+    ul {
+      margin: 0;
+
+      li {
+        padding-bottom: 10px;
+        position: relative;
+
+        a {
+          color: $secondary;
+          font-weight: 700;
+          padding: 0 0 0 35px;
+        }
+
+        &.active {
+          a {
+            color: $black;
+          }
+
+          &::before {
+            content: "";
+            width: 15px;
+            height: 17px;
+            background-color: $primary;
+            position: absolute;
+            top: 3px;
+            left: 0;
+          }
+        }
+      }
+    }
+
+    select {
+      margin: 10px 0 25px;
+      max-width: 100%;
+      background-color: $white;
+      border-radius: 6px;
+      border: 2px solid $secondary;
+      height: 3rem;
+      background-image: url("../images/chevron-down-dark.svg");
+      background-size: 25px 25px;
+    }
+
+    .actions {
+      text-align: left;
+    }
+
+    input[type="submit"] {
+      @include brand-button(2px solid $white !important, 25px !important, 700 !important, $white !important, $secondary !important, $white !important, $secondary !important);
+
+      width: 50vw;
+      max-width: 100%;
+      font-size: 18px !important;
+      padding: 1rem 1.5rem !important;
+
+      @include breakpoint(medium) {
+        width: 35vw;
+      }
+
+      @include breakpoint(large) {
+        width: 10vw;
+      }
+
+      @include breakpoint(xlarge) {
+        max-width: 150px;
+      }
+    }
+  }
+}
+
+.blog {
+  .left-rail {
+    ul {
+      li {
+        &:first-child {
+          a {
+            color: $black;
+
+            &::before {
+              content: "";
+              width: 15px;
+              height: 17px;
+              background-color: $primary;
+              position: absolute;
+              top: 3px;
+              left: 0;
+            }
+          }
+        }
+      }
+    }
+
+    &.top {
+      order: 2;
+
+      @include breakpoint(large) {
+        order: 1;
+      }
+    }
+
+    &.bottom {
+      order: 1;
+
+      @include breakpoint(large) {
+        order: 2;
+      }
+    }
+  }
+}
+
+.archive {
+  .s-grid-cards {
+    background-color: $lighter-gray;
+
+    .spacing {
+      margin-top: 15px;
+    }
+
+    h2 {
+      margin: 0 0 30px !important;
+    }
+  }
+}
+
+.rail-wrap {
+  display: flex;
+  flex-direction: column;
+}

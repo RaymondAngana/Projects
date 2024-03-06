@@ -1,0 +1,40 @@
+.appen-menu {
+    &__item {
+        margin-bottom: 21px;
+        &.active {
+            a {
+                color: #000;
+            }
+        }
+        &:last-child {
+            margin-bottom: 0;
+        }
+        a {
+            font-family: "Grotesque";
+            font-size: 21.6px;
+            line-height: 1.5;
+            font-weight: 500;
+            color: #A2AAAD;
+            transition: all .15s cubic-bezier(.42, 0, 1, 1);
+            &:hover {
+                color: #000;
+            }
+            @media(max-width: 979px) {
+                font-size: 21px;
+            }
+        }
+    }
+}
+.appen-aside.js-sticky {
+    position: fixed;
+    top: 150px;
+}
+.appen-aside.js-hide-menu {
+    opacity: 0;
+    transition: opacity .5s ease;
+}
+@media screen and (max-height:530px) {
+    .appen-aside.js-sticky {
+        top: 75px;
+    }  
+}

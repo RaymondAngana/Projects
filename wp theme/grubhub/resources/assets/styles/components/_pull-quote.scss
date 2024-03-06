@@ -1,0 +1,130 @@
+.pull-quote {
+  max-width: 400px;
+  margin: auto;
+  position: relative;
+  padding-bottom: 80px;
+
+  @include breakpoint(medium) {
+    max-width: initial;
+    padding-bottom: 27.5px;
+  }
+
+  img {
+    display: block;
+    margin: auto;
+    padding-bottom: 20px;
+
+    @include breakpoint(medium) {
+      padding-bottom: 0;
+    }
+  }
+
+  .columns.image-column {
+    max-width: 300px;
+    background-color: transparent !important;
+  }
+
+  .pull-quote-row {
+    text-align: center;
+    margin: auto;
+    position: relative;
+    height: unset;
+    max-width: 1000px;
+    flex-flow: column;
+
+    @include breakpoint(medium) {
+      text-align: left;
+      height: 100%;
+      flex-flow: wrap;
+      max-width: 95%;
+    }
+
+    @include breakpoint(large) {
+      max-width: 1000px;
+    }
+
+    h4 {
+      font-weight: normal;
+      padding-bottom: 20px;
+    }
+
+    &::before {
+      content: "\00201C";
+      font-style: normal;
+      font-weight: bold;
+      font-size: 240px;
+      font-family: $body-font-family;
+      max-height: 137px;
+      position: absolute;
+      top: -18%;
+      left: 10%;
+      z-index: 12;
+
+      @include breakpoint(medium) {
+        top: -5.6rem;
+        left: -1.1rem;
+      }
+    }
+
+    &::after {
+      content: "\201D";
+      font-style: normal;
+      font-weight: bold;
+      font-size: 240px;
+      font-family: $headline-font-family;
+      max-height: 137px;
+      padding-left: 20px;
+      position: absolute;
+      bottom: 0;
+      right: -5%;
+      z-index: 10;
+      display: none;
+
+      @include breakpoint(medium) {
+        position: initial;
+        display: block;
+        right: 5%;
+      }
+    }
+
+    a {
+      font-weight: 700;
+      font-size: rem-calc(24);
+      padding-bottom: 60px;
+      display: block;
+
+      @include breakpoint(medium) {
+        padding-bottom: 0;
+      }
+    }
+
+    .quotee {
+      &::before {
+        content: "\2014";
+        font-style: normal;
+        font-weight: normal;
+        font-family: $body-font-family;
+        padding-right: 5px;
+        margin-bottom: 1.5rem;
+      }
+
+      &::after {
+        content: "\201D";
+        font-style: normal;
+        font-weight: bold;
+        font-size: 240px;
+        font-family: $headline-font-family;
+        max-height: 137px;
+        padding-left: 20px;
+        position: absolute;
+        bottom: -90px;
+        right: 5px;
+        z-index: 10;
+
+        @include breakpoint(medium) {
+          display: none;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+@media print{
+	  header.masthead.masthead-inline {
+	  /*  display: none; */
+	}
+	a[href]:after {
+		display:none;
+	}
+}

@@ -1,0 +1,220 @@
+@mixin button-default {
+  background: $secondary;
+}
+
+@mixin button-hover {
+  background: #4229a3;
+  color: #fff;
+  box-shadow: 0 5px 0 $gray;
+}
+
+.multi-view {
+  padding: 0 0 40px;
+  margin-top: 20px;
+
+  .contained {
+    background: $white;
+    max-width: 100%;
+    min-height: 360px;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-radius: 6px;
+    border: 1px solid $smoke;
+    position: relative;
+    overflow: hidden;
+    filter: drop-shadow(5px 5px 4px $gray);
+
+    @include breakpoint(mid) {
+      max-width: 511px;
+    }
+
+    @include breakpoint(large) {
+      max-width: $global-width;
+    }
+
+    .columns.large-4 {
+      position: relative;
+      z-index: 10;
+    }
+
+    @include breakpoint(small only) {
+      margin: 10px;
+    }
+
+    h2 {
+      font-size: 3rem;
+    }
+
+    h3 {
+      margin-left: 15px;
+
+      @include breakpoint(small only) {
+        br {
+          display: none;
+        }
+      }
+    }
+
+    h4 {
+      margin-bottom: 20px;
+    }
+
+    .mobile-img {
+      padding-left: 0;
+      padding-right: 1px;
+    }
+
+    .bullet-item {
+      margin: 20px 20px 0;
+
+      p.subheading {
+        font-weight: bold;
+        font-size: 1.25rem;
+
+        @include breakpoint(medium) {
+          font-size: 1.5rem;
+        }
+      }
+
+      ul li {
+        text-align: left;
+        font-size: 1.5rem;
+        position: relative;
+        line-height: 5px;
+
+        strong {
+          font-size: 1.2em;
+          margin-bottom: 10px;
+          display: inline-block;
+        }
+
+        &::before {
+          content: "\2022";
+          color: $primary;
+          font-weight: bold;
+          display: inline-block;
+          width: 1em;
+          margin-left: -1em;
+          vertical-align: top;
+          position: absolute;
+          top: 10px;
+        }
+
+        p {
+          display: inline-block;
+        }
+      }
+    }
+
+    .button-and-image {
+      min-height: 308px;
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 58%;
+      height: 100%;
+      z-index: 1;
+
+      &::before {
+        content: "";
+        display: none;
+        position: absolute;
+        width: 100px;
+        height: 100%;
+        background: #fff;
+        z-index: 1;
+        border-top-right-radius: 50%;
+        border-bottom-right-radius: 50%;
+        left: -25px;
+
+        @include breakpoint(large) {
+          display: block;
+        }
+      }
+
+      span {
+        background: $secondary;
+        padding: 10px 20px;
+        border-radius: 50px;
+        cursor: pointer;
+        color: #fff;
+        font-size: 1.5em;
+        font-weight: normal;
+        position: absolute;
+        top: 40%;
+        margin-left: 45px;
+        z-index: 1;
+
+        i.fas {
+          font-weight: normal;
+        }
+      }
+
+      img {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        bottom: 0;
+        border-bottom-right-radius: 5px;
+
+        &.hidden {
+          display: none;
+        }
+      }
+    }
+
+    .btn-wrap {
+      margin: 30px 0 0 15px;
+
+      a.button {
+        @include button-default;
+
+        // @include breakpoint(small only) {
+        //   width: 100%;
+        // }
+
+        &:hover {
+          box-shadow: 0 5px 0 #c0c0c0;
+        }
+
+        &:focus {
+          @include button-default;
+        }
+
+        &.primary {
+          background: $secondary;
+
+          &:hover {
+            @include button-hover;
+          }
+
+          &:focus {
+            background: $secondary;
+            border: 3px double $cotton-candy !important;
+          }
+        }
+
+        &.secondary {
+          background: $white;
+          color: $secondary;
+          border: 1px solid $secondary;
+        }
+
+        &.reverse {
+          border: 1px solid $white;
+
+          &:hover {
+            @include button-hover;
+
+            box-shadow: none;
+          }
+
+          &:focus {
+            border: 3px double $cotton-candy !important;
+          }
+        }
+      }
+    }
+  }
+}
+

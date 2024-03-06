@@ -1,0 +1,58 @@
+.btn {
+    display: inline-flex;
+    position: relative;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 32px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgb(0,0,0);
+    font-size: 14.4px;
+    letter-spacing: 0.45px;
+    line-height: 21.6px;
+    font-weight: 500;
+    transition: all 0.2s cubic-bezier(.42,0,1,1);
+    span {
+        font-family: "Grotesque";
+        font-size: inherit;
+        font-weight: inherit;
+        line-height: inherit;
+        letter-spacing: inherit;
+        z-index: 1;
+    }
+}
+
+.btn-black {
+    background-color: rgb(0,0,0);
+    color: #fff;
+    @media (hover: hover) and (pointer: fine) {
+        &:hover {
+            color: black !important;
+            background-color: white;
+        }
+    }
+    @media (hover: none), (hover: hover) and (pointer: coarse) {
+        &:active {
+            opacity: 0.4;
+            color: black !important;
+            background-color: white;
+        }
+    }
+}
+
+.btn-o {
+    background-color: transparent;
+    color: #000;
+    @media (hover: hover) and (pointer: fine) {
+        &:hover {
+            color: white !important;
+            background-color: black;
+        }
+    }
+    @media (hover: none), (hover: hover) and (pointer: coarse) {
+        &:active {
+            opacity: 0.4;
+        }
+    }
+}

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 26.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 1440 671" style="enable-background:new 0 0 1440 671;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#F3F3F3;filter:url(#Adobe_OpacityMaskFilter);}
+	.st1{mask:url(#mask0_2506:29803_00000123406969390153937350000000254029173561340057_);}
+	.st2{fill:#FFFFFF;}
+</style>
+<defs>
+	<filter id="Adobe_OpacityMaskFilter" filterUnits="userSpaceOnUse" x="-1382" y="113.9" width="4204" height="1468.2">
+		<feColorMatrix  type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/>
+	</filter>
+</defs>
+<mask maskUnits="userSpaceOnUse" x="-1382" y="113.9" width="4204" height="1468.2" id="mask0_2506:29803_00000123406969390153937350000000254029173561340057_">
+	<path class="st0" d="M1440,0H-1v671h1441V0z"/>
+</mask>
+<g class="st1">
+	<ellipse class="st2" cx="720" cy="848.1" rx="2102" ry="734.1"/>
+</g>
+</svg>

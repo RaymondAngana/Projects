@@ -1,0 +1,62 @@
+.colored-stats > div.row {
+  max-width: 1440px;
+
+  .stat-col.columns.large-4.medium-4.small-12,
+  .stat-col.columns.large-4.medium-4.small-12.tile-image {
+    @include breakpoint(medium) {
+      max-height: 175px;
+      min-height: unset;
+
+      .stat {
+        padding: 20px 0;
+      }
+    }
+
+    @include breakpoint(large) {
+      max-height: 300px;
+      min-height: 300px;
+    }
+  }
+}
+
+.stat-col {
+  border-radius: initial !important;
+
+  .stat {
+    width: 100%;
+    height: 100%;
+    padding: 70px 0;
+  }
+
+  .stat.row.align-center {
+    margin: auto;
+  }
+
+  .stat-tiled {
+    color: $white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 95%;
+    // h2 {
+    //   font-size: 100px;
+    //   margin-bottom: 15px;
+    // }
+    h3.subhead {
+      font-weight: 700;
+    }
+
+    p {
+      color: $white;
+      font-weight: bold;
+    }
+
+    .text-left {
+      text-align: left;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+  }
+}
